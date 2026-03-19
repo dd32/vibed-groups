@@ -30,7 +30,7 @@ jobs:
         run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups composer install --no-interaction
 
       - name: Run PHPUnit
-        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups vendor/bin/phpunit
+        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups phpunit
 
   jest:
     name: Jest
