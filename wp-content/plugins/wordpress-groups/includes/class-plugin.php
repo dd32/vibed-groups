@@ -53,6 +53,7 @@ class Plugin {
 		new Analytics\Dormancy_Detector();
 		Analytics\Dormancy_Detector::schedule_cron();
 		new Calendar\ICal_Export();
+		new Notifications\Scheduler();
 		new Workflow\Application_Workflow();
 		new Workflow\Status_Transition();
 		new Workflow\Site_Provisioner();
