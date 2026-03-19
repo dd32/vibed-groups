@@ -5,10 +5,8 @@
  * @package Groups\Tests\Database
  */
 
-namespace Groups\Tests\Database;
 
 use Groups\Database\Schema;
-use WP_UnitTestCase;
 
 /**
  * @group database

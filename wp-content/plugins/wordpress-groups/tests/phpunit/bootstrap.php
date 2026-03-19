@@ -2,36 +2,45 @@
 /**
  * PHPUnit bootstrap for the WordPress Groups plugin.
  *
- * Loads the WordPress test suite and activates the plugin.
- *
  * @package Groups\Tests
  */
 
-// Assume the WP test suite is available via the WP_TESTS_DIR env variable
-// or the default wp-env location.
-$_tests_dir = getenv( 'WP_TESTS_DIR' );
+$_tests_dir = getenv( 'WP_TESTS_DIR' ) ?: '/wordpress-phpunit';
 
-if ( ! $_tests_dir ) {
+if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
-	echo "Could not find {$_tests_dir}/includes/functions.php — is WP_TESTS_DIR set?\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo "Could not find $_tests_dir/includes/functions.php\n";
 	exit( 1 );
 }
 
-// Give access to tests_add_filter() function.
+// Disable multisite — wp-env bug: https://github.com/WordPress/gutenberg/issues/69818
+if ( ! defined( 'WP_TESTS_MULTISITE' ) ) {
+	define( 'WP_TESTS_MULTISITE', false );
+}
+
+// PHPUnit Polyfills path.
+if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
+	$polyfills = dirname( __DIR__, 2 ) . '/vendor/yoast/phpunit-polyfills';
+	if ( file_exists( $polyfills . '/phpunitpolyfills-autoload.php' ) ) {
+		define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $polyfills );
+	}
+}
+
 require_once $_tests_dir . '/includes/functions.php';
 
-/**
- * Manually load the plugin for testing.
- */
 tests_add_filter(
 	'muplugins_loaded',
-	static function (): void {
+	static function () {
 		require dirname( __DIR__, 2 ) . '/wordpress-groups.php';
 	}
 );
 
-// Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Create custom tables for tests.
+if ( class_exists( 'Groups\Database\Schema' ) ) {
+	\Groups\Database\Schema::create_tables();
+}

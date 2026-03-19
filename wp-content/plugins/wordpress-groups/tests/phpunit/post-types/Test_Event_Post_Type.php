@@ -5,15 +5,13 @@
  * @package Groups\Tests
  */
 
-namespace Groups\Tests\Post_Types;
 
 use Groups\Post_Types\Event;
-use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \Groups\Post_Types\Event
  */
-class Test_Event extends WP_UnitTestCase {
+class Test_Event_Post_Type extends WP_UnitTestCase {
 
 	/**
 	 * Set up each test — ensure the CPT and statuses are registered.
