@@ -24,6 +24,13 @@ class Test_Membership extends WP_UnitTestCase {
 	private int $blog_id;
 
 	/**
+	 * An organizer user ID for authorization in mutating methods.
+	 *
+	 * @var int
+	 */
+	private int $organizer_id;
+
+	/**
 	 * Set up a test site and register roles before each test.
 	 */
 	public function set_up(): void {
@@ -38,6 +45,16 @@ class Test_Membership extends WP_UnitTestCase {
 		// Register custom roles on the test site.
 		switch_to_blog( $this->blog_id );
 		Membership::register_roles();
+		restore_current_blog();
+
+		// Create an organizer to act as the authorized actor for mutating methods.
+		$this->organizer_id = self::factory()->user->create();
+		Membership::join( $this->organizer_id, $this->blog_id );
+
+		// Promote to organizer directly (bypassing change_role auth check for setup).
+		switch_to_blog( $this->blog_id );
+		$user = new \WP_User( $this->organizer_id );
+		$user->set_role( 'organizer' );
 		restore_current_blog();
 	}
 
@@ -159,7 +176,7 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		Membership::join( $user_id, $this->blog_id );
-		$result = Membership::change_role( $user_id, 'organizer', $this->blog_id );
+		$result = Membership::change_role( $user_id, 'organizer', $this->blog_id, $this->organizer_id );
 
 		$this->assertTrue( $result );
 		$this->assertSame( 'organizer', Membership::get_user_role( $user_id, $this->blog_id ) );
@@ -172,7 +189,7 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		Membership::join( $user_id, $this->blog_id );
-		Membership::change_role( $user_id, 'co_organizer', $this->blog_id );
+		Membership::change_role( $user_id, 'co_organizer', $this->blog_id, $this->organizer_id );
 
 		$this->assertSame( 'co_organizer', Membership::get_user_role( $user_id, $this->blog_id ) );
 	}
@@ -184,7 +201,7 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		Membership::join( $user_id, $this->blog_id );
-		$result = Membership::change_role( $user_id, 'superadmin', $this->blog_id );
+		$result = Membership::change_role( $user_id, 'superadmin', $this->blog_id, $this->organizer_id );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'invalid_role', $result->get_error_code() );
@@ -196,10 +213,54 @@ class Test_Membership extends WP_UnitTestCase {
 	public function test_change_role_non_member_returns_error(): void {
 		$user_id = self::factory()->user->create();
 
-		$result = Membership::change_role( $user_id, 'organizer', $this->blog_id );
+		$result = Membership::change_role( $user_id, 'organizer', $this->blog_id, $this->organizer_id );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'not_a_member', $result->get_error_code() );
+	}
+
+	/**
+	 * @covers ::change_role
+	 */
+	public function test_change_role_fires_action_hook(): void {
+		$user_id = self::factory()->user->create();
+		$fired   = false;
+
+		Membership::join( $user_id, $this->blog_id );
+
+		add_action(
+			'groups_member_role_changed',
+			function ( $uid, $new_role, $old_role, $bid ) use ( $user_id, &$fired ) {
+				$fired = true;
+				$this->assertSame( $user_id, $uid );
+				$this->assertSame( 'organizer', $new_role );
+				$this->assertSame( 'member', $old_role );
+				$this->assertSame( $this->blog_id, $bid );
+			},
+			10,
+			4
+		);
+
+		Membership::change_role( $user_id, 'organizer', $this->blog_id, $this->organizer_id );
+
+		$this->assertTrue( $fired, 'The groups_member_role_changed action should have fired.' );
+	}
+
+	/**
+	 * @covers ::change_role
+	 */
+	public function test_unauthorized_role_change_returns_wp_error(): void {
+		$user_id    = self::factory()->user->create();
+		$non_org_id = self::factory()->user->create();
+
+		Membership::join( $user_id, $this->blog_id );
+		Membership::join( $non_org_id, $this->blog_id );
+
+		// non_org_id is a regular member, not an organizer.
+		$result = Membership::change_role( $user_id, 'organizer', $this->blog_id, $non_org_id );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'unauthorized', $result->get_error_code() );
 	}
 
 	/**
@@ -210,7 +271,7 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		Membership::join( $user_id, $this->blog_id );
-		$result = Membership::ban( $user_id, $this->blog_id );
+		$result = Membership::ban( $user_id, $this->blog_id, $this->organizer_id );
 
 		$this->assertTrue( $result );
 		$this->assertFalse( is_user_member_of_blog( $user_id, $this->blog_id ) );
@@ -234,13 +295,85 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		Membership::join( $user_id, $this->blog_id );
-		Membership::ban( $user_id, $this->blog_id );
+		Membership::ban( $user_id, $this->blog_id, $this->organizer_id );
 
 		$result = Membership::join( $user_id, $this->blog_id );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'user_banned', $result->get_error_code() );
 		$this->assertFalse( is_user_member_of_blog( $user_id, $this->blog_id ) );
+	}
+
+	/**
+	 * @covers ::ban
+	 */
+	public function test_ban_fires_action_hook(): void {
+		$user_id = self::factory()->user->create();
+		$fired   = false;
+
+		Membership::join( $user_id, $this->blog_id );
+
+		add_action(
+			'groups_member_banned',
+			function ( $uid, $bid ) use ( $user_id, &$fired ) {
+				$fired = true;
+				$this->assertSame( $user_id, $uid );
+				$this->assertSame( $this->blog_id, $bid );
+			},
+			10,
+			2
+		);
+
+		Membership::ban( $user_id, $this->blog_id, $this->organizer_id );
+
+		$this->assertTrue( $fired, 'The groups_member_banned action should have fired.' );
+	}
+
+	/**
+	 * @covers ::unban
+	 */
+	public function test_unban_allows_rejoin(): void {
+		$user_id = self::factory()->user->create();
+
+		Membership::join( $user_id, $this->blog_id );
+		Membership::ban( $user_id, $this->blog_id, $this->organizer_id );
+
+		$this->assertTrue( Membership::is_banned( $user_id, $this->blog_id ) );
+
+		$result = Membership::unban( $user_id, $this->blog_id, $this->organizer_id );
+		$this->assertTrue( $result );
+		$this->assertFalse( Membership::is_banned( $user_id, $this->blog_id ) );
+
+		// User can now rejoin.
+		$join_result = Membership::join( $user_id, $this->blog_id );
+		$this->assertTrue( $join_result );
+		$this->assertTrue( is_user_member_of_blog( $user_id, $this->blog_id ) );
+	}
+
+	/**
+	 * @covers ::unban
+	 */
+	public function test_unban_fires_action_hook(): void {
+		$user_id = self::factory()->user->create();
+		$fired   = false;
+
+		Membership::join( $user_id, $this->blog_id );
+		Membership::ban( $user_id, $this->blog_id, $this->organizer_id );
+
+		add_action(
+			'groups_member_unbanned',
+			function ( $uid, $bid ) use ( $user_id, &$fired ) {
+				$fired = true;
+				$this->assertSame( $user_id, $uid );
+				$this->assertSame( $this->blog_id, $bid );
+			},
+			10,
+			2
+		);
+
+		Membership::unban( $user_id, $this->blog_id, $this->organizer_id );
+
+		$this->assertTrue( $fired, 'The groups_member_unbanned action should have fired.' );
 	}
 
 	/**
@@ -271,7 +404,7 @@ class Test_Membership extends WP_UnitTestCase {
 
 		Membership::join( $user1, $this->blog_id );
 		Membership::join( $user2, $this->blog_id );
-		Membership::change_role( $user1, 'organizer', $this->blog_id );
+		Membership::change_role( $user1, 'organizer', $this->blog_id, $this->organizer_id );
 
 		$organizers    = Membership::get_members( $this->blog_id, 'organizer' );
 		$organizer_ids = wp_list_pluck( $organizers, 'ID' );
@@ -320,5 +453,22 @@ class Test_Membership extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 
 		$this->assertFalse( Membership::get_user_role( $user_id, $this->blog_id ) );
+	}
+
+	/**
+	 * @covers ::can_manage_members
+	 */
+	public function test_can_manage_members_for_organizer(): void {
+		$this->assertTrue( Membership::can_manage_members( $this->organizer_id, $this->blog_id ) );
+	}
+
+	/**
+	 * @covers ::can_manage_members
+	 */
+	public function test_can_manage_members_false_for_regular_member(): void {
+		$user_id = self::factory()->user->create();
+		Membership::join( $user_id, $this->blog_id );
+
+		$this->assertFalse( Membership::can_manage_members( $user_id, $this->blog_id ) );
 	}
 }
