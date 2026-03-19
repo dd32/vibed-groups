@@ -1,0 +1,110 @@
+.wp-block-groups-rsvp-list {
+	&__summary {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		margin-bottom: var(--wp--preset--spacing--20, 16px);
+		padding-bottom: var(--wp--preset--spacing--10, 10px);
+		border-bottom: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+	}
+
+	&__empty {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-style: italic;
+	}
+
+	&__section {
+		margin-bottom: var(--wp--preset--spacing--30, 24px);
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__heading {
+		font-family: var(--wp--preset--font-family--eb-garamond, serif);
+		font-size: var(--wp--preset--font-size--medium, 16px);
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-0, #1a1919);
+		margin: 0 0 var(--wp--preset--spacing--10, 12px);
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: var(--wp--preset--spacing--10, 12px);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	&__card {
+		display: flex;
+		align-items: center;
+		gap: var(--wp--preset--spacing--10, 10px);
+		padding: var(--wp--preset--spacing--10, 10px);
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #ffffff);
+		transition: border-color 0.2s ease;
+
+		&:hover {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+
+		&--newcomer {
+			border-color: var(--wp--preset--color--acid-green-3, #b8e6c8);
+		}
+	}
+
+	&__avatar {
+		flex-shrink: 0;
+		line-height: 0;
+
+		img {
+			border-radius: 50%;
+			width: 48px;
+			height: 48px;
+		}
+	}
+
+	&__info {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	&__name {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-weight: 500;
+		color: var(--wp--preset--color--charcoal-0, #1a1919);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__badge {
+		display: inline-block;
+		font-size: var(--wp--preset--font-size--extra-small, 11px);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 1px 6px;
+		border-radius: 2px;
+		background: var(--wp--preset--color--acid-green-3, #e2ffed);
+		color: #0a6627;
+		width: fit-content;
+	}
+
+	&__section--waitlisted {
+		.wp-block-groups-rsvp-list__card {
+			opacity: 0.8;
+		}
+
+		.wp-block-groups-rsvp-list__heading {
+			color: var(--wp--preset--color--charcoal-4, #656a71);
+		}
+	}
+}
