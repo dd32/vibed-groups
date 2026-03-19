@@ -1,0 +1,45 @@
+.wp-block-groups-venue-map {
+	margin-bottom: var(--wp--preset--spacing--30, 20px);
+
+	&__container {
+		width: 100%;
+		height: 400px;
+		background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		border-radius: 4px;
+		overflow: hidden;
+		z-index: 0;
+
+		// Leaflet overrides for proper display within the block.
+		.leaflet-container {
+			width: 100%;
+			height: 100%;
+			font-family: inherit;
+		}
+	}
+
+	&__address {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: var(--wp--preset--spacing--20, 12px) 0;
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		line-height: 1.5;
+	}
+
+	&__venue-name {
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-0, #1a1919);
+	}
+
+	&__venue-address {
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+	}
+
+	// Responsive: shorter map on small screens.
+	@media (max-width: 600px) {
+		&__container {
+			height: 280px;
+		}
+	}
+}
