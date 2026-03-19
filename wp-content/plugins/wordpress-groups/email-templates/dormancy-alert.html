@@ -1,0 +1,73 @@
+<h1 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 700; color: #1e1e1e; line-height: 1.3;">
+	Dormancy Alert
+</h1>
+
+<p style="margin: 0 0 20px 0;">
+	Hi {{deputy_name}},
+</p>
+
+<p style="margin: 0 0 20px 0;">
+	The group <strong>{{group_name}}</strong> has had no events for <strong>{{days_inactive}} days</strong> and may need attention.
+</p>
+
+<!-- Alert Card -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 0 0 28px 0;">
+	<tr>
+		<td class="info-box" style="background-color: #fcf0f0; border-left: 4px solid #cc1818; border-radius: 0 8px 8px 0; padding: 20px 24px;">
+			<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td style="padding-bottom: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;">
+						<span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #cc1818;">Inactivity Warning</span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-bottom: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 18px; font-weight: 600; color: #1e1e1e;">
+						{{group_name}}
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-bottom: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; color: #50575e;">
+						&#9888;&#65039;&nbsp; Last event was <strong>{{days_inactive}} days ago</strong>
+					</td>
+				</tr>
+				<tr>
+					<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; color: #50575e;">
+						Groups with 90+ days of inactivity are automatically marked as dormant.
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<h2 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #1e1e1e;">Recommended Actions</h2>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 0 0 24px 0;">
+	<tr>
+		<td style="padding: 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; color: #1e1e1e;">
+			&#8226;&nbsp;&nbsp;Reach out to the organizer to check on the group's status
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; color: #1e1e1e;">
+			&#8226;&nbsp;&nbsp;Offer support or resources if the organizer needs help
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 14px; color: #1e1e1e;">
+			&#8226;&nbsp;&nbsp;Consider assigning a mentor or co-organizer
+		</td>
+	</tr>
+</table>
+
+<!-- CTA Buttons -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 12px 0;">
+	<tr>
+		<td style="border-radius: 8px; background-color: #3858E9; padding-right: 12px;" class="cta-button">
+			<a href="{{group_url}}" target="_blank" style="display: inline-block; padding: 14px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px;">View Group</a>
+		</td>
+		<td style="border-radius: 8px; border: 2px solid #3858E9;">
+			<a href="{{dashboard_url}}" target="_blank" style="display: inline-block; padding: 12px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; font-size: 15px; font-weight: 600; color: #3858E9; text-decoration: none; border-radius: 8px;">Deputy Dashboard</a>
+		</td>
+	</tr>
+</table>
