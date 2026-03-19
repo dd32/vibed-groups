@@ -47,5 +47,15 @@ class Plugin {
 	private function init_components(): void {
 		new Post_Types\Event();
 		new Post_Types\Venue();
+
+		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+	}
+
+	/**
+	 * Register REST API controllers.
+	 */
+	public function register_rest_routes(): void {
+		$event_controller = new REST\Event_Controller();
+		$event_controller->register_routes();
 	}
 }
