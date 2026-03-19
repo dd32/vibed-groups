@@ -275,7 +275,7 @@ class Test_Email_Templates extends WP_UnitTestCase {
 			$this->assertStringContainsString( '<!DOCTYPE html>', $html, "Template {$template_name} missing DOCTYPE." );
 			$this->assertStringContainsString( 'WordPress.org', $html, "Template {$template_name} missing WordPress.org branding." );
 			$this->assertStringContainsString( 'Community Groups', $html, "Template {$template_name} missing Community Groups text." );
-			$this->assertStringContainsString( 'email-preferences', $html, "Template {$template_name} missing unsubscribe link." );
+			$this->assertStringContainsString( 'Manage email preferences', $html, "Template {$template_name} missing unsubscribe link." );
 			$this->assertStringContainsString( 'prefers-color-scheme: dark', $html, "Template {$template_name} missing dark mode support." );
 		}
 	}

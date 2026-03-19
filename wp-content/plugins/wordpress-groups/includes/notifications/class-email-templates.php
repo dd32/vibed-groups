@@ -155,7 +155,10 @@ class Email_Templates {
 			$value = (string) $value;
 
 			if ( in_array( $key, self::HTML_ALLOWED_PLACEHOLDERS, true ) ) {
-				$escaped_value = wp_kses_post( $value );
+				// Strip script/style tags and their content before sanitizing,
+				// since wp_kses_post() removes the tags but leaves inner text.
+				$sanitized = preg_replace( '/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $value );
+				$escaped_value = wp_kses_post( $sanitized );
 			} else {
 				$escaped_value = esc_html( $value );
 			}
