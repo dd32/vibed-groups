@@ -8,7 +8,6 @@
 
 use Groups\Models\Membership;
 use Groups\REST\Membership_Controller;
-use WP_REST_Server;
 
 /**
  * @coversDefaultClass \Groups\REST\Membership_Controller
@@ -55,19 +54,22 @@ class Test_Membership_Controller extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Multisite tests require a multisite installation.' );
 		}
 
-		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
-
 		$this->blog_id = self::factory()->blog->create();
 
 		// Register custom roles on the test site.
 		switch_to_blog( $this->blog_id );
 		Membership::register_roles();
-
-		$controller = new Membership_Controller();
-		$controller->register_routes();
-
 		restore_current_blog();
+
+		// Boot the REST server via the rest_api_init action so routes are registered properly.
+		add_action( 'rest_api_init', static function () {
+			$controller = new Membership_Controller();
+			$controller->register_routes();
+		} );
+
+		global $wp_rest_server;
+		$this->server = $wp_rest_server = new WP_REST_Server();
+		do_action( 'rest_api_init', $this->server );
 
 		// Create users.
 		$this->user_id      = self::factory()->user->create( [ 'display_name' => 'Test User' ] );
