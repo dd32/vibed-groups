@@ -50,6 +50,8 @@ class Plugin {
 		new Blocks\Block_Registrar();
 		new Analytics\Newcomer_Tracker();
 		new Analytics\Activity_Logger();
+		new Analytics\Dormancy_Detector();
+		Analytics\Dormancy_Detector::schedule_cron();
 		new Calendar\ICal_Export();
 		new Workflow\Application_Workflow();
 		new Workflow\Status_Transition();
