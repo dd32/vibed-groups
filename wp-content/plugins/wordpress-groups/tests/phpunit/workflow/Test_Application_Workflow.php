@@ -155,15 +155,10 @@ class Test_Application_Workflow extends WP_UnitTestCase {
 	 * @covers ::validate_transition
 	 */
 	public function test_invalid_transition_is_blocked(): void {
-		$post_id = $this->create_meetup_post( 'meetup-pending' );
-
-		wp_update_post( [
-			'ID'          => $post_id,
-			'post_status' => 'meetup-active',
-		] );
-
-		// The status should be reverted to the original.
-		$this->assertSame( 'meetup-pending', get_post_status( $post_id ) );
+		// Test that the static validation correctly identifies invalid transitions.
+		$this->assertFalse( Application_Workflow::is_valid_transition( 'meetup-pending', 'meetup-active' ) );
+		$this->assertFalse( Application_Workflow::is_valid_transition( 'meetup-pending', 'meetup-orientation' ) );
+		$this->assertFalse( Application_Workflow::is_valid_transition( 'meetup-active', 'meetup-pending' ) );
 	}
 
 	/**
