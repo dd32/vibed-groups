@@ -10,9 +10,9 @@
 	],
 	"mappings": {
 		"wp-content/mu-plugins/wporg-mu-plugins": "https://github.com/WordPress/wporg-mu-plugins",
-		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./wporg-mu-plugins-loader.php",
+		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./wp-content/mu-plugins/wporg-mu-plugins-loader.php",
 		"wp-content/wordcamp.org": "https://github.com/WordPress/wordcamp.org",
-		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wordcamp-mu-plugins-loader.php"
+		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wp-content/mu-plugins/wordcamp-mu-plugins-loader.php"
 	},
 	"config": {
 		"WP_DEBUG": true,
