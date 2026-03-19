@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/rsvp-button",
+	"version": "0.1.0",
+	"title": "RSVP Button",
+	"category": "widgets",
+	"description": "An interactive RSVP button for events, with attending/waitlist states and live counts.",
+	"textdomain": "wordpress-groups",
+	"attributes": {
+		"eventId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false
+	},
+	"editorScript": "file:./edit.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
