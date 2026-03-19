@@ -57,6 +57,8 @@ class Plugin {
 		new Workflow\Application_Workflow();
 		new Workflow\Status_Transition();
 		new Workflow\Site_Provisioner();
+		new Models\Recurrence_Generator();
+		Models\Recurrence_Generator::schedule_cron();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
