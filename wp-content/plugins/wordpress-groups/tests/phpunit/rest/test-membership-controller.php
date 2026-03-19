@@ -309,6 +309,57 @@ class Test_Membership_Controller extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::get_items
+	 */
+	public function test_joined_date_uses_group_meta_not_user_registered(): void {
+		wp_set_current_user( $this->user_id );
+
+		$request  = new WP_REST_Request( 'POST', '/groups/v1/members/join' );
+		$response = $this->dispatch_on_blog( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertNotNull( $data['joined_date'], 'joined_date should not be null after joining.' );
+
+		// The joined_date should NOT equal user_registered (account creation date).
+		$user            = get_userdata( $this->user_id );
+		$registered_date = mysql_to_rfc3339( $user->user_registered );
+		$meta_value      = get_user_meta( $this->user_id, "_groups_joined_{$this->blog_id}", true );
+
+		$this->assertNotEmpty( $meta_value, 'Join should have stored a _groups_joined meta.' );
+		$this->assertSame( mysql_to_rfc3339( $meta_value ), $data['joined_date'] );
+	}
+
+	/**
+	 * @covers ::get_items
+	 */
+	public function test_joined_date_falls_back_to_user_registered_for_legacy_members(): void {
+		// Simulate a legacy member by adding them to the blog directly (no meta).
+		add_user_to_blog( $this->blog_id, $this->user_id, 'member' );
+
+		$request  = new WP_REST_Request( 'GET', '/groups/v1/members' );
+		$response = $this->dispatch_on_blog( $request );
+
+		$data         = $response->get_data();
+		$member_entry = null;
+
+		foreach ( $data as $entry ) {
+			if ( $entry['user_id'] === $this->user_id ) {
+				$member_entry = $entry;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $member_entry );
+
+		$user            = get_userdata( $this->user_id );
+		$registered_date = mysql_to_rfc3339( $user->user_registered );
+
+		$this->assertSame( $registered_date, $member_entry['joined_date'] );
+	}
+
+	/**
 	 * @covers ::join_item
 	 */
 	public function test_join_response_includes_expected_fields(): void {

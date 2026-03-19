@@ -262,29 +262,30 @@ class Membership_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get the date a user was added to a blog.
+	 * Get the date a user joined a group site.
 	 *
-	 * Reads from the user's capabilities meta on the target blog to determine
-	 * when the user was added (not directly available, so we use user_registered
-	 * as a fallback and check if the blog-specific meta exists).
+	 * Reads from the `_groups_joined_{blog_id}` user meta, which is set when a
+	 * user joins via the Membership model. Falls back to `user_registered` for
+	 * legacy members who joined before this meta was introduced.
 	 *
 	 * @param int $user_id The user ID.
 	 * @param int $blog_id The blog ID.
 	 * @return string|null ISO 8601 date string, or null if unavailable.
 	 */
 	private function get_joined_date( int $user_id, int $blog_id ): ?string {
-		global $wpdb;
-
-		$prefix = $wpdb->get_blog_prefix( $blog_id );
-		$key    = $prefix . 'capabilities';
-
-		// WordPress does not store a "joined date" per blog. Fall back to user_registered.
 		$user = get_userdata( $user_id );
 
-		if ( ! $user || ! get_user_meta( $user_id, $key, true ) ) {
+		if ( ! $user ) {
 			return null;
 		}
 
+		$joined = get_user_meta( $user_id, "_groups_joined_{$blog_id}", true );
+
+		if ( $joined ) {
+			return mysql_to_rfc3339( $joined );
+		}
+
+		// Legacy fallback: use account registration date.
 		return mysql_to_rfc3339( $user->user_registered );
 	}
 
