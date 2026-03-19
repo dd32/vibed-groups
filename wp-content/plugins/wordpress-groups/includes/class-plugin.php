@@ -47,6 +47,7 @@ class Plugin {
 	private function init_components(): void {
 		new Post_Types\Event();
 		new Post_Types\Venue();
+		new Blocks\Block_Registrar();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );

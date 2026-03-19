@@ -1,0 +1,139 @@
+<?php
+/**
+ * Server-side render for the Event Card block.
+ *
+ * @package Groups\Blocks
+ *
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block content (empty for server-rendered).
+ * @var WP_Block $block      Block instance.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+// Determine which event to display: explicit attribute or current post context.
+$event_id = ! empty( $attributes['eventId'] )
+	? (int) $attributes['eventId']
+	: ( $block->context['postId'] ?? 0 );
+
+if ( ! $event_id ) {
+	return;
+}
+
+$event = get_post( $event_id );
+
+if ( ! $event || 'event' !== $event->post_type ) {
+	return;
+}
+
+// Event meta.
+$start_datetime = get_post_meta( $event_id, '_event_start', true );
+$end_datetime   = get_post_meta( $event_id, '_event_end', true );
+$timezone       = get_post_meta( $event_id, '_event_timezone', true );
+$venue_id       = (int) get_post_meta( $event_id, '_event_venue_id', true );
+$online_link    = get_post_meta( $event_id, '_event_online_link', true );
+
+// RSVP count — RSVPs are stored as comments with 'attending' status meta.
+$attending_count = 0;
+$rsvp_comments   = get_comments( [
+	'post_id'    => $event_id,
+	'status'     => 'approve',
+	'meta_key'   => '_rsvp_status',
+	'meta_value' => 'attending',
+	'count'      => true,
+] );
+$attending_count = (int) $rsvp_comments;
+
+// Event status.
+$status      = get_post_status( $event_id );
+$status_map  = [
+	'event-draft'     => __( 'Draft', 'wordpress-groups' ),
+	'event-scheduled' => __( 'Scheduled', 'wordpress-groups' ),
+	'event-active'    => __( 'Happening Now', 'wordpress-groups' ),
+	'event-past'      => __( 'Past', 'wordpress-groups' ),
+	'event-cancelled' => __( 'Cancelled', 'wordpress-groups' ),
+	'publish'         => __( 'Scheduled', 'wordpress-groups' ),
+];
+$status_label = $status_map[ $status ] ?? ucfirst( str_replace( 'event-', '', $status ) );
+
+// Format date/time with timezone support.
+$date_display = '';
+$time_display = '';
+
+if ( $start_datetime ) {
+	$tz = $timezone ? new \DateTimeZone( $timezone ) : wp_timezone();
+
+	$date_display = wp_date( get_option( 'date_format' ), strtotime( $start_datetime ), $tz );
+	$time_display = wp_date( get_option( 'time_format' ), strtotime( $start_datetime ), $tz );
+
+	if ( $end_datetime ) {
+		$time_display .= ' – ' . wp_date( get_option( 'time_format' ), strtotime( $end_datetime ), $tz );
+	}
+
+	if ( $timezone ) {
+		$tz_abbr       = wp_date( 'T', strtotime( $start_datetime ), $tz );
+		$time_display .= ' ' . $tz_abbr;
+	}
+}
+
+// Venue name.
+$venue_name = '';
+if ( $venue_id ) {
+	$venue = get_post( $venue_id );
+	if ( $venue && 'venue' === $venue->post_type ) {
+		$venue_name = $venue->post_title;
+	}
+} elseif ( $online_link ) {
+	$venue_name = __( 'Online', 'wordpress-groups' );
+}
+
+// Build the status CSS class modifier.
+$status_class = sanitize_html_class( 'wp-block-groups-event-card__status--' . str_replace( 'event-', '', $status ) );
+
+$wrapper_attributes = get_block_wrapper_attributes( [
+	'class' => 'wp-block-groups-event-card',
+] );
+?>
+
+<div <?php echo $wrapper_attributes; ?>>
+	<?php if ( $status ) : ?>
+		<span class="wp-block-groups-event-card__status <?php echo esc_attr( $status_class ); ?>">
+			<?php echo esc_html( $status_label ); ?>
+		</span>
+	<?php endif; ?>
+
+	<h3 class="wp-block-groups-event-card__title">
+		<a href="<?php echo esc_url( get_permalink( $event_id ) ); ?>">
+			<?php echo esc_html( get_the_title( $event_id ) ); ?>
+		</a>
+	</h3>
+
+	<?php if ( $date_display ) : ?>
+		<div class="wp-block-groups-event-card__datetime">
+			<time datetime="<?php echo esc_attr( $start_datetime ); ?>">
+				<span class="wp-block-groups-event-card__date"><?php echo esc_html( $date_display ); ?></span>
+				<?php if ( $time_display ) : ?>
+					<span class="wp-block-groups-event-card__time"><?php echo esc_html( $time_display ); ?></span>
+				<?php endif; ?>
+			</time>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( $venue_name ) : ?>
+		<div class="wp-block-groups-event-card__venue">
+			<?php echo esc_html( $venue_name ); ?>
+		</div>
+	<?php endif; ?>
+
+	<div class="wp-block-groups-event-card__meta">
+		<span class="wp-block-groups-event-card__rsvp-count">
+			<?php
+			printf(
+				/* translators: %d: Number of attendees. */
+				esc_html( _n( '%d attending', '%d attending', $attending_count, 'wordpress-groups' ) ),
+				$attending_count
+			);
+			?>
+		</span>
+	</div>
+</div>

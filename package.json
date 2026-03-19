@@ -4,13 +4,24 @@
 	"scripts": {
 		"start": "wp-scripts start",
 		"build": "wp-scripts build",
+		"start:blocks": "wp-scripts start --webpack-src-dir=wp-content/plugins/wordpress-groups/blocks --output-path=wp-content/plugins/wordpress-groups/build",
+		"build:blocks": "wp-scripts build --webpack-src-dir=wp-content/plugins/wordpress-groups/blocks --output-path=wp-content/plugins/wordpress-groups/build",
 		"env:start": "wp-env start",
 		"env:stop": "wp-env stop",
 		"env:destroy": "wp-env destroy"
 	},
 	"devDependencies": {
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@wordpress/block-editor": "^15.15.0",
+		"@wordpress/blocks": "^15.15.0",
+		"@wordpress/components": "^32.4.0",
 		"@wordpress/env": "^11.2.0",
+		"@wordpress/i18n": "^6.15.0",
 		"@wordpress/scripts": "^31.7.0"
+	},
+	"dependencies": {
+		"@wordpress/server-side-render": "^5.0.0"
 	},
 	"engines": {
 		"node": ">=20"
