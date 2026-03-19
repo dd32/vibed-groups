@@ -7,8 +7,8 @@
 import { createElement } from '@wordpress/element';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
-import { Placeholder, Spinner, TextControl } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { Placeholder, TextControl } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -79,6 +79,3 @@ export default function Edit( { attributes, setAttributes } ) {
 		)
 	);
 }
-
-// Required for @wordpress/scripts to pick up sprintf.
-import { sprintf } from '@wordpress/i18n';

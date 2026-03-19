@@ -65,36 +65,48 @@ if ( $is_logged_in ) {
 }
 
 $initial_state = $is_logged_in ? ( $user_status ?: 'not-rsvped' ) : 'not-logged-in';
+$login_url      = ! $is_logged_in ? wp_login_url( get_permalink( $event_id ) ) : '';
 
-$wrapper_attributes = get_block_wrapper_attributes(
-	[
-		'class'               => 'wp-block-groups-rsvp-button',
-		'data-event-id'       => esc_attr( $event_id ),
-		'data-initial-state'  => esc_attr( $initial_state ),
-		'data-attending'      => esc_attr( $attending_count ),
-		'data-waitlisted'     => esc_attr( $waitlist_count ),
-	]
-);
+$data_attributes = [
+	'class'               => 'wp-block-groups-rsvp-button',
+	'data-event-id'       => esc_attr( $event_id ),
+	'data-initial-state'  => esc_attr( $initial_state ),
+	'data-attending'      => esc_attr( $attending_count ),
+	'data-waitlisted'     => esc_attr( $waitlist_count ),
+];
+
+if ( $login_url ) {
+	$data_attributes['data-login-url'] = esc_url( $login_url );
+}
+
+$wrapper_attributes = get_block_wrapper_attributes( $data_attributes );
 
 $button_text = match ( $initial_state ) {
-	'attending'     => esc_html__( 'Attending', 'wordpress-groups' ),
-	'waitlisted'    => esc_html__( 'On Waitlist', 'wordpress-groups' ),
-	'not-logged-in' => esc_html__( 'Log in to RSVP', 'wordpress-groups' ),
-	default         => esc_html__( 'RSVP', 'wordpress-groups' ),
+	'attending'     => __( 'Attending', 'wordpress-groups' ),
+	'waitlisted'    => __( 'On Waitlist', 'wordpress-groups' ),
+	'not-logged-in' => __( 'Log in to RSVP', 'wordpress-groups' ),
+	default         => __( 'RSVP', 'wordpress-groups' ),
 };
 
 ?>
 <div <?php echo $wrapper_attributes; ?>>
-	<button
-		class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--<?php echo esc_attr( $initial_state ); ?>"
-		type="button"
-		<?php if ( 'not-logged-in' === $initial_state ) : ?>
-			disabled
-		<?php endif; ?>
-		aria-label="<?php echo esc_attr( $button_text ); ?>"
-	>
-		<span class="wp-block-groups-rsvp-button__label"><?php echo $button_text; ?></span>
-	</button>
+	<?php if ( 'not-logged-in' === $initial_state && $login_url ) : ?>
+		<a
+			class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--not-logged-in"
+			href="<?php echo esc_url( $login_url ); ?>"
+			aria-label="<?php echo esc_attr( $button_text ); ?>"
+		>
+			<span class="wp-block-groups-rsvp-button__label"><?php echo esc_html( $button_text ); ?></span>
+		</a>
+	<?php else : ?>
+		<button
+			class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--<?php echo esc_attr( $initial_state ); ?>"
+			type="button"
+			aria-label="<?php echo esc_attr( $button_text ); ?>"
+		>
+			<span class="wp-block-groups-rsvp-button__label"><?php echo esc_html( $button_text ); ?></span>
+		</button>
+	<?php endif; ?>
 	<div class="wp-block-groups-rsvp-button__counts" aria-live="polite">
 		<span class="wp-block-groups-rsvp-button__attending-count">
 			<?php

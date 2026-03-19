@@ -15,8 +15,9 @@
 		gap: 8px;
 	}
 
-	// Button base.
+	// Button base (also applies to <a> tags used as buttons for logged-out users).
 	&__btn {
+		text-decoration: none;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -35,25 +36,25 @@
 
 		// Default state (not RSVP'd).
 		&--not-rsvped {
-			background-color: #3858e9;
-			color: #fff;
-			border-color: #3858e9;
+			background-color: var(--wp--preset--color--blueberry-1);
+			color: var(--wp--preset--color--white);
+			border-color: var(--wp--preset--color--blueberry-1);
 
 			&:hover {
-				background-color: #2145c4;
-				border-color: #2145c4;
+				background-color: var(--wp--preset--color--deep-blueberry);
+				border-color: var(--wp--preset--color--deep-blueberry);
 			}
 
 			&:active {
-				background-color: #1a37a0;
-				border-color: #1a37a0;
+				background-color: var(--wp--preset--color--dark-blueberry);
+				border-color: var(--wp--preset--color--dark-blueberry);
 			}
 		}
 
 		// Attending state (green).
 		&--attending {
 			background-color: #00a32a;
-			color: #fff;
+			color: var(--wp--preset--color--white);
 			border-color: #00a32a;
 
 			&:hover {
@@ -70,7 +71,7 @@
 		// Waitlisted state (yellow/amber).
 		&--waitlisted {
 			background-color: #dba617;
-			color: #1e1e1e;
+			color: var(--wp--preset--color--charcoal-1);
 			border-color: #dba617;
 
 			&:hover {
@@ -86,17 +87,17 @@
 
 		// Not logged in.
 		&--not-logged-in {
-			background-color: #dcdcde;
-			color: #50575e;
-			border-color: #dcdcde;
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
 			cursor: not-allowed;
 		}
 
 		// Loading state.
 		&--loading {
-			background-color: #dcdcde;
-			color: #50575e;
-			border-color: #dcdcde;
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
 			cursor: wait;
 		}
 
@@ -108,9 +109,9 @@
 
 		// Accessible focus styles.
 		&:focus-visible {
-			outline: 2px solid #3858e9;
+			outline: 2px solid var(--wp--preset--color--blueberry-1);
 			outline-offset: 2px;
-			box-shadow: 0 0 0 2px #fff;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white);
 		}
 	}
 
@@ -130,7 +131,7 @@
 		display: flex;
 		gap: 12px;
 		font-size: 14px;
-		color: #50575e;
+		color: var(--wp--preset--color--charcoal-4);
 		line-height: 1.4;
 	}
 

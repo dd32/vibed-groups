@@ -5,7 +5,7 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
-import { createElement, render, useState, useEffect, useCallback } from '@wordpress/element';
+import { createElement, createRoot, useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 /**
@@ -27,13 +27,20 @@ const STATE = {
  * @param {string} props.initialState  Initial RSVP state from server render.
  * @param {number} props.initialAttending  Initial attending count.
  * @param {number} props.initialWaitlisted Initial waitlist count.
+ * @param {string} props.loginUrl      Login URL for logged-out users.
  */
-function RsvpButton( { eventId, initialState, initialAttending, initialWaitlisted } ) {
+export function RsvpButton( { eventId, initialState, initialAttending, initialWaitlisted, loginUrl } ) {
 	const [ state, setState ] = useState( initialState );
 	const [ attending, setAttending ] = useState( initialAttending );
 	const [ waitlisted, setWaitlisted ] = useState( initialWaitlisted );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ error, setError ] = useState( '' );
+	const stateRef = useRef( state );
+
+	// Keep the ref in sync with state.
+	useEffect( () => {
+		stateRef.current = state;
+	}, [ state ] );
 
 	/**
 	 * Refresh RSVP data from the server.
@@ -49,13 +56,13 @@ function RsvpButton( { eventId, initialState, initialAttending, initialWaitliste
 
 			if ( data.user_status ) {
 				setState( data.user_status );
-			} else if ( state !== STATE.NOT_LOGGED_IN ) {
+			} else if ( stateRef.current !== STATE.NOT_LOGGED_IN ) {
 				setState( STATE.NOT_RSVPED );
 			}
 		} catch {
 			// Silently fall back to server-rendered state on fetch failure.
 		}
-	}, [ eventId, state ] );
+	}, [ eventId ] );
 
 	// Refresh state on mount if the user is logged in.
 	useEffect( () => {
@@ -68,7 +75,14 @@ function RsvpButton( { eventId, initialState, initialAttending, initialWaitliste
 	 * Handle RSVP action (toggle between RSVP and cancel).
 	 */
 	const handleClick = useCallback( async () => {
-		if ( state === STATE.NOT_LOGGED_IN || isLoading ) {
+		if ( stateRef.current === STATE.NOT_LOGGED_IN ) {
+			if ( loginUrl ) {
+				window.location.href = loginUrl;
+			}
+			return;
+		}
+
+		if ( isLoading ) {
 			return;
 		}
 
@@ -76,7 +90,7 @@ function RsvpButton( { eventId, initialState, initialAttending, initialWaitliste
 		setError( '' );
 
 		try {
-			if ( state === STATE.ATTENDING || state === STATE.WAITLISTED ) {
+			if ( stateRef.current === STATE.ATTENDING || stateRef.current === STATE.WAITLISTED ) {
 				// Cancel RSVP.
 				await apiFetch( {
 					path: `/groups/v1/events/${ eventId }/rsvp`,
@@ -100,7 +114,7 @@ function RsvpButton( { eventId, initialState, initialAttending, initialWaitliste
 		} finally {
 			setIsLoading( false );
 		}
-	}, [ eventId, state, isLoading, refreshState ] );
+	}, [ eventId, isLoading, loginUrl, refreshState ] );
 
 	const currentState = isLoading ? STATE.LOADING : state;
 
@@ -121,7 +135,7 @@ function RsvpButton( { eventId, initialState, initialAttending, initialWaitliste
 				type: 'button',
 				className: `wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--${ currentState }`,
 				onClick: handleClick,
-				disabled: state === STATE.NOT_LOGGED_IN || isLoading,
+				disabled: ( state === STATE.NOT_LOGGED_IN && ! loginUrl ) || isLoading,
 				'aria-busy': isLoading,
 				'aria-label': buttonText[ currentState ],
 			},
@@ -186,22 +200,26 @@ function init() {
 		const initialState = container.dataset.initialState || STATE.NOT_LOGGED_IN;
 		const initialAttending = parseInt( container.dataset.attending, 10 ) || 0;
 		const initialWaitlisted = parseInt( container.dataset.waitlisted, 10 ) || 0;
+		const loginUrl = container.dataset.loginUrl || '';
 
-		render(
+		const root = createRoot( container );
+		root.render(
 			createElement( RsvpButton, {
 				eventId,
 				initialState,
 				initialAttending,
 				initialWaitlisted,
-			} ),
-			container
+				loginUrl,
+			} )
 		);
 	} );
 }
 
-// Hydrate when the DOM is ready.
-if ( document.readyState === 'loading' ) {
-	document.addEventListener( 'DOMContentLoaded', init );
-} else {
-	init();
+// Hydrate when the DOM is ready (skip during tests).
+if ( typeof document !== 'undefined' ) {
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', init );
+	} else {
+		init();
+	}
 }
