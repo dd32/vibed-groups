@@ -89,9 +89,11 @@ class Email_Notifier {
 		 */
 		do_action( 'groups_before_email_send', $to, $subject, $template, $data );
 
-		$sent = wp_mail( $to, $subject, $html, $headers );
-
-		remove_filter( 'wp_mail_content_type', $set_html_content_type );
+		try {
+			$sent = wp_mail( $to, $subject, $html, $headers );
+		} finally {
+			remove_filter( 'wp_mail_content_type', $set_html_content_type );
+		}
 
 		/**
 		 * Fires after an email notification is sent.
@@ -109,10 +111,14 @@ class Email_Notifier {
 	/**
 	 * Generate a default unsubscribe URL for a given email address.
 	 *
+	 * Uses an HMAC token instead of exposing the raw email in the URL.
+	 *
 	 * @param string $email Recipient email address.
 	 * @return string Unsubscribe URL.
 	 */
 	private function get_default_unsubscribe_url( string $email ): string {
+		$token = self::generate_unsubscribe_token( $email );
+
 		/**
 		 * Filters the default unsubscribe URL.
 		 *
@@ -124,11 +130,61 @@ class Email_Notifier {
 			add_query_arg(
 				[
 					'action' => 'groups_email_preferences',
-					'email'  => rawurlencode( $email ),
+					'token'  => $token,
 				],
 				home_url( '/email-preferences/' )
 			),
 			$email
 		);
+	}
+
+	/**
+	 * Generate an HMAC-based unsubscribe token for an email address.
+	 *
+	 * The token encodes the email address securely using wp_hash() so that
+	 * the raw email is not exposed in the unsubscribe URL query string.
+	 *
+	 * @param string $email The email address to generate a token for.
+	 * @return string The HMAC token (base64url-encoded email + hash).
+	 */
+	public static function generate_unsubscribe_token( string $email ): string {
+		$hash = wp_hash( 'unsubscribe:' . $email, 'nonce' );
+
+		// Encode both email and hash together so the server can verify.
+		$payload = base64_encode( $email . '|' . $hash );
+
+		// Make URL-safe by replacing +/= characters.
+		return rtrim( strtr( $payload, '+/', '-_' ), '=' );
+	}
+
+	/**
+	 * Verify and extract the email address from an unsubscribe token.
+	 *
+	 * @param string $token The unsubscribe token to verify.
+	 * @return string|false The email address if valid, false otherwise.
+	 */
+	public static function verify_unsubscribe_token( string $token ): string|false {
+		// Restore base64 encoding.
+		$payload = base64_decode( strtr( $token, '-_', '+/' ) );
+
+		if ( false === $payload ) {
+			return false;
+		}
+
+		$parts = explode( '|', $payload, 2 );
+
+		if ( count( $parts ) !== 2 ) {
+			return false;
+		}
+
+		[ $email, $hash ] = $parts;
+
+		$expected_hash = wp_hash( 'unsubscribe:' . $email, 'nonce' );
+
+		if ( ! hash_equals( $expected_hash, $hash ) ) {
+			return false;
+		}
+
+		return $email;
 	}
 }

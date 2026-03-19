@@ -8,6 +8,7 @@
 namespace Groups\Tests\Notifications;
 
 use Groups\Notifications\Email_Templates;
+use Groups\Notifications\Email_Notifier;
 use WP_UnitTestCase;
 
 /**
@@ -334,5 +335,163 @@ class Test_Email_Templates extends WP_UnitTestCase {
 	public function test_base_not_in_available_templates(): void {
 		$templates = $this->templates->get_available_templates();
 		$this->assertNotContains( 'base', $templates );
+	}
+
+	/**
+	 * Test that placeholder values containing HTML are escaped in output.
+	 *
+	 * Non-HTML-allowed placeholders like group_name, user_name, event_title
+	 * should have their HTML entities escaped to prevent XSS.
+	 */
+	public function test_placeholder_values_are_html_escaped(): void {
+		$xss_payload = '<script>alert("xss")</script>';
+
+		$data = [
+			'user_name'       => $xss_payload,
+			'event_title'     => 'Event with <b>bold</b> & "quotes"',
+			'event_date'      => 'Jan 1, 2026',
+			'event_time'      => '12:00 PM',
+			'event_url'       => 'https://example.com',
+			'venue_name'      => 'Test Venue',
+			'venue_address'   => '123 Test St',
+			'group_name'      => $xss_payload,
+			'unsubscribe_url' => 'https://example.com/unsubscribe',
+			'email_subject'   => 'Test Subject',
+			'preview_text'    => 'Test preview.',
+		];
+
+		$html = $this->templates->render( 'event-reminder', $data );
+
+		// Raw script tags must NOT appear in the output.
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringNotContainsString( '</script>', $html );
+
+		// The escaped version should be present.
+		$this->assertStringContainsString( '&lt;script&gt;', $html );
+
+		// Ampersands and quotes should be escaped in non-HTML placeholders.
+		$this->assertStringContainsString( '&amp;', $html );
+	}
+
+	/**
+	 * Test that HTML-allowed placeholders preserve safe HTML but strip scripts.
+	 *
+	 * announcement_body is allowed to contain HTML (via wp_kses_post),
+	 * so safe tags like <p> and <strong> should be preserved, but
+	 * dangerous tags like <script> should be stripped.
+	 */
+	public function test_html_allowed_placeholders_strip_scripts_but_keep_safe_html(): void {
+		$data = [
+			'user_name'          => 'Grace',
+			'group_name'         => 'London WordPress',
+			'announcement_title' => 'Test',
+			'announcement_body'  => '<p>Safe <strong>HTML</strong> content.</p><script>alert("xss")</script>',
+			'group_url'          => 'https://events.wordpress.org/london/',
+			'unsubscribe_url'    => 'https://example.com/unsubscribe',
+			'email_subject'      => 'Group Announcement',
+			'preview_text'       => 'Test.',
+		];
+
+		$html = $this->templates->render( 'group-announcement', $data );
+
+		// Safe HTML tags should be preserved.
+		$this->assertStringContainsString( '<p>Safe <strong>HTML</strong> content.</p>', $html );
+
+		// Script tags should be stripped entirely.
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringNotContainsString( 'alert("xss")', $html );
+	}
+
+	/**
+	 * Test that email_subject is properly escaped in attribute contexts.
+	 *
+	 * The email_subject appears in <title> and aria-label attributes in base.html,
+	 * which need esc_attr() escaping rather than just esc_html().
+	 */
+	public function test_email_subject_escaped_in_attribute_contexts(): void {
+		$data = [
+			'user_name'       => 'Test',
+			'event_title'     => 'Test Event',
+			'event_date'      => 'Jan 1, 2026',
+			'event_time'      => '12:00 PM',
+			'event_url'       => 'https://example.com',
+			'venue_name'      => 'Test Venue',
+			'venue_address'   => '123 Test St',
+			'group_name'      => 'Test Group',
+			'unsubscribe_url' => 'https://example.com/unsubscribe',
+			'email_subject'   => 'Subject with "quotes" & <tags>',
+			'preview_text'    => 'Test preview.',
+		];
+
+		$html = $this->templates->render( 'event-reminder', $data );
+
+		// In the title tag, the subject should be attribute-safe.
+		$this->assertStringNotContainsString( '<title>Subject with "quotes" & <tags></title>', $html );
+
+		// The aria-label should use esc_attr-safe content.
+		$this->assertStringNotContainsString( 'aria-label="Subject with "quotes"', $html );
+	}
+
+	/**
+	 * Test that the unsubscribe URL uses an HMAC token, not the raw email.
+	 */
+	public function test_unsubscribe_url_uses_token_not_raw_email(): void {
+		$email = 'user@example.com';
+
+		$notifier = new Email_Notifier();
+
+		// Use reflection to access the private get_default_unsubscribe_url method.
+		$reflection = new \ReflectionMethod( $notifier, 'get_default_unsubscribe_url' );
+		$reflection->setAccessible( true );
+
+		$url = $reflection->invoke( $notifier, $email );
+
+		// The raw email should NOT appear in the URL.
+		$this->assertStringNotContainsString( 'user@example.com', $url );
+		$this->assertStringNotContainsString( 'user%40example.com', $url );
+
+		// The URL should use a token parameter instead of email.
+		$this->assertStringContainsString( 'token=', $url );
+		$this->assertStringNotContainsString( 'email=', $url );
+	}
+
+	/**
+	 * Test that generate_unsubscribe_token creates verifiable tokens.
+	 */
+	public function test_unsubscribe_token_roundtrip(): void {
+		$email = 'test@wordpress.org';
+
+		$token = Email_Notifier::generate_unsubscribe_token( $email );
+
+		// Token should be a non-empty string.
+		$this->assertNotEmpty( $token );
+
+		// Token should be URL-safe (no +, /, or = characters).
+		$this->assertDoesNotMatchRegularExpression( '/[+\/=]/', $token );
+
+		// Verify the token resolves back to the original email.
+		$result = Email_Notifier::verify_unsubscribe_token( $token );
+		$this->assertSame( $email, $result );
+	}
+
+	/**
+	 * Test that tampered unsubscribe tokens are rejected.
+	 */
+	public function test_tampered_unsubscribe_token_is_rejected(): void {
+		$token = Email_Notifier::generate_unsubscribe_token( 'legit@example.com' );
+
+		// Tamper with the token.
+		$tampered = $token . 'tampered';
+
+		$result = Email_Notifier::verify_unsubscribe_token( $tampered );
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test that an invalid unsubscribe token returns false.
+	 */
+	public function test_invalid_unsubscribe_token_returns_false(): void {
+		$this->assertFalse( Email_Notifier::verify_unsubscribe_token( '' ) );
+		$this->assertFalse( Email_Notifier::verify_unsubscribe_token( 'not-a-real-token' ) );
 	}
 }

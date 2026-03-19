@@ -30,6 +30,30 @@ class Email_Templates {
 	private ?string $base_template = null;
 
 	/**
+	 * Placeholders that are allowed to contain HTML.
+	 *
+	 * These values are sanitized with wp_kses_post() instead of esc_html().
+	 *
+	 * @var array<string>
+	 */
+	private const HTML_ALLOWED_PLACEHOLDERS = [
+		'content',
+		'announcement_body',
+		'status_message',
+	];
+
+	/**
+	 * Placeholders that appear in HTML attribute contexts (e.g. title, aria-label).
+	 *
+	 * These are escaped with esc_attr() in attribute positions by the base template.
+	 *
+	 * @var array<string>
+	 */
+	private const ATTR_CONTEXT_PLACEHOLDERS = [
+		'email_subject',
+	];
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string|null $template_dir Optional. Path to templates directory.
@@ -109,6 +133,13 @@ class Email_Templates {
 	/**
 	 * Substitute {{placeholder}} tokens in HTML with values from data array.
 	 *
+	 * Values are escaped based on their context:
+	 * - HTML-allowed placeholders (content, announcement_body, status_message)
+	 *   are sanitized with wp_kses_post() to allow safe HTML.
+	 * - Attribute-context placeholders (email_subject) are additionally replaced
+	 *   in attribute positions using esc_attr().
+	 * - All other values are escaped with esc_html() to prevent XSS.
+	 *
 	 * Any placeholders without matching data keys are left as-is.
 	 *
 	 * @param string $html The HTML containing placeholders.
@@ -117,8 +148,40 @@ class Email_Templates {
 	 */
 	private function substitute_placeholders( string $html, array $data ): string {
 		foreach ( $data as $key => $value ) {
-			if ( is_string( $value ) || is_numeric( $value ) ) {
-				$html = str_replace( '{{' . $key . '}}', (string) $value, $html );
+			if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+				continue;
+			}
+
+			$value = (string) $value;
+
+			if ( in_array( $key, self::HTML_ALLOWED_PLACEHOLDERS, true ) ) {
+				$escaped_value = wp_kses_post( $value );
+			} else {
+				$escaped_value = esc_html( $value );
+			}
+
+			// For placeholders that appear in attribute contexts (like <title> and aria-label),
+			// also substitute an attribute-safe version in those positions.
+			if ( in_array( $key, self::ATTR_CONTEXT_PLACEHOLDERS, true ) ) {
+				$attr_value = esc_attr( $value );
+				$placeholder = '{{' . $key . '}}';
+
+				// Replace in attribute contexts first (aria-label="...", title tag content).
+				$html = preg_replace(
+					'/(aria-label=["\'])' . preg_quote( $placeholder, '/' ) . '(["\'])/i',
+					'${1}' . str_replace( '\\', '\\\\', $attr_value ) . '${2}',
+					$html
+				);
+				$html = preg_replace(
+					'/(<title>)' . preg_quote( $placeholder, '/' ) . '(<\/title>)/i',
+					'${1}' . str_replace( '\\', '\\\\', $attr_value ) . '${2}',
+					$html
+				);
+
+				// Replace remaining occurrences with HTML-escaped version.
+				$html = str_replace( $placeholder, $escaped_value, $html );
+			} else {
+				$html = str_replace( '{{' . $key . '}}', $escaped_value, $html );
 			}
 		}
 
