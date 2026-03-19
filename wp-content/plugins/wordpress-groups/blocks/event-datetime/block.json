@@ -1,0 +1,37 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/event-datetime",
+	"version": "0.1.0",
+	"title": "Event Date & Time",
+	"category": "widgets",
+	"icon": "clock",
+	"description": "Displays event date and time in the event's timezone, with client-side local time conversion for the viewer.",
+	"textdomain": "wordpress-groups",
+	"attributes": {
+		"eventId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"usesContext": [ "postId", "postType" ],
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}
