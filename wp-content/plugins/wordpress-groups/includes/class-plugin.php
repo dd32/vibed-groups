@@ -65,5 +65,8 @@ class Plugin {
 
 		$rsvp_controller = new REST\Rsvp_Controller();
 		$rsvp_controller->register_routes();
+
+		$venue_controller = new REST\Venue_Controller();
+		$venue_controller->register_routes();
 	}
 }
