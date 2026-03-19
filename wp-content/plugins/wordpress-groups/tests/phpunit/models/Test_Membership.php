@@ -5,10 +5,8 @@
  * @package Groups\Tests
  */
 
-namespace Groups\Tests\Models;
 
 use Groups\Models\Membership;
-use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \Groups\Models\Membership

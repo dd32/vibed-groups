@@ -9,11 +9,12 @@
 		"./wp-content/themes/groups-site"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/wporg-mu-plugins": "https://github.com/WordPress/wporg-mu-plugins",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./wp-content/mu-plugins/wporg-mu-plugins-loader.php",
-		"wp-content/wordcamp.org": "https://github.com/WordPress/wordcamp.org",
+		"wp-content/wordcamp.org": "WordPress/wordcamp.org#production",
 		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wp-content/mu-plugins/wordcamp-mu-plugins-loader.php"
 	},
+	"testsEnvironment": false,
 	"config": {
 		"WP_DEBUG": true,
 		"WP_DEBUG_LOG": true,

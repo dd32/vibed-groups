@@ -5,15 +5,12 @@
  * @package Groups\Tests\REST
  */
 
-namespace Groups\Tests\REST;
 
 use Groups\Models\Membership;
 use Groups\Models\Rsvp;
 use Groups\Post_Types\Event;
 use Groups\REST\Rsvp_Controller;
-use WP_REST_Request;
 use WP_REST_Server;
-use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \Groups\REST\Rsvp_Controller

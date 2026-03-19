@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <phpunit
 	bootstrap="tests/phpunit/bootstrap.php"
 	backupGlobals="false"
@@ -9,13 +8,7 @@
 >
 	<testsuites>
 		<testsuite name="WordPress Groups">
-			<directory suffix=".php">tests/phpunit/</directory>
+			<directory suffix=".php" prefix="Test_">tests/phpunit/</directory>
 		</testsuite>
 	</testsuites>
-
-	<filter>
-		<whitelist>
-			<directory suffix=".php">includes/</directory>
-		</whitelist>
-	</filter>
 </phpunit>
