@@ -28,9 +28,6 @@ jobs:
   phpunit:
     name: PHPUnit
     runs-on: ubuntu-latest
-    # TODO: Fix PHPUnit in wp-env — blocked by polyfills compatibility with PHPUnit 11.
-    # See: https://github.com/WordPress/gutenberg/issues/69818
-    if: false
     steps:
       - uses: actions/checkout@v4
 
@@ -46,5 +43,15 @@ jobs:
       - name: Start wp-env
         run: npx wp-env start
 
+      - name: Fix multisite test config
+        run: |
+          npx wp-env run cli bash -c "
+            sed -i '/MULTISITE/d; /SUBDOMAIN_INSTALL/d; /DOMAIN_CURRENT_SITE/d; /PATH_CURRENT_SITE/d; /SITE_ID_CURRENT_SITE/d; /BLOG_ID_CURRENT_SITE/d; /WP_ALLOW_MULTISITE/d' /wordpress-phpunit/wp-tests-config.php
+            echo \"define( 'WP_TESTS_MULTISITE', true );\" >> /wordpress-phpunit/wp-tests-config.php
+          "
+
+      - name: Install Composer dependencies
+        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups composer install --no-interaction
+
       - name: Run PHPUnit
-        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups phpunit
+        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups vendor/bin/phpunit

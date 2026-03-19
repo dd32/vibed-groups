@@ -5,11 +5,9 @@
  * @package Groups\Tests
  */
 
-namespace Groups\Tests\Models;
 
 use Groups\Models\Event;
 use Groups\Post_Types\Event as Event_Post_Type;
-use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \Groups\Models\Event

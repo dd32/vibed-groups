@@ -5,10 +5,8 @@
  * @package Groups\Tests
  */
 
-namespace Groups\Tests\Post_Types;
 
 use Groups\Post_Types\Venue;
-use WP_UnitTestCase;
 
 /**
  * @coversDefaultClass \Groups\Post_Types\Venue

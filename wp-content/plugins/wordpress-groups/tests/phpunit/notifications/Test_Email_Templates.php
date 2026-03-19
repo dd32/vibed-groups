@@ -5,11 +5,9 @@
  * @package Groups\Tests\Notifications
  */
 
-namespace Groups\Tests\Notifications;
 
 use Groups\Notifications\Email_Templates;
 use Groups\Notifications\Email_Notifier;
-use WP_UnitTestCase;
 
 /**
  * Test email template rendering, placeholder substitution, and base wrapping.
