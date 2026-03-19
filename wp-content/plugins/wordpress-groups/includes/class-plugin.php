@@ -49,6 +49,7 @@ class Plugin {
 		new Post_Types\Venue();
 		new Blocks\Block_Registrar();
 		new Analytics\Newcomer_Tracker();
+		new Analytics\Activity_Logger();
 		new Calendar\ICal_Export();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
