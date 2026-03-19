@@ -5,6 +5,11 @@
  * @package Groups\Tests
  */
 
+// Force multisite mode for the test suite.
+if ( ! getenv( 'WP_MULTISITE' ) ) {
+	putenv( 'WP_MULTISITE=1' );
+}
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
