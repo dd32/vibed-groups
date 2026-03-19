@@ -9,9 +9,6 @@
 use Groups\Models\Membership;
 use Groups\Models\Rsvp;
 use Groups\Post_Types\Event;
-use Groups\REST\Rsvp_Controller;
-use WP_REST_Server;
-
 /**
  * @coversDefaultClass \Groups\REST\Rsvp_Controller
  * @group rest-api
@@ -21,9 +18,9 @@ class Test_Rsvp_Controller extends WP_UnitTestCase {
 	/**
 	 * REST server instance.
 	 *
-	 * @var WP_REST_Server
+	 * @var \WP_REST_Server
 	 */
-	private WP_REST_Server $server;
+	private \WP_REST_Server $server;
 
 	/**
 	 * Administrator user ID.
@@ -79,10 +76,9 @@ class Test_Rsvp_Controller extends WP_UnitTestCase {
 		parent::set_up();
 
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
-
-		$controller = new Rsvp_Controller();
-		$controller->register_routes();
+		$wp_rest_server = new \WP_REST_Server();
+		$this->server   = $wp_rest_server;
+		do_action( 'rest_api_init' );
 
 		$this->admin_id       = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		$this->subscriber_id  = self::factory()->user->create( [ 'role' => 'subscriber' ] );
