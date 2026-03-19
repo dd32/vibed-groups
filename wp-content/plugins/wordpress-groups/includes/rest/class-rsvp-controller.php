@@ -7,6 +7,7 @@
 
 namespace Groups\REST;
 
+use Groups\Models\Membership;
 use Groups\Models\Rsvp;
 use Groups\Post_Types\Event;
 use WP_Error;
@@ -70,7 +71,7 @@ class Rsvp_Controller extends WP_REST_Controller {
 			]
 		);
 
-		// POST /events/{event_id}/rsvp — RSVP to an event.
+		// POST/PUT/DELETE /events/{event_id}/rsvp — create, update, or cancel RSVP.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/rsvp',
@@ -97,14 +98,6 @@ class Rsvp_Controller extends WP_REST_Controller {
 						],
 					],
 				],
-			]
-		);
-
-		// PUT /events/{event_id}/rsvp — update own RSVP.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/rsvp',
-			[
 				[
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => [ $this, 'update_item' ],
@@ -125,14 +118,6 @@ class Rsvp_Controller extends WP_REST_Controller {
 						],
 					],
 				],
-			]
-		);
-
-		// DELETE /events/{event_id}/rsvp — cancel own RSVP.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/rsvp',
-			[
 				[
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => [ $this, 'delete_item' ],
@@ -268,6 +253,14 @@ class Rsvp_Controller extends WP_REST_Controller {
 			);
 		}
 
+		if ( Membership::is_banned( get_current_user_id() ) ) {
+			return new WP_Error(
+				'rest_user_banned',
+				__( 'You are banned from this group.', 'wordpress-groups' ),
+				[ 'status' => 403 ]
+			);
+		}
+
 		$event = $this->validate_event( absint( $request->get_param( 'event_id' ) ) );
 
 		if ( is_wp_error( $event ) ) {
@@ -284,10 +277,26 @@ class Rsvp_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		$event_id = absint( $request->get_param( 'event_id' ) );
-		$user_id  = get_current_user_id();
-		$guests   = absint( $request->get_param( 'guests' ) );
-		$answers  = sanitize_text_field( $request->get_param( 'answers' ) ?? '' );
+		$event_id    = absint( $request->get_param( 'event_id' ) );
+		$user_id     = get_current_user_id();
+		$guests      = absint( $request->get_param( 'guests' ) );
+		$raw_answers = $request->get_param( 'answers' ) ?? '';
+
+		if ( '' !== $raw_answers ) {
+			$decoded = json_decode( wp_unslash( $raw_answers ), true );
+
+			if ( null === $decoded && 'null' !== $raw_answers ) {
+				return new WP_Error(
+					'rest_invalid_answers',
+					__( 'The answers field must be valid JSON.', 'wordpress-groups' ),
+					[ 'status' => 400 ]
+				);
+			}
+
+			$answers = wp_json_encode( $decoded );
+		} else {
+			$answers = '';
+		}
 
 		$result = Rsvp::create( $event_id, $user_id, $guests, $answers );
 
@@ -365,7 +374,21 @@ class Rsvp_Controller extends WP_REST_Controller {
 
 		$answers = $request->get_param( 'answers' );
 		if ( null !== $answers ) {
-			$args['answers'] = sanitize_text_field( $answers );
+			if ( '' !== $answers ) {
+				$decoded = json_decode( wp_unslash( $answers ), true );
+
+				if ( null === $decoded && 'null' !== $answers ) {
+					return new WP_Error(
+						'rest_invalid_answers',
+						__( 'The answers field must be valid JSON.', 'wordpress-groups' ),
+						[ 'status' => 400 ]
+					);
+				}
+
+				$args['answers'] = wp_json_encode( $decoded );
+			} else {
+				$args['answers'] = '';
+			}
 		}
 
 		$result = Rsvp::update( (int) $rsvp->comment_ID, $args );

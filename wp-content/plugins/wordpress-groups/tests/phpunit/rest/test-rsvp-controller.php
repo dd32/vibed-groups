@@ -7,6 +7,7 @@
 
 namespace Groups\Tests\REST;
 
+use Groups\Models\Membership;
 use Groups\Models\Rsvp;
 use Groups\Post_Types\Event;
 use Groups\REST\Rsvp_Controller;
@@ -405,6 +406,71 @@ class Test_Rsvp_Controller extends WP_UnitTestCase {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 404, $response->get_status() );
+	}
+
+	/**
+	 * @covers ::update_item_permissions_check
+	 */
+	public function test_anonymous_cannot_update_rsvp(): void {
+		wp_set_current_user( 0 );
+
+		$event_id = $this->create_event();
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $event_id . '/rsvp' );
+		$request->set_body_params( [
+			'guests' => 1,
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 401, $response->get_status() );
+	}
+
+	/**
+	 * @covers ::delete_item_permissions_check
+	 */
+	public function test_anonymous_cannot_cancel_rsvp(): void {
+		wp_set_current_user( 0 );
+
+		$event_id = $this->create_event();
+
+		$request  = new WP_REST_Request( 'DELETE', '/groups/v1/events/' . $event_id . '/rsvp' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 401, $response->get_status() );
+	}
+
+	/**
+	 * @covers ::create_item_permissions_check
+	 */
+	public function test_rsvp_to_nonexistent_event_returns_404(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$request  = new WP_REST_Request( 'POST', '/groups/v1/events/999999/rsvp' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status() );
+	}
+
+	/**
+	 * @covers ::create_item_permissions_check
+	 */
+	public function test_banned_user_cannot_rsvp(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$event_id = $this->create_event();
+
+		// Ban the subscriber from the current site.
+		update_user_meta( $this->subscriber_id, '_groups_banned_' . get_current_blog_id(), 1 );
+
+		$request  = new WP_REST_Request( 'POST', '/groups/v1/events/' . $event_id . '/rsvp' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'rest_user_banned', $response->get_data()['code'] );
+
+		// Clean up.
+		delete_user_meta( $this->subscriber_id, '_groups_banned_' . get_current_blog_id() );
 	}
 
 	/**
