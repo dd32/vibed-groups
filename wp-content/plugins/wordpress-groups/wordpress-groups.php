@@ -6,12 +6,14 @@
  * Requires at least: 6.7
  * Requires PHP: 8.3
  * Network: true
+ * Author: WordPress.org Meta Team
  * Text Domain: wordpress-groups
  */
 
 defined( 'ABSPATH' ) || exit;
 
 define( 'GROUPS_PLUGIN_DIR', __DIR__ );
+define( 'GROUPS_PLUGIN_FILE', __FILE__ );
 define( 'GROUPS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GROUPS_PLUGIN_VERSION', '0.1.0' );
 
@@ -38,6 +40,17 @@ if ( function_exists( 'WordPressdotorg\Autoload\register_class_path' ) ) {
 		}
 	} );
 }
+
+/**
+ * Create database tables on network activation.
+ */
+function groups_activate( $network_wide ) {
+	if ( $network_wide ) {
+		require_once __DIR__ . '/includes/database/class-schema.php';
+		\Groups\Database\Schema::create_tables();
+	}
+}
+register_activation_hook( __FILE__, 'groups_activate' );
 
 // Boot the plugin.
 require_once __DIR__ . '/includes/class-plugin.php';
