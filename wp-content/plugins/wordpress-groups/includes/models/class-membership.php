@@ -154,6 +154,9 @@ class Membership {
 			return $result;
 		}
 
+		// Record when the user joined this group.
+		update_user_meta( $user_id, "_groups_joined_{$blog_id}", current_time( 'mysql', true ) );
+
 		/**
 		 * Fires after a user joins a group.
 		 *
@@ -180,6 +183,9 @@ class Membership {
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
+
+		// Clean up the joined timestamp.
+		delete_user_meta( $user_id, "_groups_joined_{$blog_id}" );
 
 		/**
 		 * Fires after a user leaves a group.

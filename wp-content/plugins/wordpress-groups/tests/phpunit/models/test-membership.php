@@ -436,6 +436,34 @@ class Test_Membership extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::join
+	 */
+	public function test_join_stores_joined_timestamp(): void {
+		$user_id = self::factory()->user->create();
+
+		Membership::join( $user_id, $this->blog_id );
+
+		$joined = get_user_meta( $user_id, "_groups_joined_{$this->blog_id}", true );
+		$this->assertNotEmpty( $joined, 'Join should store a _groups_joined_{blog_id} user meta.' );
+
+		// Verify it looks like a MySQL datetime.
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $joined );
+	}
+
+	/**
+	 * @covers ::leave
+	 */
+	public function test_leave_deletes_joined_timestamp(): void {
+		$user_id = self::factory()->user->create();
+
+		Membership::join( $user_id, $this->blog_id );
+		$this->assertNotEmpty( get_user_meta( $user_id, "_groups_joined_{$this->blog_id}", true ) );
+
+		Membership::leave( $user_id, $this->blog_id );
+		$this->assertEmpty( get_user_meta( $user_id, "_groups_joined_{$this->blog_id}", true ) );
+	}
+
+	/**
 	 * @covers ::get_user_role
 	 */
 	public function test_get_user_role_returns_role(): void {

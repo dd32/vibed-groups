@@ -58,5 +58,8 @@ class Plugin {
 	public function register_rest_routes(): void {
 		$event_controller = new REST\Event_Controller();
 		$event_controller->register_routes();
+
+		$membership_controller = new REST\Membership_Controller();
+		$membership_controller->register_routes();
 	}
 }
