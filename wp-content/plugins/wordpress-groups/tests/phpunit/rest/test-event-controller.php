@@ -41,6 +41,20 @@ class Test_Event_Controller extends WP_UnitTestCase {
 	private int $subscriber_id;
 
 	/**
+	 * Organizer user ID.
+	 *
+	 * @var int
+	 */
+	private int $organizer_id;
+
+	/**
+	 * Co-organizer user ID.
+	 *
+	 * @var int
+	 */
+	private int $co_organizer_id;
+
+	/**
 	 * Set up the test suite — register CPT and statuses once.
 	 */
 	public static function set_up_before_class(): void {
@@ -49,6 +63,15 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		$event_cpt = new Event();
 		$event_cpt->register_post_type();
 		$event_cpt->register_post_statuses();
+
+		// Register custom roles for organizer / co-organizer.
+		if ( ! get_role( 'organizer' ) ) {
+			add_role( 'organizer', 'Organizer', [ 'read' => true ] );
+		}
+
+		if ( ! get_role( 'co-organizer' ) ) {
+			add_role( 'co-organizer', 'Co-Organizer', [ 'read' => true ] );
+		}
 	}
 
 	/**
@@ -63,8 +86,10 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		$controller = new Event_Controller();
 		$controller->register_routes();
 
-		$this->admin_id      = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		$this->subscriber_id = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$this->admin_id         = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->subscriber_id    = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		$this->organizer_id     = self::factory()->user->create( [ 'role' => 'organizer' ] );
+		$this->co_organizer_id  = self::factory()->user->create( [ 'role' => 'co-organizer' ] );
 	}
 
 	/**
@@ -406,5 +431,370 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		// Invalid status should fall back to event-draft.
 		$data = $response->get_data();
 		$this->assertSame( 'event-draft', $data['status'] );
+	}
+
+	// =========================================================================
+	// Security tests
+	// =========================================================================
+
+	/**
+	 * Test that user A cannot update user B's event (IDOR prevention).
+	 *
+	 * A co-organizer should only be able to update their own events.
+	 *
+	 * @covers ::update_item_permissions_check
+	 */
+	public function test_co_organizer_cannot_update_other_users_event(): void {
+		// Create an event owned by the admin.
+		$post_id = $this->create_event( [
+			'post_title'  => 'Admin Event',
+			'post_author' => $this->admin_id,
+		] );
+
+		// Authenticate as a co-organizer (who is NOT the author).
+		wp_set_current_user( $this->co_organizer_id );
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $post_id );
+		$request->set_body_params( [
+			'title' => 'Hijacked Title',
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status(), 'Co-organizer should not be able to update another user\'s event.' );
+
+		// Verify the title was NOT changed.
+		$post = get_post( $post_id );
+		$this->assertSame( 'Admin Event', $post->post_title );
+	}
+
+	/**
+	 * Test that user A cannot delete user B's event (IDOR prevention).
+	 *
+	 * @covers ::delete_item_permissions_check
+	 */
+	public function test_co_organizer_cannot_delete_other_users_event(): void {
+		$post_id = $this->create_event( [
+			'post_title'  => 'Admin Event',
+			'post_author' => $this->admin_id,
+		] );
+
+		wp_set_current_user( $this->co_organizer_id );
+
+		$request  = new WP_REST_Request( 'DELETE', '/groups/v1/events/' . $post_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status(), 'Co-organizer should not be able to cancel another user\'s event.' );
+	}
+
+	/**
+	 * Test that anonymous users cannot see draft events via GET single.
+	 *
+	 * @covers ::get_item_permissions_check
+	 */
+	public function test_anonymous_cannot_see_draft_event(): void {
+		wp_set_current_user( 0 );
+
+		$post_id = $this->create_event( [
+			'post_status' => 'event-draft',
+			'post_title'  => 'Secret Draft',
+		] );
+
+		$request  = new WP_REST_Request( 'GET', '/groups/v1/events/' . $post_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Anonymous users should not be able to see draft events.' );
+	}
+
+	/**
+	 * Test that anonymous users cannot see draft events in listings.
+	 *
+	 * @covers ::get_items
+	 */
+	public function test_anonymous_cannot_see_draft_events_in_list(): void {
+		wp_set_current_user( 0 );
+
+		$this->create_event( [
+			'post_status' => 'event-draft',
+			'post_title'  => 'Hidden Draft',
+		] );
+
+		$this->create_event( [
+			'post_status' => 'event-scheduled',
+			'post_title'  => 'Visible Event',
+		] );
+
+		$request  = new WP_REST_Request( 'GET', '/groups/v1/events' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$data   = $response->get_data();
+		$titles = array_column( $data, 'title' );
+
+		$this->assertNotContains( 'Hidden Draft', $titles, 'Draft events should not appear in anonymous listings.' );
+		$this->assertContains( 'Visible Event', $titles );
+	}
+
+	/**
+	 * Test that subscribers cannot create events.
+	 *
+	 * Subscribers do not have the organizer/co-organizer/admin role.
+	 *
+	 * @covers ::create_item_permissions_check
+	 */
+	public function test_subscribers_cannot_create_events(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$request = new WP_REST_Request( 'POST', '/groups/v1/events' );
+		$request->set_body_params( [
+			'title' => 'Subscriber Event',
+			'meta'  => [
+				'start_date' => '2026-08-01 14:00:00',
+				'end_date'   => '2026-08-01 16:00:00',
+				'timezone'   => 'UTC',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status(), 'Subscribers should not be allowed to create events.' );
+	}
+
+	/**
+	 * Test that co-organizers CAN create events.
+	 *
+	 * @covers ::create_item_permissions_check
+	 * @covers ::create_item
+	 */
+	public function test_co_organizer_can_create_event(): void {
+		wp_set_current_user( $this->co_organizer_id );
+
+		$request = new WP_REST_Request( 'POST', '/groups/v1/events' );
+		$request->set_body_params( [
+			'title'  => 'Co-Org Event',
+			'status' => 'event-scheduled',
+			'meta'   => [
+				'start_date' => '2026-08-01 14:00:00',
+				'end_date'   => '2026-08-01 16:00:00',
+				'timezone'   => 'America/New_York',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Co-organizers should be allowed to create events.' );
+		$this->assertSame( 'Co-Org Event', $response->get_data()['title'] );
+	}
+
+	/**
+	 * Test that co-organizers CAN update their own events.
+	 *
+	 * @covers ::update_item_permissions_check
+	 * @covers ::update_item
+	 */
+	public function test_co_organizer_can_update_own_event(): void {
+		$post_id = $this->create_event( [
+			'post_title'  => 'My Event',
+			'post_author' => $this->co_organizer_id,
+		] );
+
+		wp_set_current_user( $this->co_organizer_id );
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $post_id );
+		$request->set_body_params( [
+			'title' => 'My Updated Event',
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Co-organizers should be able to update their own events.' );
+		$this->assertSame( 'My Updated Event', $response->get_data()['title'] );
+	}
+
+	/**
+	 * Test that organizers CAN create events.
+	 *
+	 * @covers ::create_item_permissions_check
+	 * @covers ::create_item
+	 */
+	public function test_organizer_can_create_event(): void {
+		wp_set_current_user( $this->organizer_id );
+
+		$request = new WP_REST_Request( 'POST', '/groups/v1/events' );
+		$request->set_body_params( [
+			'title'  => 'Organizer Event',
+			'status' => 'event-scheduled',
+			'meta'   => [
+				'start_date' => '2026-10-01 14:00:00',
+				'end_date'   => '2026-10-01 16:00:00',
+				'timezone'   => 'Europe/London',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Organizers should be allowed to create events.' );
+	}
+
+	/**
+	 * Test that organizers can update ANY event on the site.
+	 *
+	 * @covers ::update_item_permissions_check
+	 */
+	public function test_organizer_can_update_any_event(): void {
+		$post_id = $this->create_event( [
+			'post_title'  => 'Admin Event',
+			'post_author' => $this->admin_id,
+		] );
+
+		wp_set_current_user( $this->organizer_id );
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $post_id );
+		$request->set_body_params( [
+			'title' => 'Organizer Updated',
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Organizers should be able to update any event.' );
+	}
+
+	/**
+	 * Test that invalid date format is rejected.
+	 *
+	 * @covers ::create_item
+	 */
+	public function test_invalid_date_format_rejected(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'POST', '/groups/v1/events' );
+		$request->set_body_params( [
+			'title' => 'Bad Date Event',
+			'meta'  => [
+				'start_date' => 'not-a-date',
+				'end_date'   => '2026-08-01 16:00:00',
+				'timezone'   => 'UTC',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid date format should be rejected.' );
+		$this->assertSame( 'rest_invalid_date_format', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Test that invalid date format is rejected on update too.
+	 *
+	 * @covers ::update_item
+	 */
+	public function test_invalid_date_format_rejected_on_update(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$post_id = $this->create_event();
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $post_id );
+		$request->set_body_params( [
+			'meta' => [
+				'start_date' => '15/06/2026 18:00',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid date format should be rejected on update.' );
+	}
+
+	/**
+	 * Test that invalid timezone is rejected.
+	 *
+	 * @covers ::create_item
+	 */
+	public function test_invalid_timezone_rejected(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'POST', '/groups/v1/events' );
+		$request->set_body_params( [
+			'title' => 'Bad TZ Event',
+			'meta'  => [
+				'start_date' => '2026-08-01 14:00:00',
+				'end_date'   => '2026-08-01 16:00:00',
+				'timezone'   => 'Not/A_Real_Timezone',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid timezone should be rejected.' );
+		$this->assertSame( 'rest_invalid_timezone', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Test that invalid timezone is rejected on update.
+	 *
+	 * @covers ::update_item
+	 */
+	public function test_invalid_timezone_rejected_on_update(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$post_id = $this->create_event();
+
+		$request = new WP_REST_Request( 'PUT', '/groups/v1/events/' . $post_id );
+		$request->set_body_params( [
+			'meta' => [
+				'timezone' => 'Fake/Zone',
+			],
+		] );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid timezone should be rejected on update.' );
+	}
+
+	/**
+	 * Test that the event author can view their own draft event.
+	 *
+	 * @covers ::get_item_permissions_check
+	 */
+	public function test_author_can_see_own_draft_event(): void {
+		$post_id = $this->create_event( [
+			'post_status' => 'event-draft',
+			'post_author' => $this->co_organizer_id,
+		] );
+
+		wp_set_current_user( $this->co_organizer_id );
+
+		$request  = new WP_REST_Request( 'GET', '/groups/v1/events/' . $post_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Event author should be able to see their own draft event.' );
+	}
+
+	/**
+	 * Test that subscribers cannot see cancelled events in list.
+	 *
+	 * @covers ::get_items
+	 */
+	public function test_subscriber_cannot_see_cancelled_events_in_list(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$this->create_event( [
+			'post_status' => 'event-cancelled',
+			'post_title'  => 'Cancelled Event',
+		] );
+
+		$this->create_event( [
+			'post_status' => 'event-scheduled',
+			'post_title'  => 'Active Event',
+		] );
+
+		$request  = new WP_REST_Request( 'GET', '/groups/v1/events' );
+		$response = $this->server->dispatch( $request );
+
+		$titles = array_column( $response->get_data(), 'title' );
+
+		$this->assertNotContains( 'Cancelled Event', $titles, 'Cancelled events should not appear in subscriber listings.' );
+		$this->assertContains( 'Active Event', $titles );
 	}
 }

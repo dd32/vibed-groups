@@ -56,6 +56,17 @@ class Event_Controller extends WP_REST_Controller {
 	];
 
 	/**
+	 * Event statuses that are visible to the public (unauthenticated / non-privileged users).
+	 *
+	 * @var string[]
+	 */
+	const PUBLIC_STATUSES = [
+		'event-scheduled',
+		'event-active',
+		'event-past',
+	];
+
+	/**
 	 * Register REST routes.
 	 */
 	public function register_routes(): void {
@@ -121,19 +132,80 @@ class Event_Controller extends WP_REST_Controller {
 	/**
 	 * Check whether the current user can manage events.
 	 *
-	 * Organizers, co-organizers, and administrators may create/update/delete events.
+	 * Only organizers, co-organizers, and network administrators may manage events.
+	 * Does NOT use edit_posts — that capability is too broad.
 	 *
 	 * @return bool
 	 */
 	private function can_manage_events(): bool {
-		if ( current_user_can( 'edit_posts' ) ) {
+		if ( is_super_admin() ) {
 			return true;
 		}
 
 		$user = wp_get_current_user();
 
+		if ( in_array( 'administrator', (array) $user->roles, true ) ) {
+			return true;
+		}
+
 		return in_array( 'organizer', (array) $user->roles, true )
 			|| in_array( 'co-organizer', (array) $user->roles, true );
+	}
+
+	/**
+	 * Check whether the current user can manage a specific event post.
+	 *
+	 * The user must be the post author, an organizer/co-organizer, or a network admin.
+	 *
+	 * @param WP_Post $post The event post to check.
+	 * @return bool
+	 */
+	private function can_manage_event( WP_Post $post ): bool {
+		if ( ! $this->can_manage_events() ) {
+			return false;
+		}
+
+		// Network admins and site administrators can manage any event.
+		if ( is_super_admin() ) {
+			return true;
+		}
+
+		$user = wp_get_current_user();
+
+		if ( in_array( 'administrator', (array) $user->roles, true ) ) {
+			return true;
+		}
+
+		// Organizers can manage any event on the site.
+		if ( in_array( 'organizer', (array) $user->roles, true ) ) {
+			return true;
+		}
+
+		// Co-organizers can only manage their own events.
+		if ( in_array( 'co-organizer', (array) $user->roles, true ) ) {
+			return (int) $post->post_author === get_current_user_id();
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check whether the current user can view a non-public event.
+	 *
+	 * @param WP_Post $post The event post.
+	 * @return bool
+	 */
+	private function can_view_non_public_event( WP_Post $post ): bool {
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// Event author can always see their own events.
+		if ( (int) $post->post_author === get_current_user_id() ) {
+			return true;
+		}
+
+		return $this->can_manage_events();
 	}
 
 	/**
@@ -161,6 +233,17 @@ class Event_Controller extends WP_REST_Controller {
 				__( 'Event not found.', 'wordpress-groups' ),
 				[ 'status' => 404 ]
 			);
+		}
+
+		// Non-public statuses require authorization.
+		if ( ! in_array( $post->post_status, self::PUBLIC_STATUSES, true ) ) {
+			if ( ! $this->can_view_non_public_event( $post ) ) {
+				return new WP_Error(
+					'rest_event_not_found',
+					__( 'Event not found.', 'wordpress-groups' ),
+					[ 'status' => 404 ]
+				);
+			}
 		}
 
 		return true;
@@ -195,6 +278,8 @@ class Event_Controller extends WP_REST_Controller {
 	/**
 	 * Permission check for updating an event.
 	 *
+	 * Verifies the user owns the specific event or is an organizer/admin.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error
 	 */
@@ -217,10 +302,10 @@ class Event_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! $this->can_manage_events() ) {
+		if ( ! $this->can_manage_event( $post ) ) {
 			return new WP_Error(
 				'rest_cannot_update_events',
-				__( 'Sorry, you are not allowed to update events.', 'wordpress-groups' ),
+				__( 'Sorry, you are not allowed to update this event.', 'wordpress-groups' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -230,6 +315,8 @@ class Event_Controller extends WP_REST_Controller {
 
 	/**
 	 * Permission check for deleting (cancelling) an event.
+	 *
+	 * Verifies the user owns the specific event or is an organizer/admin.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error
@@ -253,10 +340,10 @@ class Event_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! $this->can_manage_events() ) {
+		if ( ! $this->can_manage_event( $post ) ) {
 			return new WP_Error(
 				'rest_cannot_delete_events',
-				__( 'Sorry, you are not allowed to cancel events.', 'wordpress-groups' ),
+				__( 'Sorry, you are not allowed to cancel this event.', 'wordpress-groups' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -278,12 +365,14 @@ class Event_Controller extends WP_REST_Controller {
 			'orderby'        => 'meta_value',
 			'meta_key'       => '_event_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'          => 'ASC',
-			'post_status'    => $this->get_allowed_statuses(),
+			'post_status'    => $this->get_allowed_statuses_for_request(),
 		];
 
-		// Filter by status.
-		$status = $request->get_param( 'status' );
-		if ( $status && in_array( $status, Event::get_statuses(), true ) ) {
+		// Filter by status — only if the requested status is allowed for this user.
+		$status           = $request->get_param( 'status' );
+		$allowed_statuses = $this->get_allowed_statuses_for_request();
+
+		if ( $status && in_array( $status, $allowed_statuses, true ) ) {
 			$args['post_status'] = sanitize_text_field( $status );
 		}
 
@@ -366,6 +455,16 @@ class Event_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
+		$meta = $request->get_param( 'meta' );
+
+		// Validate meta fields before creating the post.
+		if ( is_array( $meta ) ) {
+			$validation_error = $this->validate_event_meta( $meta );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
+		}
+
 		$post_data = [
 			'post_type'    => Event::POST_TYPE,
 			'post_title'   => sanitize_text_field( $request->get_param( 'title' ) ),
@@ -411,6 +510,16 @@ class Event_Controller extends WP_REST_Controller {
 				__( 'Event not found.', 'wordpress-groups' ),
 				[ 'status' => 404 ]
 			);
+		}
+
+		$meta = $request->get_param( 'meta' );
+
+		// Validate meta fields before updating.
+		if ( is_array( $meta ) ) {
+			$validation_error = $this->validate_event_meta( $meta );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
 		}
 
 		$post_data = [ 'ID' => $post_id ];
@@ -557,6 +666,53 @@ class Event_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Validate event meta fields.
+	 *
+	 * @param array $meta Meta values from the request.
+	 * @return true|WP_Error True on success, WP_Error on validation failure.
+	 */
+	private function validate_event_meta( array $meta ) {
+		$date_fields = [ 'start_date', 'end_date', 'rsvp_open_date', 'rsvp_close_date' ];
+
+		foreach ( $date_fields as $field ) {
+			if ( array_key_exists( $field, $meta ) && '' !== $meta[ $field ] ) {
+				if ( ! $this->is_valid_datetime( $meta[ $field ] ) ) {
+					return new WP_Error(
+						'rest_invalid_date_format',
+						/* translators: %s: field name */
+						sprintf( __( 'Invalid date format for %s. Expected Y-m-d H:i:s.', 'wordpress-groups' ), $field ),
+						[ 'status' => 400 ]
+					);
+				}
+			}
+		}
+
+		if ( array_key_exists( 'timezone', $meta ) && '' !== $meta['timezone'] ) {
+			if ( ! in_array( $meta['timezone'], timezone_identifiers_list(), true ) ) {
+				return new WP_Error(
+					'rest_invalid_timezone',
+					__( 'Invalid timezone identifier.', 'wordpress-groups' ),
+					[ 'status' => 400 ]
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate a datetime string matches Y-m-d H:i:s format.
+	 *
+	 * @param string $datetime The datetime string to validate.
+	 * @return bool
+	 */
+	private function is_valid_datetime( string $datetime ): bool {
+		$parsed = \DateTime::createFromFormat( 'Y-m-d H:i:s', $datetime );
+
+		return $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $datetime;
+	}
+
+	/**
 	 * Update event meta fields from the request.
 	 *
 	 * @param int             $post_id Post ID.
@@ -574,7 +730,7 @@ class Event_Controller extends WP_REST_Controller {
 			'end_date'         => 'sanitize_text_field',
 			'timezone'         => 'sanitize_text_field',
 			'venue_id'         => 'absint',
-			'online_link'      => 'esc_url_raw',
+			'online_link'      => [ $this, 'sanitize_online_link' ],
 			'attendee_limit'   => 'absint',
 			'waitlist_enabled' => [ $this, 'sanitize_boolean' ],
 			'rsvp_open_date'   => 'sanitize_text_field',
@@ -590,6 +746,16 @@ class Event_Controller extends WP_REST_Controller {
 				update_post_meta( $post_id, $meta_key, $value );
 			}
 		}
+	}
+
+	/**
+	 * Sanitize the online link, restricting to http/https protocols.
+	 *
+	 * @param string $value Raw URL value.
+	 * @return string Sanitized URL.
+	 */
+	public function sanitize_online_link( $value ): string {
+		return esc_url_raw( $value, [ 'http', 'https' ] );
 	}
 
 	/**
@@ -619,12 +785,19 @@ class Event_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get allowed post statuses for public queries.
+	 * Get allowed post statuses for the current request.
+	 *
+	 * Anonymous and non-privileged users can only see public statuses.
+	 * Organizers, co-organizers, and admins can see all statuses.
 	 *
 	 * @return string[]
 	 */
-	private function get_allowed_statuses(): array {
-		return Event::get_statuses();
+	private function get_allowed_statuses_for_request(): array {
+		if ( is_user_logged_in() && $this->can_manage_events() ) {
+			return Event::get_statuses();
+		}
+
+		return self::PUBLIC_STATUSES;
 	}
 
 	/**
