@@ -112,23 +112,25 @@ class Location_Query {
 		 * We use %f for all float parameters in $wpdb->prepare().
 		 */
 		$haversine = sprintf(
-			'( %f * ACOS( LEAST( 1, COS( RADIANS(%%f) ) * COS( RADIANS( lat_meta.meta_value ) ) * COS( RADIANS( lon_meta.meta_value ) - RADIANS(%%f) ) + SIN( RADIANS(%%f) ) * SIN( RADIANS( lat_meta.meta_value ) ) ) ) )',
+			'( %f * ACOS( GREATEST( -1, LEAST( 1, COS( RADIANS(%%f) ) * COS( RADIANS( lat_meta.meta_value ) ) * COS( RADIANS( lon_meta.meta_value ) - RADIANS(%%f) ) + SIN( RADIANS(%%f) ) * SIN( RADIANS( lat_meta.meta_value ) ) ) ) ) )',
 			self::EARTH_RADIUS_KM
 		);
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
-			"SELECT p.*, {$haversine} AS distance
-			FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->postmeta} lat_meta
-				ON p.ID = lat_meta.post_id AND lat_meta.meta_key = %s
-			INNER JOIN {$wpdb->postmeta} lon_meta
-				ON p.ID = lon_meta.post_id AND lon_meta.meta_key = %s
-			WHERE p.post_type = %s
-				AND p.post_status = %s
-				AND lat_meta.meta_value != ''
-				AND lon_meta.meta_value != ''
-			HAVING distance <= %f
+			"SELECT * FROM (
+				SELECT p.*, {$haversine} AS distance
+				FROM {$wpdb->posts} p
+				INNER JOIN {$wpdb->postmeta} lat_meta
+					ON p.ID = lat_meta.post_id AND lat_meta.meta_key = %s
+				INNER JOIN {$wpdb->postmeta} lon_meta
+					ON p.ID = lon_meta.post_id AND lon_meta.meta_key = %s
+				WHERE p.post_type = %s
+					AND p.post_status = %s
+					AND lat_meta.meta_value != ''
+					AND lon_meta.meta_value != ''
+			) AS nearby
+			WHERE distance <= %f
 			ORDER BY distance ASC
 			LIMIT %d",
 			$lat,
