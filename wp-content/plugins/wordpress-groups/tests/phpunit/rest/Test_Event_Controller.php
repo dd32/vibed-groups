@@ -78,10 +78,9 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		parent::set_up();
 
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new WP_REST_Server();
-
-		$controller = new Event_Controller();
-		$controller->register_routes();
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+		do_action( 'rest_api_init' );
 
 		$this->admin_id         = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		$this->subscriber_id    = self::factory()->user->create( [ 'role' => 'subscriber' ] );
@@ -423,11 +422,8 @@ class Test_Event_Controller extends WP_UnitTestCase {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( 201, $response->get_status() );
-
-		// Invalid status should fall back to event-draft.
-		$data = $response->get_data();
-		$this->assertSame( 'event-draft', $data['status'] );
+		// The schema defines an enum for status, so the REST API rejects invalid values at validation time.
+		$this->assertSame( 400, $response->get_status() );
 	}
 
 	// =========================================================================
