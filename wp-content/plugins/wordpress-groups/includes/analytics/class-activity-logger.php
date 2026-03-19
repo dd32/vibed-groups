@@ -34,7 +34,7 @@ class Activity_Logger {
 		add_action( 'groups_rsvp_promoted', [ $this, 'log_rsvp_promoted' ], 10, 3 );
 
 		// Event actions.
-		add_action( 'groups_event_status_transition', [ $this, 'log_event_status_changed' ], 10, 4 );
+		add_action( 'groups_event_status_transition', [ $this, 'log_event_status_changed' ], 10, 3 );
 		add_action( 'transition_post_status', [ $this, 'log_event_created' ], 10, 3 );
 	}
 
@@ -160,8 +160,9 @@ class Activity_Logger {
 	 * @param string $new_status New status.
 	 * @param int    $blog_id    Blog ID of the group site.
 	 */
-	public function log_event_status_changed( int $event_id, string $old_status, string $new_status, int $blog_id ): void {
-		$post = get_post( $event_id );
+	public function log_event_status_changed( int $event_id, string $old_status, string $new_status ): void {
+		$post    = get_post( $event_id );
+		$blog_id = get_current_blog_id();
 
 		Activity_Log_Table::insert(
 			$blog_id,
