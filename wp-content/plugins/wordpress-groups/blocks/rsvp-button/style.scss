@@ -1,0 +1,169 @@
+/**
+ * RSVP Button block styles.
+ *
+ * Follows WordPress.org design language with accessible focus styles.
+ */
+
+.wp-block-groups-rsvp-button {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&__inner {
+		display: inline-flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	// Button base (also applies to <a> tags used as buttons for logged-out users).
+	&__btn {
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 24px;
+		border: 2px solid transparent;
+		border-radius: 4px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.5;
+		cursor: pointer;
+		transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+		min-height: 44px; // WCAG 2.1 AA touch target.
+		min-width: 120px;
+		text-align: center;
+
+		// Default state (not RSVP'd).
+		&--not-rsvped {
+			background-color: var(--wp--preset--color--blueberry-1);
+			color: var(--wp--preset--color--white);
+			border-color: var(--wp--preset--color--blueberry-1);
+
+			&:hover {
+				background-color: var(--wp--preset--color--deep-blueberry);
+				border-color: var(--wp--preset--color--deep-blueberry);
+			}
+
+			&:active {
+				background-color: var(--wp--preset--color--dark-blueberry);
+				border-color: var(--wp--preset--color--dark-blueberry);
+			}
+		}
+
+		// Attending state (green).
+		&--attending {
+			background-color: #00a32a;
+			color: var(--wp--preset--color--white);
+			border-color: #00a32a;
+
+			&:hover {
+				background-color: #008a20;
+				border-color: #008a20;
+			}
+
+			&:active {
+				background-color: #007017;
+				border-color: #007017;
+			}
+		}
+
+		// Waitlisted state (yellow/amber).
+		&--waitlisted {
+			background-color: #dba617;
+			color: var(--wp--preset--color--charcoal-1);
+			border-color: #dba617;
+
+			&:hover {
+				background-color: #c08c00;
+				border-color: #c08c00;
+			}
+
+			&:active {
+				background-color: #a67b00;
+				border-color: #a67b00;
+			}
+		}
+
+		// Not logged in.
+		&--not-logged-in {
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
+			cursor: not-allowed;
+		}
+
+		// Loading state.
+		&--loading {
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
+			cursor: wait;
+		}
+
+		// Disabled.
+		&:disabled {
+			opacity: 0.7;
+			cursor: not-allowed;
+		}
+
+		// Accessible focus styles.
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white);
+		}
+	}
+
+	// Loading spinner.
+	&__spinner {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		border: 2px solid currentColor;
+		border-right-color: transparent;
+		border-radius: 50%;
+		animation: groups-rsvp-spin 0.75s linear infinite;
+	}
+
+	// Counts.
+	&__counts {
+		display: flex;
+		gap: 12px;
+		font-size: 14px;
+		color: var(--wp--preset--color--charcoal-4);
+		line-height: 1.4;
+	}
+
+	&__attending-count {
+		color: #00a32a;
+		font-weight: 500;
+	}
+
+	&__waitlist-count {
+		color: #996800;
+		font-weight: 500;
+	}
+
+	// Error message.
+	&__error {
+		color: #cc1818;
+		font-size: 14px;
+		margin: 4px 0 0;
+	}
+
+	// Editor preview.
+	&__preview {
+		margin-top: 12px;
+
+		.wp-block-groups-rsvp-button__btn {
+			pointer-events: none;
+		}
+	}
+}
+
+@keyframes groups-rsvp-spin {
+	to {
+		transform: rotate( 360deg );
+	}
+}
