@@ -23,11 +23,11 @@ class Activity_Logger {
 	 * Register hooks.
 	 */
 	public function __construct() {
-		// Membership actions.
-		add_action( 'groups_member_joined', [ $this, 'log_member_joined' ], 10, 3 );
-		add_action( 'groups_member_left', [ $this, 'log_member_left' ], 10, 3 );
+		// Membership actions — params match Membership model's do_action calls.
+		add_action( 'groups_member_joined', [ $this, 'log_member_joined' ], 10, 2 );
+		add_action( 'groups_member_left', [ $this, 'log_member_left' ], 10, 2 );
 		add_action( 'groups_member_role_changed', [ $this, 'log_role_changed' ], 10, 4 );
-		add_action( 'groups_member_banned', [ $this, 'log_member_banned' ], 10, 3 );
+		add_action( 'groups_member_banned', [ $this, 'log_member_banned' ], 10, 2 );
 
 		// RSVP actions.
 		add_action( 'groups_rsvp_created', [ $this, 'log_rsvp_created' ], 10, 4 );
@@ -41,46 +41,44 @@ class Activity_Logger {
 	/**
 	 * Log a member joining a group.
 	 *
-	 * @param int    $blog_id Blog ID of the group site.
-	 * @param int    $user_id User who joined.
-	 * @param string $role    Role assigned.
+	 * @param int $user_id User who joined.
+	 * @param int $blog_id Blog ID of the group site.
 	 */
-	public function log_member_joined( int $blog_id, int $user_id, string $role ): void {
+	public function log_member_joined( int $user_id, int $blog_id ): void {
 		Activity_Log_Table::insert(
 			$blog_id,
 			$user_id,
 			'member_joined',
 			$user_id,
-			[ 'role' => $role ]
+			[]
 		);
 	}
 
 	/**
 	 * Log a member leaving a group.
 	 *
-	 * @param int    $blog_id Blog ID of the group site.
-	 * @param int    $user_id User who left.
-	 * @param string $role    Role the user had before leaving.
+	 * @param int $user_id User who left.
+	 * @param int $blog_id Blog ID of the group site.
 	 */
-	public function log_member_left( int $blog_id, int $user_id, string $role ): void {
+	public function log_member_left( int $user_id, int $blog_id ): void {
 		Activity_Log_Table::insert(
 			$blog_id,
 			$user_id,
 			'member_left',
 			$user_id,
-			[ 'previous_role' => $role ]
+			[]
 		);
 	}
 
 	/**
 	 * Log a member role change.
 	 *
-	 * @param int    $blog_id  Blog ID of the group site.
 	 * @param int    $user_id  User whose role changed.
-	 * @param string $old_role Previous role.
 	 * @param string $new_role New role.
+	 * @param string $old_role Previous role.
+	 * @param int    $blog_id  Blog ID of the group site.
 	 */
-	public function log_role_changed( int $blog_id, int $user_id, string $old_role, string $new_role ): void {
+	public function log_role_changed( int $user_id, string $new_role, string $old_role, int $blog_id ): void {
 		Activity_Log_Table::insert(
 			$blog_id,
 			$user_id,
@@ -96,17 +94,16 @@ class Activity_Logger {
 	/**
 	 * Log a member being banned.
 	 *
-	 * @param int    $blog_id Blog ID of the group site.
-	 * @param int    $user_id User who was banned.
-	 * @param string $reason  Ban reason.
+	 * @param int $user_id User who was banned.
+	 * @param int $blog_id Blog ID of the group site.
 	 */
-	public function log_member_banned( int $blog_id, int $user_id, string $reason ): void {
+	public function log_member_banned( int $user_id, int $blog_id ): void {
 		Activity_Log_Table::insert(
 			$blog_id,
 			$user_id,
 			'member_banned',
 			$user_id,
-			[ 'reason' => $reason ]
+			[]
 		);
 	}
 
@@ -158,7 +155,6 @@ class Activity_Logger {
 	 * @param int    $event_id   The event post ID.
 	 * @param string $old_status Previous status.
 	 * @param string $new_status New status.
-	 * @param int    $blog_id    Blog ID of the group site.
 	 */
 	public function log_event_status_changed( int $event_id, string $old_status, string $new_status ): void {
 		$post    = get_post( $event_id );
