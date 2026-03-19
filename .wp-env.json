@@ -1,11 +1,19 @@
 {
 	"core": "WordPress/WordPress#master",
+	"multisite": true,
 	"plugins": [
-		"./wp-content/plugins/vibed-groups"
+		"./wp-content/plugins/wordpress-groups"
 	],
 	"themes": [
-		"./wp-content/themes/vibed-groups"
+		"./wp-content/themes/groups-directory",
+		"./wp-content/themes/groups-site"
 	],
+	"mappings": {
+		"wp-content/mu-plugins/wporg-mu-plugins": "https://github.com/WordPress/wporg-mu-plugins",
+		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./wporg-mu-plugins-loader.php",
+		"wp-content/wordcamp.org": "https://github.com/WordPress/wordcamp.org",
+		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wordcamp-mu-plugins-loader.php"
+	},
 	"config": {
 		"WP_DEBUG": true,
 		"WP_DEBUG_LOG": true,
