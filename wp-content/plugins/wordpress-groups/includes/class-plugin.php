@@ -51,6 +51,8 @@ class Plugin {
 		new Analytics\Newcomer_Tracker();
 		new Analytics\Activity_Logger();
 		new Calendar\ICal_Export();
+		new Workflow\Application_Workflow();
+		new Workflow\Status_Transition();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
