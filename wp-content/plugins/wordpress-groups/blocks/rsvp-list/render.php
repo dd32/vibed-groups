@@ -29,10 +29,10 @@ if ( ! $event || 'event' !== $event->post_type ) {
 	return;
 }
 
-// Query attending RSVPs (comments with type 'rsvp' and _rsvp_status meta).
+// Query attending RSVPs (comments with type 'groups_rsvp' and _rsvp_status meta).
 $attending_rsvps = get_comments( [
 	'post_id'    => $event_id,
-	'type'       => 'rsvp',
+	'type'       => 'groups_rsvp',
 	'status'     => 'approve',
 	'meta_key'   => '_rsvp_status',
 	'meta_value' => 'attending',
@@ -42,7 +42,7 @@ $attending_rsvps = get_comments( [
 
 $waitlisted_rsvps = get_comments( [
 	'post_id'    => $event_id,
-	'type'       => 'rsvp',
+	'type'       => 'groups_rsvp',
 	'status'     => 'approve',
 	'meta_key'   => '_rsvp_status',
 	'meta_value' => 'waitlisted',
