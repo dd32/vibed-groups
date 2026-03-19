@@ -90,6 +90,12 @@ tests_add_filter(
 	}
 );
 
+// Tell the WP test bootstrap exactly where the config file lives so that
+// symlinked includes directories do not break __DIR__ resolution.
+if ( ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) {
+	define( 'WP_TESTS_CONFIG_FILE_PATH', $_tests_dir . '/wp-tests-config.php' );
+}
+
 require $_tests_dir . '/includes/bootstrap.php';
 
 // Create custom tables for tests.
