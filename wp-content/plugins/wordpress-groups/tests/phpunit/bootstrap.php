@@ -7,11 +7,16 @@
  * @package Groups\Tests
  */
 
-// Assume the WP test suite is available via the WP_TESTS_DIR env variable
-// or the default wp-env location.
+// Try wp-env location first, then WP_TESTS_DIR env, then /tmp fallback.
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
+	// wp-env places the test suite here.
+	$_tests_dir = '/wordpress-phpunit';
+}
+
+if ( ! $_tests_dir || ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	// Fallback for non-wp-env setups.
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 }
 

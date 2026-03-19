@@ -114,7 +114,10 @@ describe( 'RsvpButton', () => {
 	} );
 
 	it( 'shows error message on API failure', async () => {
-		mockApiFetch.mockRejectedValueOnce( new Error( 'Network error' ) );
+		// First call is refreshState on mount (resolve it), second is the POST (reject it).
+		mockApiFetch
+			.mockResolvedValueOnce( { attending_count: 5, waitlist_count: 0 } )
+			.mockRejectedValueOnce( new Error( 'Network error' ) );
 
 		render(
 			createElement( RsvpButton, {
@@ -125,10 +128,17 @@ describe( 'RsvpButton', () => {
 			} )
 		);
 
+		// Wait for mount refresh to complete.
+		await waitFor( () => {
+			expect( mockApiFetch ).toHaveBeenCalledTimes( 1 );
+		} );
+
 		fireEvent.click( screen.getByRole( 'button' ) );
 
 		await waitFor( () => {
-			expect( screen.getByRole( 'alert' ) ).toHaveTextContent( 'Network error' );
+			const alert = screen.getByRole( 'alert' );
+			expect( alert ).toBeInTheDocument();
+			expect( alert.textContent ).toContain( 'Network error' );
 		} );
 	} );
 

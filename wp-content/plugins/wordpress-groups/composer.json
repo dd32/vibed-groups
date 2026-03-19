@@ -1,0 +1,11 @@
+{
+	"name": "wordpress/groups",
+	"description": "WordPress Community Groups platform plugin",
+	"type": "wordpress-plugin",
+	"require-dev": {
+		"yoast/phpunit-polyfills": "^3.0"
+	},
+	"config": {
+		"allow-plugins": {}
+	}
+}

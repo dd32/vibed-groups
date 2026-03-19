@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
 	bootstrap="tests/phpunit/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
 >
 	<testsuites>
 		<testsuite name="WordPress Groups">
@@ -13,9 +12,9 @@
 		</testsuite>
 	</testsuites>
 
-	<filter>
-		<whitelist>
+	<source>
+		<include>
 			<directory suffix=".php">includes/</directory>
-		</whitelist>
-	</filter>
+		</include>
+	</source>
 </phpunit>
