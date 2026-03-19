@@ -1,0 +1,51 @@
+<?php
+/**
+ * Central plugin orchestrator.
+ *
+ * @package Groups
+ */
+
+namespace Groups;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Plugin class — singleton orchestrator that wires up all sub-components.
+ */
+class Plugin {
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var Plugin|null
+	 */
+	private static ?Plugin $instance = null;
+
+	/**
+	 * Get the singleton instance.
+	 *
+	 * @return Plugin
+	 */
+	public static function get_instance(): Plugin {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor — private, use get_instance().
+	 */
+	private function __construct() {
+		$this->init_components();
+	}
+
+	/**
+	 * Initialise plugin components.
+	 */
+	private function init_components(): void {
+		new Post_Types\Event();
+		new Post_Types\Venue();
+	}
+}
