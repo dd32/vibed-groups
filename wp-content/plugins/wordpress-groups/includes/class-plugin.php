@@ -61,5 +61,8 @@ class Plugin {
 
 		$membership_controller = new REST\Membership_Controller();
 		$membership_controller->register_routes();
+
+		$rsvp_controller = new REST\Rsvp_Controller();
+		$rsvp_controller->register_routes();
 	}
 }
