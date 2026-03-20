@@ -1,16 +1,18 @@
 /**
  * Responsive styles for Groups Site theme.
  *
- * Breakpoints:
- *   - Small (mobile):  up to 599px
- *   - Medium (tablet):  600px - 1023px
- *   - Large (desktop):  1024px+
+ * Breakpoints (from design spec):
+ *   - Mobile:  0 - 639px
+ *   - Tablet:  640px - 1023px
+ *   - Desktop: 1024px - 1279px
+ *   - Wide:    1280px - 1439px
+ *   - Ultra:   1440px+
  *
  * @package Groups_Site
  */
 
 /* ==========================================================================
-   Mobile-first base adjustments (applies to all sizes, overridden upward)
+   Mobile-first base adjustments
    ========================================================================== */
 
 img,
@@ -21,59 +23,14 @@ iframe {
 }
 
 /* ==========================================================================
-   Global header styles
+   Small screens - up to 639px
    ========================================================================== */
-
-.groups-site-subnav__nav .wp-block-navigation-item a {
-	display: block;
-	padding: 12px 16px;
-	text-decoration: none;
-	border-bottom: 2px solid transparent;
-	transition: border-color 0.15s ease;
-}
-
-.groups-site-subnav__nav .wp-block-navigation-item a:hover,
-.groups-site-subnav__nav .wp-block-navigation-item.current-menu-item a {
-	border-bottom-color: var(--wp--preset--color--blueberry-1, #3858e9);
-}
-
-@media (min-width: 1024px) {
-	.groups-site-event-info-card {
-		position: sticky;
-		top: 32px;
-	}
-}
-
-/* ==========================================================================
-   Small screens - up to 599px
-   ========================================================================== */
-@media (max-width: 599px) {
-
-	.groups-site-global-header .wp-block-group > .wp-block-group {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: var(--wp--preset--spacing--10, 10px);
-	}
+@media (max-width: 639px) {
 
 	.groups-site-local-header .wp-block-group > .wp-block-group {
 		flex-direction: column;
 		align-items: flex-start;
-		gap: var(--wp--preset--spacing--10, 10px);
-	}
-
-	h1,
-	.has-heading-1-font-size {
-		font-size: clamp(28px, 7vw, 36px) !important;
-	}
-
-	h2,
-	.has-heading-2-font-size {
-		font-size: clamp(24px, 5.5vw, 32px) !important;
-	}
-
-	h3,
-	.has-heading-3-font-size {
-		font-size: clamp(20px, 4.5vw, 26px) !important;
+		gap: 8px;
 	}
 
 	.groups-site-event-layout {
@@ -82,45 +39,29 @@ iframe {
 
 	.groups-site-event-layout .wp-block-column {
 		flex-basis: 100% !important;
-	}
-
-	.wp-block-groups-upcoming-events,
-	.wp-block-groups-past-events,
-	.wp-block-groups-event-directory {
-		display: flex !important;
-		flex-direction: column;
-		gap: var(--wp--preset--spacing--20, 20px);
 	}
 
 	.wp-block-groups-event-card__thumbnail {
 		max-height: 160px;
 	}
 
-	.wp-block-groups-event-hero {
-		min-height: 180px;
-	}
-
 	.groups-site-community-callout .wp-block-group > .wp-block-group,
 	.groups-site-footer .wp-block-group > .wp-block-group {
 		flex-direction: column;
 		align-items: flex-start;
-		gap: var(--wp--preset--spacing--10, 10px);
+		gap: 8px;
 	}
 
 	.groups-site-subnav {
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
 	}
-
-	.wp-block-groups-group-members {
-		grid-template-columns: 1fr !important;
-	}
 }
 
 /* ==========================================================================
-   Medium screens - 600px to 1023px
+   Tablet - 640px to 1023px
    ========================================================================== */
-@media (min-width: 600px) and (max-width: 1023px) {
+@media (min-width: 640px) and (max-width: 1023px) {
 
 	.groups-site-event-layout {
 		flex-direction: column !important;
@@ -129,59 +70,16 @@ iframe {
 	.groups-site-event-layout .wp-block-column {
 		flex-basis: 100% !important;
 	}
-
-	.wp-block-groups-upcoming-events,
-	.wp-block-groups-past-events,
-	.wp-block-groups-event-directory {
-		display: grid !important;
-		grid-template-columns: repeat(2, 1fr);
-		gap: var(--wp--preset--spacing--20, 20px);
-	}
-
-	.wp-block-groups-group-members {
-		grid-template-columns: repeat(2, 1fr) !important;
-	}
-
-	.wp-block-groups-event-hero {
-		min-height: 240px;
-	}
 }
 
 /* ==========================================================================
-   Large screens - 1024px+
+   Desktop - 1024px+
    ========================================================================== */
 @media (min-width: 1024px) {
 
-	.wp-block-groups-upcoming-events,
-	.wp-block-groups-past-events,
-	.wp-block-groups-event-directory {
-		display: grid !important;
-		grid-template-columns: repeat(3, 1fr);
-		gap: var(--wp--preset--spacing--30, 30px);
-	}
-
-	.wp-block-groups-group-members {
-		grid-template-columns: repeat(3, 1fr) !important;
-	}
-
-	.wp-block-groups-event-hero {
-		min-height: 320px;
-	}
-}
-
-/* ==========================================================================
-   Extra-large screens - 1440px+
-   ========================================================================== */
-@media (min-width: 1440px) {
-
-	.wp-block-groups-upcoming-events,
-	.wp-block-groups-past-events,
-	.wp-block-groups-event-directory {
-		grid-template-columns: repeat(4, 1fr);
-	}
-
-	.wp-block-groups-group-members {
-		grid-template-columns: repeat(4, 1fr) !important;
+	.groups-site-event-info-card {
+		position: sticky;
+		top: 92px;
 	}
 }
 
@@ -193,8 +91,8 @@ iframe {
 	width: 100%;
 	overflow: hidden;
 	border-radius: 0;
-	margin-bottom: var(--wp--preset--spacing--30, 30px);
-	background-color: var(--wp--preset--color--blueberry-4, #eff2ff);
+	margin-bottom: 32px;
+	background: linear-gradient(135deg, var(--wp--preset--color--primary-100), var(--wp--preset--color--accent-100));
 }
 
 .wp-block-groups-event-hero img {
@@ -204,41 +102,16 @@ iframe {
 	display: block;
 }
 
-.wp-block-groups-event-hero--placeholder {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: var(--wp--preset--color--blueberry-2, #9fb1ff);
-	font-size: 48px;
-}
-
-/* ==========================================================================
-   Event card thumbnail
-   ========================================================================== */
-.wp-block-groups-event-card__thumbnail {
-	margin: calc(-1 * var(--wp--preset--spacing--30, 20px));
-	margin-bottom: var(--wp--preset--spacing--20, 20px);
-	overflow: hidden;
-	border-radius: 4px 4px 0 0;
-}
-
-.wp-block-groups-event-card__thumbnail img {
-	width: 100%;
-	height: 180px;
-	object-fit: cover;
-	display: block;
-}
-
 /* ==========================================================================
    Navigation overlay (hamburger)
    ========================================================================== */
 .wp-block-navigation__responsive-container.is-menu-open {
-	background-color: var(--wp--preset--color--white, #ffffff);
-	color: var(--wp--preset--color--charcoal-1, #1e1e1e);
-	padding: var(--wp--preset--spacing--40, 40px);
+	background-color: var(--wp--preset--color--neutral-0, #ffffff);
+	color: var(--wp--preset--color--neutral-900);
+	padding: 32px;
 }
 
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a {
-	font-size: var(--wp--preset--font-size--large, 18px);
-	padding: var(--wp--preset--spacing--10, 10px) 0;
+	font-size: var(--wp--preset--font-size--body-lg, 18px);
+	padding: 8px 0;
 }
