@@ -187,6 +187,123 @@
 		color: var(--wp--preset--color--charcoal-4, #656a71);
 	}
 
+	// Toolbar: search + view toggle side by side.
+	&__toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--wp--preset--spacing--20, 16px);
+		margin-bottom: var(--wp--preset--spacing--40, 30px);
+	}
+
+	// When toolbar is present, remove standalone search margin.
+	&__toolbar &__search {
+		margin-bottom: 0;
+	}
+
+	// View toggle buttons.
+	&__view-toggle {
+		display: flex;
+		gap: 0;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	&__view-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--wp--preset--spacing--10, 8px) var(--wp--preset--spacing--20, 16px);
+		border: none;
+		background: var(--wp--preset--color--white, #ffffff);
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-family: inherit;
+		cursor: pointer;
+		transition: background-color 0.2s ease, color 0.2s ease;
+
+		&:not(:last-child) {
+			border-right: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		}
+
+		&:hover:not(&--active) {
+			background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		}
+
+		&--active {
+			background: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--white, #ffffff);
+		}
+	}
+
+	// Map view container.
+	&__map-wrapper {
+		position: relative;
+	}
+
+	&__map-container {
+		width: 100%;
+		height: 400px;
+		background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		border-radius: 4px;
+		overflow: hidden;
+		z-index: 0;
+
+		.leaflet-container {
+			width: 100%;
+			height: 100%;
+			font-family: inherit;
+		}
+	}
+
+	// Geolocation button.
+	&__geolocate-btn {
+		position: absolute;
+		top: var(--wp--preset--spacing--10, 10px);
+		right: var(--wp--preset--spacing--10, 10px);
+		z-index: 1000;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: var(--wp--preset--spacing--10, 8px) var(--wp--preset--spacing--20, 12px);
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #ffffff);
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-family: inherit;
+		cursor: pointer;
+		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16);
+		transition: background-color 0.2s ease;
+
+		&:hover:not(:disabled) {
+			background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		}
+
+		&:disabled {
+			opacity: 0.65;
+			cursor: wait;
+		}
+	}
+
+	// Responsive: shorter map on small screens.
+	@media (max-width: 600px) {
+		&__map-container {
+			height: 280px;
+		}
+
+		&__toolbar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		&__view-toggle {
+			align-self: flex-start;
+		}
+	}
+
 	// Editor preview styles.
 	&__editor-preview {
 		width: 100%;

@@ -50,6 +50,8 @@ foreach ( $query->posts as $post ) {
 		'name'         => esc_html( $post->post_title ),
 		'city'         => sanitize_text_field( get_post_meta( $post->ID, '_meetup_city', true ) ),
 		'country'      => sanitize_text_field( get_post_meta( $post->ID, '_meetup_country', true ) ),
+		'latitude'     => (float) get_post_meta( $post->ID, '_meetup_latitude', true ),
+		'longitude'    => (float) get_post_meta( $post->ID, '_meetup_longitude', true ),
 		'member_count' => absint( get_post_meta( $post->ID, '_meetup_member_count', true ) ),
 		'site_url'     => $site_url,
 	];
@@ -57,12 +59,46 @@ foreach ( $query->posts as $post ) {
 
 restore_current_blog();
 
+// Build a JSON array of groups with valid coordinates for the map view.
+$map_groups = [];
+foreach ( $groups as $group ) {
+	if ( ! empty( $group['latitude'] ) && ! empty( $group['longitude'] ) ) {
+		$map_groups[] = [
+			'id'        => $group['id'],
+			'name'      => $group['name'],
+			'city'      => $group['city'],
+			'country'   => $group['country'],
+			'latitude'  => $group['latitude'],
+			'longitude' => $group['longitude'],
+			'site_url'  => $group['site_url'],
+		];
+	}
+}
+
+// Enqueue Leaflet CSS from CDN (same as venue-map block).
+wp_enqueue_style(
+	'leaflet',
+	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+	[],
+	'1.9.4'
+);
+
+// Enqueue Leaflet JS from CDN (same as venue-map block).
+wp_enqueue_script(
+	'leaflet',
+	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+	[],
+	'1.9.4',
+	true
+);
+
 $wrapper_attributes = get_block_wrapper_attributes( [
-	'class'          => 'wp-block-groups-group-directory',
-	'data-per-page'  => $per_page,
-	'data-total'     => $total,
-	'data-pages'     => $total_pages,
-	'data-groups'    => wp_json_encode( $groups ),
+	'class'            => 'wp-block-groups-group-directory',
+	'data-per-page'    => $per_page,
+	'data-total'       => $total,
+	'data-pages'       => $total_pages,
+	'data-groups'      => wp_json_encode( $groups ),
+	'data-map-groups'  => wp_json_encode( $map_groups ),
 ] );
 ?>
 

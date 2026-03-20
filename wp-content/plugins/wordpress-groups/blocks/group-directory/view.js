@@ -2,7 +2,7 @@
  * Group Directory — frontend interactive script.
  *
  * Hydrates the server-rendered directory container with interactive search,
- * filtering, and pagination via the REST API.
+ * filtering, pagination, and an optional Leaflet map view.
  */
 
 import apiFetch from '@wordpress/api-fetch';
@@ -156,21 +156,218 @@ function Pagination( { currentPage, totalPages, onPageChange } ) {
 }
 
 /**
+ * Map View component using Leaflet.
+ *
+ * Renders an OpenStreetMap with markers for each group that has coordinates.
+ *
+ * @param {Object}   props
+ * @param {Array}    props.mapGroups   Groups with lat/lon data for the map.
+ * @param {Function} props.onLoadAll   Callback to fetch all groups for the map.
+ */
+function MapView( { mapGroups, onLoadAll } ) {
+	const mapRef = useRef( null );
+	const mapInstanceRef = useRef( null );
+	const markersRef = useRef( [] );
+	const [ geolocating, setGeolocating ] = useState( false );
+
+	/**
+	 * Initialize the Leaflet map on first render.
+	 */
+	useEffect( () => {
+		if ( ! mapRef.current || ! window.L ) {
+			return;
+		}
+
+		if ( mapInstanceRef.current ) {
+			return;
+		}
+
+		const map = window.L.map( mapRef.current, {
+			scrollWheelZoom: false,
+		} ).setView( [ 20, 0 ], 2 );
+
+		window.L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution:
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			maxZoom: 19,
+		} ).addTo( map );
+
+		mapInstanceRef.current = map;
+
+		// Trigger a load of all groups for the map.
+		if ( onLoadAll ) {
+			onLoadAll();
+		}
+
+		// Invalidate size after layout settles.
+		setTimeout( () => map.invalidateSize(), 100 );
+
+		return () => {
+			map.remove();
+			mapInstanceRef.current = null;
+		};
+	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps
+
+	/**
+	 * Update markers when mapGroups changes.
+	 */
+	useEffect( () => {
+		const map = mapInstanceRef.current;
+		if ( ! map || ! window.L ) {
+			return;
+		}
+
+		// Clear existing markers.
+		markersRef.current.forEach( ( m ) => m.remove() );
+		markersRef.current = [];
+
+		const bounds = [];
+
+		mapGroups.forEach( ( group ) => {
+			if ( ! group.latitude || ! group.longitude ) {
+				return;
+			}
+
+			const latlng = [ group.latitude, group.longitude ];
+			bounds.push( latlng );
+
+			const locationParts = [ group.city, group.country ].filter( Boolean );
+			const location = locationParts.join( ', ' );
+
+			let popupContent = `<strong>${ group.name }</strong>`;
+			if ( location ) {
+				popupContent += `<br>${ location }`;
+			}
+			if ( group.site_url ) {
+				popupContent += `<br><a href="${ group.site_url }">${ __( 'Visit group', 'wordpress-groups' ) }</a>`;
+			}
+
+			const marker = window.L.marker( latlng )
+				.bindPopup( popupContent )
+				.addTo( map );
+
+			markersRef.current.push( marker );
+		} );
+
+		// Fit the map to show all markers.
+		if ( bounds.length > 0 ) {
+			map.fitBounds( bounds, { padding: [ 40, 40 ], maxZoom: 12 } );
+		}
+	}, [ mapGroups ] );
+
+	/**
+	 * Handle geolocation button click.
+	 */
+	const handleGeolocate = useCallback( () => {
+		if ( ! navigator.geolocation || ! mapInstanceRef.current ) {
+			return;
+		}
+
+		setGeolocating( true );
+
+		navigator.geolocation.getCurrentPosition(
+			( position ) => {
+				const { latitude, longitude } = position.coords;
+				mapInstanceRef.current.setView( [ latitude, longitude ], 10 );
+				setGeolocating( false );
+			},
+			() => {
+				setGeolocating( false );
+			},
+			{ timeout: 10000 }
+		);
+	}, [] );
+
+	const supportsGeolocation = typeof navigator !== 'undefined' && 'geolocation' in navigator;
+
+	return createElement(
+		'div',
+		{ className: 'wp-block-groups-group-directory__map-wrapper' },
+		supportsGeolocation &&
+			createElement(
+				'button',
+				{
+					type: 'button',
+					className: 'wp-block-groups-group-directory__geolocate-btn',
+					onClick: handleGeolocate,
+					disabled: geolocating,
+					'aria-label': __( 'Center map on my location', 'wordpress-groups' ),
+				},
+				geolocating
+					? __( 'Locating\u2026', 'wordpress-groups' )
+					: __( 'My location', 'wordpress-groups' )
+			),
+		createElement( 'div', {
+			ref: mapRef,
+			className: 'wp-block-groups-group-directory__map-container',
+			role: 'application',
+			'aria-label': __( 'Interactive map of community groups', 'wordpress-groups' ),
+		} )
+	);
+}
+
+/**
+ * View toggle buttons for switching between list and map.
+ *
+ * @param {Object}   props
+ * @param {string}   props.activeView  Current view ('list' or 'map').
+ * @param {Function} props.onToggle    Callback when a view is selected.
+ */
+function ViewToggle( { activeView, onToggle } ) {
+	return createElement(
+		'div',
+		{
+			className: 'wp-block-groups-group-directory__view-toggle',
+			role: 'tablist',
+			'aria-label': __( 'Directory view', 'wordpress-groups' ),
+		},
+		createElement(
+			'button',
+			{
+				type: 'button',
+				role: 'tab',
+				className: `wp-block-groups-group-directory__view-btn${ activeView === 'list' ? ' wp-block-groups-group-directory__view-btn--active' : '' }`,
+				onClick: () => onToggle( 'list' ),
+				'aria-selected': activeView === 'list',
+				'aria-controls': 'group-directory-list-view',
+			},
+			__( 'List View', 'wordpress-groups' )
+		),
+		createElement(
+			'button',
+			{
+				type: 'button',
+				role: 'tab',
+				className: `wp-block-groups-group-directory__view-btn${ activeView === 'map' ? ' wp-block-groups-group-directory__view-btn--active' : '' }`,
+				onClick: () => onToggle( 'map' ),
+				'aria-selected': activeView === 'map',
+				'aria-controls': 'group-directory-map-view',
+			},
+			__( 'Map View', 'wordpress-groups' )
+		)
+	);
+}
+
+/**
  * Main Group Directory component.
  *
  * @param {Object}   props
- * @param {number}   props.perPage       Groups per page.
- * @param {Array}    props.initialGroups  Server-rendered initial groups.
- * @param {number}   props.initialTotal   Total number of groups.
- * @param {number}   props.initialPages   Total number of pages.
+ * @param {number}   props.perPage         Groups per page.
+ * @param {Array}    props.initialGroups    Server-rendered initial groups.
+ * @param {number}   props.initialTotal     Total number of groups.
+ * @param {number}   props.initialPages     Total number of pages.
+ * @param {Array}    props.initialMapGroups Initial groups with coordinates for the map.
  */
-export function GroupDirectory( { perPage, initialGroups, initialTotal, initialPages } ) {
+export function GroupDirectory( { perPage, initialGroups, initialTotal, initialPages, initialMapGroups } ) {
 	const [ groups, setGroups ] = useState( initialGroups );
 	const [ search, setSearch ] = useState( '' );
 	const [ currentPage, setCurrentPage ] = useState( 1 );
 	const [ totalPages, setTotalPages ] = useState( initialPages );
 	const [ total, setTotal ] = useState( initialTotal );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ activeView, setActiveView ] = useState( 'list' );
+	const [ mapGroups, setMapGroups ] = useState( initialMapGroups );
+	const [ allMapGroupsLoaded, setAllMapGroupsLoaded ] = useState( false );
 	const abortRef = useRef( null );
 
 	/**
@@ -220,6 +417,33 @@ export function GroupDirectory( { perPage, initialGroups, initialTotal, initialP
 	}, [ perPage ] );
 
 	/**
+	 * Fetch all groups with coordinates for the map view.
+	 * Uses a large per_page to get everything in one request.
+	 */
+	const fetchAllMapGroups = useCallback( async () => {
+		if ( allMapGroupsLoaded ) {
+			return;
+		}
+
+		try {
+			const response = await apiFetch( {
+				path: '/groups/v1/groups?per_page=200',
+				parse: false,
+			} );
+
+			const data = await response.json();
+			const geoGroups = data.filter(
+				( g ) => g.latitude && g.longitude
+			);
+
+			setMapGroups( geoGroups );
+			setAllMapGroupsLoaded( true );
+		} catch {
+			// On error, keep the initial map groups from server render.
+		}
+	}, [ allMapGroupsLoaded ] );
+
+	/**
 	 * Debounced search handler.
 	 */
 	const debouncedSearch = useCallback(
@@ -252,64 +476,92 @@ export function GroupDirectory( { perPage, initialGroups, initialTotal, initialP
 		{ className: 'wp-block-groups-group-directory__inner' },
 		createElement(
 			'div',
-			{ className: 'wp-block-groups-group-directory__search' },
+			{ className: 'wp-block-groups-group-directory__toolbar' },
 			createElement(
-				'label',
-				{
-					htmlFor: 'group-directory-search',
-					className: 'screen-reader-text',
-				},
-				__( 'Search groups', 'wordpress-groups' )
+				'div',
+				{ className: 'wp-block-groups-group-directory__search' },
+				createElement(
+					'label',
+					{
+						htmlFor: 'group-directory-search',
+						className: 'screen-reader-text',
+					},
+					__( 'Search groups', 'wordpress-groups' )
+				),
+				createElement( 'input', {
+					type: 'search',
+					id: 'group-directory-search',
+					className: 'wp-block-groups-group-directory__search-input',
+					placeholder: __( 'Search groups\u2026', 'wordpress-groups' ),
+					value: search,
+					onChange: handleSearchChange,
+				} )
 			),
-			createElement( 'input', {
-				type: 'search',
-				id: 'group-directory-search',
-				className: 'wp-block-groups-group-directory__search-input',
-				placeholder: __( 'Search groups\u2026', 'wordpress-groups' ),
-				value: search,
-				onChange: handleSearchChange,
+			createElement( ViewToggle, {
+				activeView,
+				onToggle: setActiveView,
 			} )
 		),
-		createElement(
-			'div',
-			{
-				className: 'wp-block-groups-group-directory__results',
-				'aria-live': 'polite',
-				'aria-busy': isLoading,
-			},
-			isLoading &&
+		activeView === 'list' &&
+			createElement(
+				'div',
+				{
+					id: 'group-directory-list-view',
+					role: 'tabpanel',
+				},
 				createElement(
 					'div',
-					{ className: 'wp-block-groups-group-directory__loading' },
-					createElement( 'span', {
-						className: 'wp-block-groups-group-directory__spinner',
-						'aria-hidden': 'true',
-					} ),
-					__( 'Loading groups\u2026', 'wordpress-groups' )
+					{
+						className: 'wp-block-groups-group-directory__results',
+						'aria-live': 'polite',
+						'aria-busy': isLoading,
+					},
+					isLoading &&
+						createElement(
+							'div',
+							{ className: 'wp-block-groups-group-directory__loading' },
+							createElement( 'span', {
+								className: 'wp-block-groups-group-directory__spinner',
+								'aria-hidden': 'true',
+							} ),
+							__( 'Loading groups\u2026', 'wordpress-groups' )
+						),
+					! isLoading && groups.length === 0 &&
+						createElement(
+							'p',
+							{ className: 'wp-block-groups-group-directory__empty' },
+							search
+								? __( 'No groups found matching your search.', 'wordpress-groups' )
+								: __( 'No groups found.', 'wordpress-groups' )
+						),
+					! isLoading && groups.length > 0 &&
+						createElement(
+							'div',
+							{ className: 'wp-block-groups-group-directory__grid' },
+							groups.map( ( group ) =>
+								createElement( GroupCard, { key: group.id, group } )
+							)
+						)
 				),
-			! isLoading && groups.length === 0 &&
-				createElement(
-					'p',
-					{ className: 'wp-block-groups-group-directory__empty' },
-					search
-						? __( 'No groups found matching your search.', 'wordpress-groups' )
-						: __( 'No groups found.', 'wordpress-groups' )
-				),
-			! isLoading && groups.length > 0 &&
-				createElement(
-					'div',
-					{ className: 'wp-block-groups-group-directory__grid' },
-					groups.map( ( group ) =>
-						createElement( GroupCard, { key: group.id, group } )
-					)
-				)
-		),
-		! isLoading &&
-			createElement( Pagination, {
-				currentPage,
-				totalPages,
-				onPageChange: handlePageChange,
-			} )
+				! isLoading &&
+					createElement( Pagination, {
+						currentPage,
+						totalPages,
+						onPageChange: handlePageChange,
+					} )
+			),
+		activeView === 'map' &&
+			createElement(
+				'div',
+				{
+					id: 'group-directory-map-view',
+					role: 'tabpanel',
+				},
+				createElement( MapView, {
+					mapGroups,
+					onLoadAll: fetchAllMapGroups,
+				} )
+			)
 	);
 }
 
@@ -331,6 +583,13 @@ function init() {
 			initialGroups = [];
 		}
 
+		let initialMapGroups = [];
+		try {
+			initialMapGroups = JSON.parse( container.dataset.mapGroups || '[]' );
+		} catch {
+			initialMapGroups = [];
+		}
+
 		const root = createRoot( container );
 		root.render(
 			createElement( GroupDirectory, {
@@ -338,6 +597,7 @@ function init() {
 				initialGroups,
 				initialTotal,
 				initialPages,
+				initialMapGroups,
 			} )
 		);
 	} );
