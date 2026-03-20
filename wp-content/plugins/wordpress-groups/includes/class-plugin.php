@@ -71,6 +71,8 @@ class Plugin {
 		new Notifications\Rsvp_Notifications();
 		new Blocks\Recurrence_Panel();
 
+		Cache::register_hooks();
+
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 	}

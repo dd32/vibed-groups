@@ -10,6 +10,8 @@
 
 namespace Groups\Models;
 
+use Groups\Cache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -383,9 +385,15 @@ class Membership {
 	 * @return int The number of members.
 	 */
 	public static function get_member_count( int $blog_id = 0 ): int {
-		$blog_id = $blog_id ?: get_current_blog_id();
+		$blog_id   = $blog_id ?: get_current_blog_id();
+		$cache_key = 'member_count_' . $blog_id;
 
-		return count(
+		$cached = Cache::get( $cache_key, Cache::GROUP_MEMBERS );
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
+
+		$count = count(
 			get_users(
 				[
 					'blog_id' => $blog_id,
@@ -393,6 +401,10 @@ class Membership {
 				]
 			)
 		);
+
+		Cache::set( $cache_key, $count, Cache::GROUP_MEMBERS );
+
+		return $count;
 	}
 
 	/**
