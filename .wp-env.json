@@ -16,7 +16,7 @@
 	},
 	"testsEnvironment": false,
 	"lifecycleScripts": {
-		"afterStart": "npx wp-env run cli wp plugin activate wordpress-groups && npx wp-env run cli wp theme activate groups-site && npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php"
+		"afterStart": "npm run build:blocks && npx wp-env run cli wp plugin activate wordpress-groups && npx wp-env run cli wp theme activate groups-site && npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php"
 	},
 	"config": {
 		"WP_DEBUG": true,
