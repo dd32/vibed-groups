@@ -65,18 +65,18 @@ $zip        = get_post_meta( $venue_id, '_venue_zip', true );
 $address_parts = array_filter( [ $address, $city, $state, $zip, $country ] );
 $full_address  = implode( ', ', $address_parts );
 
-// Enqueue Leaflet CSS from CDN.
+// Enqueue Leaflet CSS locally.
 wp_enqueue_style(
 	'leaflet',
-	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+	plugins_url( 'assets/vendor/leaflet/leaflet.css', GROUPS_PLUGIN_FILE ),
 	[],
 	'1.9.4'
 );
 
-// Enqueue Leaflet JS from CDN.
+// Enqueue Leaflet JS locally.
 wp_enqueue_script(
 	'leaflet',
-	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+	plugins_url( 'assets/vendor/leaflet/leaflet.js', GROUPS_PLUGIN_FILE ),
 	[],
 	'1.9.4',
 	true

@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/member-profile",
+	"version": "0.1.0",
+	"title": "Member Profile",
+	"category": "widgets",
+	"icon": "admin-users",
+	"description": "Displays a member profile card with avatar, role badge, membership date, events attended, and upcoming RSVPs.",
+	"textdomain": "wordpress-groups",
+	"attributes": {
+		"userId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

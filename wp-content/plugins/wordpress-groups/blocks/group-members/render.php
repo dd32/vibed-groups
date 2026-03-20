@@ -112,9 +112,9 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 							<?php echo get_avatar( $user->ID, 80, '', esc_attr( $user->display_name ) ); ?>
 						</div>
 						<div class="wp-block-groups-group-members__info">
-							<span class="wp-block-groups-group-members__name">
+							<a class="wp-block-groups-group-members__name" href="<?php echo esc_url( get_author_posts_url( $user->ID ) ); ?>">
 								<?php echo esc_html( $user->display_name ); ?>
-							</span>
+							</a>
 							<span class="wp-block-groups-group-members__badge wp-block-groups-group-members__badge--<?php echo esc_attr( sanitize_html_class( $role ) ); ?>">
 								<?php echo esc_html( $roles[ $role ] ); ?>
 							</span>
