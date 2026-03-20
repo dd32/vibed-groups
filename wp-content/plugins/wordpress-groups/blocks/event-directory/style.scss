@@ -1,0 +1,473 @@
+.wp-block-groups-event-directory {
+	max-width: 100%;
+
+	&__toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--wp--preset--spacing--20, 16px);
+		margin-bottom: var(--wp--preset--spacing--30, 24px);
+		padding-bottom: var(--wp--preset--spacing--20, 16px);
+		border-bottom: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+	}
+
+	&__view-toggle {
+		display: flex;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	&__view-btn {
+		padding: 8px 16px;
+		border: none;
+		background: var(--wp--preset--color--white, #ffffff);
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.15s ease, color 0.15s ease;
+
+		&:hover {
+			background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		}
+
+		&.is-active {
+			background: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--white, #ffffff);
+		}
+
+		& + & {
+			border-left: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		}
+	}
+
+	&__filters {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--wp--preset--spacing--10, 12px);
+		flex: 1;
+	}
+
+	&__filter-group {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		&--custom-dates {
+			flex-wrap: wrap;
+		}
+	}
+
+	&__filter-label {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		white-space: nowrap;
+	}
+
+	&__filter-select,
+	&__filter-input {
+		padding: 6px 10px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		background: var(--wp--preset--color--white, #ffffff);
+		min-width: 0;
+
+		&:focus {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			outline: 2px solid transparent;
+			box-shadow: 0 0 0 1px var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+	}
+
+	// Results meta.
+	&__results-meta {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		margin-bottom: var(--wp--preset--spacing--20, 16px);
+	}
+
+	// List view.
+	&__list {
+		display: grid;
+		gap: var(--wp--preset--spacing--20, 16px);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	&__card {
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		padding: var(--wp--preset--spacing--30, 20px);
+		background: var(--wp--preset--color--white, #ffffff);
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+		&:hover {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		}
+	}
+
+	&__card-title {
+		font-family: var(--wp--preset--font-family--eb-garamond, serif);
+		font-size: var(--wp--preset--font-size--large, 18px);
+		font-weight: 400;
+		line-height: 1.3;
+		margin: 0 0 var(--wp--preset--spacing--10, 8px);
+
+		a {
+			color: var(--wp--preset--color--charcoal-0, #1a1919);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--wp--preset--color--blueberry-1, #3858e9);
+				text-decoration: underline;
+			}
+		}
+	}
+
+	&__card-date {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		margin-bottom: 4px;
+	}
+
+	&__card-venue {
+		display: inline-block;
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		margin-bottom: 4px;
+
+		&::before {
+			content: "\1F4CD ";
+		}
+	}
+
+	&__card-excerpt {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		margin: var(--wp--preset--spacing--10, 8px) 0 0;
+		line-height: 1.5;
+	}
+
+	// Calendar view.
+	&__calendar {
+		margin-top: var(--wp--preset--spacing--10, 8px);
+	}
+
+	&__calendar-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: var(--wp--preset--spacing--20, 16px);
+	}
+
+	&__calendar-title {
+		font-family: var(--wp--preset--font-family--eb-garamond, serif);
+		font-size: var(--wp--preset--font-size--large, 18px);
+		font-weight: 400;
+		margin: 0;
+	}
+
+	&__calendar-nav {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #ffffff);
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+		color: var(--wp--preset--color--charcoal-3, #40464d);
+		transition: background-color 0.15s ease;
+
+		&:hover {
+			background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		}
+	}
+
+	&__calendar-grid {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 1px;
+		background: var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	&__calendar-weekday {
+		padding: 8px 4px;
+		text-align: center;
+		font-size: var(--wp--preset--font-size--extra-small, 12px);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+	}
+
+	&__calendar-cell {
+		min-height: 60px;
+		padding: 6px;
+		background: var(--wp--preset--color--white, #ffffff);
+		position: relative;
+
+		&--empty {
+			background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		}
+
+		&--today {
+			background: var(--wp--preset--color--blueberry-4, #eff2ff);
+		}
+
+		&--has-events {
+			cursor: default;
+		}
+	}
+
+	&__calendar-day {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		font-weight: 500;
+
+		.wp-block-groups-event-directory__calendar-cell--today & {
+			color: var(--wp--preset--color--deep-blueberry, #213fd4);
+			font-weight: 700;
+		}
+	}
+
+	&__calendar-dots {
+		display: flex;
+		gap: 3px;
+		margin-top: 4px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	&__calendar-dot {
+		display: block;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--wp--preset--color--blueberry-1, #3858e9);
+	}
+
+	&__calendar-more {
+		font-size: 10px;
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-weight: 600;
+	}
+
+	&__calendar-events {
+		list-style: none;
+		padding: 0;
+		margin: var(--wp--preset--spacing--20, 16px) 0 0;
+		display: grid;
+		gap: 8px;
+	}
+
+	&__calendar-event-item {
+		a {
+			display: flex;
+			gap: 12px;
+			padding: 10px 12px;
+			border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+			border-radius: 4px;
+			text-decoration: none;
+			color: inherit;
+			transition: border-color 0.15s ease;
+
+			&:hover {
+				border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			}
+		}
+	}
+
+	&__calendar-event-date {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		white-space: nowrap;
+		min-width: 140px;
+	}
+
+	&__calendar-event-title {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-0, #1a1919);
+		font-weight: 500;
+	}
+
+	// Pagination.
+	&__pagination {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--wp--preset--spacing--20, 16px);
+		margin-top: var(--wp--preset--spacing--30, 24px);
+		padding-top: var(--wp--preset--spacing--20, 16px);
+		border-top: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+	}
+
+	&__page-btn {
+		padding: 8px 16px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #ffffff);
+		color: var(--wp--preset--color--blueberry-1, #3858e9);
+		font-size: var(--wp--preset--font-size--small, 14px);
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.15s ease, border-color 0.15s ease;
+
+		&:hover:not(:disabled) {
+			background: var(--wp--preset--color--blueberry-4, #eff2ff);
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+	}
+
+	&__page-info {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-weight: 500;
+	}
+
+	// Loading & error states.
+	&__loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		padding: var(--wp--preset--spacing--40, 40px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-size: var(--wp--preset--font-size--small, 14px);
+	}
+
+	&__spinner {
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		border: 2px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-top-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		border-radius: 50%;
+		animation: groups-event-directory-spin 0.6s linear infinite;
+	}
+
+	@keyframes groups-event-directory-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	&__error {
+		padding: var(--wp--preset--spacing--30, 20px);
+		background: var(--wp--preset--color--pomegrade-3, #ffe9de);
+		color: #a83a1f;
+		border-radius: 4px;
+		font-size: var(--wp--preset--font-size--small, 14px);
+	}
+
+	&__empty {
+		padding: var(--wp--preset--spacing--40, 40px);
+		text-align: center;
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-size: var(--wp--preset--font-size--small, 14px);
+	}
+
+	// Noscript fallback.
+	&__noscript {
+		.wp-block-groups-event-directory__heading {
+			font-family: var(--wp--preset--font-family--eb-garamond, serif);
+			font-size: var(--wp--preset--font-size--x-large, 24px);
+			font-weight: 400;
+			margin: 0 0 var(--wp--preset--spacing--20, 16px);
+		}
+
+		.wp-block-groups-event-directory__event-item {
+			padding: var(--wp--preset--spacing--20, 16px) 0;
+			border-bottom: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+			list-style: none;
+		}
+
+		.wp-block-groups-event-directory__event-link {
+			font-size: var(--wp--preset--font-size--medium, 16px);
+			font-weight: 500;
+			color: var(--wp--preset--color--charcoal-0, #1a1919);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--wp--preset--color--blueberry-1, #3858e9);
+				text-decoration: underline;
+			}
+		}
+
+		.wp-block-groups-event-directory__event-date,
+		.wp-block-groups-event-directory__event-venue {
+			display: block;
+			font-size: var(--wp--preset--font-size--small, 14px);
+			color: var(--wp--preset--color--charcoal-4, #656a71);
+			margin-top: 4px;
+		}
+	}
+
+	// Responsive adjustments.
+	@media (max-width: 600px) {
+		&__toolbar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		&__view-toggle {
+			align-self: flex-start;
+		}
+
+		&__filters {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		&__filter-group {
+			flex-direction: column;
+			align-items: stretch;
+
+			&--custom-dates {
+				flex-direction: column;
+			}
+		}
+
+		&__filter-select,
+		&__filter-input {
+			width: 100%;
+		}
+
+		&__calendar-grid {
+			font-size: var(--wp--preset--font-size--extra-small, 12px);
+		}
+
+		&__calendar-cell {
+			min-height: 44px;
+			padding: 4px;
+		}
+
+		&__calendar-event-item a {
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		&__calendar-event-date {
+			min-width: 0;
+		}
+	}
+}
