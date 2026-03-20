@@ -67,10 +67,12 @@ class Plugin {
 		new Integrations\WordPress_Org_Profile();
 		new Admin\Application_Tracker();
 		new Admin\Reports();
+		new Admin\Event_Duplicator();
 		new Workflow\Organizer_Onboarding();
 		new Notifications\Rsvp_Notifications();
 		new Blocks\Recurrence_Panel();
 		new SEO();
+		new Geocoder();
 
 		Cache::register_hooks();
 
