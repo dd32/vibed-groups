@@ -480,7 +480,7 @@ class Venue_Controller extends WP_REST_Controller {
 
 		$data = [
 			'id'       => (int) $post->ID,
-			'title'    => $post->post_title,
+			'title'    => esc_html( $post->post_title ),
 			'content'  => wp_kses_post( $post->post_content ),
 			'status'   => esc_html( $post->post_status ),
 			'author'   => (int) $post->post_author,
