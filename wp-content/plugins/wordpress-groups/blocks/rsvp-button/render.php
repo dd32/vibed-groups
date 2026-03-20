@@ -87,20 +87,37 @@ $wrapper_attributes = get_block_wrapper_attributes( $data_attributes );
 $button_text = match ( $initial_state ) {
 	'attending'     => __( 'Attending', 'wordpress-groups' ),
 	'waitlisted'    => __( 'On Waitlist', 'wordpress-groups' ),
-	'not-logged-in' => __( 'Log in to RSVP', 'wordpress-groups' ),
+	'not-logged-in' => __( 'RSVP to this Event', 'wordpress-groups' ),
 	default         => __( 'RSVP', 'wordpress-groups' ),
 };
 
 ?>
 <div <?php echo $wrapper_attributes; ?>>
 	<?php if ( 'not-logged-in' === $initial_state && $login_url ) : ?>
-		<a
-			class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--not-logged-in"
-			href="<?php echo esc_url( $login_url ); ?>"
-			aria-label="<?php echo esc_attr( $button_text ); ?>"
-		>
-			<span class="wp-block-groups-rsvp-button__label"><?php echo esc_html( $button_text ); ?></span>
-		</a>
+		<div class="wp-block-groups-rsvp-button__guest-prompt">
+			<p class="wp-block-groups-rsvp-button__guest-text">
+				<?php esc_html_e( 'Want to attend this event?', 'wordpress-groups' ); ?>
+			</p>
+			<a
+				class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--login"
+				href="<?php echo esc_url( $login_url ); ?>"
+				aria-label="<?php esc_attr_e( 'Log in to RSVP for this event', 'wordpress-groups' ); ?>"
+			>
+				<span class="wp-block-groups-rsvp-button__label"><?php esc_html_e( 'Log in to RSVP', 'wordpress-groups' ); ?></span>
+			</a>
+			<?php
+			$register_url = wp_registration_url();
+			if ( get_option( 'users_can_register' ) && $register_url ) :
+			?>
+				<a
+					class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--register"
+					href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( get_permalink( $event_id ) ), $register_url ) ); ?>"
+					aria-label="<?php esc_attr_e( 'Create an account to RSVP', 'wordpress-groups' ); ?>"
+				>
+					<span class="wp-block-groups-rsvp-button__label"><?php esc_html_e( 'Create Account', 'wordpress-groups' ); ?></span>
+				</a>
+			<?php endif; ?>
+		</div>
 	<?php else : ?>
 		<button
 			class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--<?php echo esc_attr( $initial_state ); ?>"

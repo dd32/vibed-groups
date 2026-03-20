@@ -79,15 +79,21 @@ if ( $start_datetime ) {
 	}
 }
 
-// Venue name.
-$venue_name = '';
+// Venue name and format badge (Online / Hybrid / in-person).
+$venue_name   = '';
+$format_badge = '';
 if ( $venue_id ) {
 	$venue = get_post( $venue_id );
 	if ( $venue && 'venue' === $venue->post_type ) {
 		$venue_name = $venue->post_title;
 	}
+	if ( $online_link ) {
+		// Has both a physical venue and an online link — hybrid event.
+		$format_badge = __( 'Hybrid', 'wordpress-groups' );
+	}
 } elseif ( $online_link ) {
-	$venue_name = __( 'Online', 'wordpress-groups' );
+	$venue_name   = __( 'Online', 'wordpress-groups' );
+	$format_badge = __( 'Online', 'wordpress-groups' );
 }
 
 // Build the status CSS class modifier.
@@ -120,6 +126,12 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 		</span>
 	<?php endif; ?>
 
+	<?php if ( $format_badge ) : ?>
+		<span class="wp-block-groups-event-card__format-badge wp-block-groups-event-card__format-badge--<?php echo esc_attr( sanitize_html_class( strtolower( $format_badge ) ) ); ?>">
+			<?php echo esc_html( $format_badge ); ?>
+		</span>
+	<?php endif; ?>
+
 	<h3 class="wp-block-groups-event-card__title">
 		<a href="<?php echo esc_url( get_permalink( $event_id ) ); ?>">
 			<?php echo esc_html( get_the_title( $event_id ) ); ?>
@@ -140,6 +152,14 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 	<?php if ( $venue_name ) : ?>
 		<div class="wp-block-groups-event-card__venue">
 			<?php echo esc_html( $venue_name ); ?>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( $online_link && is_singular( 'event' ) ) : ?>
+		<div class="wp-block-groups-event-card__online-link">
+			<a href="<?php echo esc_url( $online_link ); ?>" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( 'Join Online Meeting', 'wordpress-groups' ); ?>
+			</a>
 		</div>
 	<?php endif; ?>
 
