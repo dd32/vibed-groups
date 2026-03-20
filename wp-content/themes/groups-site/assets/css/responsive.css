@@ -1,0 +1,200 @@
+/**
+ * Responsive styles for Groups Site theme.
+ *
+ * Breakpoints:
+ *   - Small (mobile):  up to 599px
+ *   - Medium (tablet):  600px – 1023px
+ *   - Large (desktop):  1024px+
+ *
+ * @package Groups_Site
+ */
+
+/* ==========================================================================
+   Mobile-first base adjustments (applies to all sizes, overridden upward)
+   ========================================================================== */
+
+/* Ensure images and embeds never overflow their container. */
+img,
+video,
+iframe {
+	max-width: 100%;
+	height: auto;
+}
+
+/* ==========================================================================
+   Small screens – up to 599px  (phones in portrait & landscape)
+   ========================================================================== */
+@media (max-width: 599px) {
+
+	/* ---- Header ---- */
+	.wp-block-group > .wp-block-group:has(.wp-block-site-title):has(.wp-block-navigation) {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--wp--preset--spacing--10, 10px);
+	}
+
+	/* ---- Typography scale-down ---- */
+	h1,
+	.has-heading-1-font-size {
+		font-size: clamp(28px, 7vw, 36px) !important;
+	}
+
+	h2,
+	.has-heading-2-font-size {
+		font-size: clamp(24px, 5.5vw, 32px) !important;
+	}
+
+	h3,
+	.has-heading-3-font-size {
+		font-size: clamp(20px, 4.5vw, 26px) !important;
+	}
+
+	/* ---- Event cards: single column ---- */
+	.wp-block-groups-upcoming-events,
+	.wp-block-groups-past-events,
+	.wp-block-groups-event-directory {
+		display: flex !important;
+		flex-direction: column;
+		gap: var(--wp--preset--spacing--20, 20px);
+	}
+
+	/* ---- Event card thumbnails ---- */
+	.wp-block-groups-event-card__thumbnail {
+		max-height: 160px;
+	}
+
+	/* ---- Hero banner on single-event ---- */
+	.wp-block-groups-event-hero {
+		min-height: 180px;
+	}
+
+	/* ---- Footer flex wrap ---- */
+	footer .wp-block-group > .wp-block-group {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--wp--preset--spacing--10, 10px);
+	}
+
+	/* ---- Group navigation: horizontal scroll ---- */
+	.wp-block-group:has(> .wp-block-navigation) {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* ---- Members grid ---- */
+	.wp-block-groups-group-members {
+		grid-template-columns: 1fr !important;
+	}
+}
+
+/* ==========================================================================
+   Medium screens – 600px to 1023px  (tablets, small laptops)
+   ========================================================================== */
+@media (min-width: 600px) and (max-width: 1023px) {
+
+	/* ---- Event cards: 2-column grid ---- */
+	.wp-block-groups-upcoming-events,
+	.wp-block-groups-past-events,
+	.wp-block-groups-event-directory {
+		display: grid !important;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--wp--preset--spacing--20, 20px);
+	}
+
+	/* ---- Members grid ---- */
+	.wp-block-groups-group-members {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+
+	/* ---- Hero banner on single-event ---- */
+	.wp-block-groups-event-hero {
+		min-height: 240px;
+	}
+}
+
+/* ==========================================================================
+   Large screens – 1024px+  (desktops)
+   ========================================================================== */
+@media (min-width: 1024px) {
+
+	/* ---- Event cards: 3-column grid ---- */
+	.wp-block-groups-upcoming-events,
+	.wp-block-groups-past-events,
+	.wp-block-groups-event-directory {
+		display: grid !important;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--wp--preset--spacing--30, 30px);
+	}
+
+	/* ---- Members grid ---- */
+	.wp-block-groups-group-members {
+		grid-template-columns: repeat(3, 1fr) !important;
+	}
+
+	/* ---- Hero banner on single-event ---- */
+	.wp-block-groups-event-hero {
+		min-height: 320px;
+	}
+}
+
+/* ==========================================================================
+   Event hero banner (shared across breakpoints)
+   ========================================================================== */
+.wp-block-groups-event-hero {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	border-radius: 4px;
+	margin-bottom: var(--wp--preset--spacing--30, 30px);
+	background-color: var(--wp--preset--color--blueberry-4, #eff2ff);
+}
+
+.wp-block-groups-event-hero img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* Placeholder when no image is available (colored block with icon). */
+.wp-block-groups-event-hero--placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--wp--preset--color--blueberry-2, #9fb1ff);
+	font-size: 48px;
+}
+
+/* ==========================================================================
+   Event card thumbnail
+   ========================================================================== */
+.wp-block-groups-event-card__thumbnail {
+	margin: calc(-1 * var(--wp--preset--spacing--30, 20px));
+	margin-bottom: var(--wp--preset--spacing--20, 20px);
+	overflow: hidden;
+	border-radius: 4px 4px 0 0;
+}
+
+.wp-block-groups-event-card__thumbnail img {
+	width: 100%;
+	height: 180px;
+	object-fit: cover;
+	display: block;
+}
+
+/* ==========================================================================
+   Navigation overlay (hamburger) support
+   The core wp:navigation block already provides overlay/hamburger behaviour
+   when `overlayMenu` is set to "mobile" or "always". These styles ensure
+   the overlay looks correct with the theme palette.
+   ========================================================================== */
+.wp-block-navigation__responsive-container.is-menu-open {
+	background-color: var(--wp--preset--color--white, #ffffff);
+	color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+	padding: var(--wp--preset--spacing--40, 40px);
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a {
+	font-size: var(--wp--preset--font-size--large, 18px);
+	padding: var(--wp--preset--spacing--10, 10px) 0;
+}

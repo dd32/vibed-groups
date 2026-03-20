@@ -195,6 +195,71 @@ if ( ! is_wp_error( $event4_id ) ) {
 
 echo "✓ Events created.\n";
 
+// Assign placeholder featured images to events.
+// Generate simple colored PNG placeholder images for each event.
+$event_colors = [
+	$event1_id => [ 'label' => 'Block Themes',    'bg' => '#3858e9', 'fg' => '#ffffff' ],
+	$event2_id => [ 'label' => 'Performance',      'bg' => '#e26f56', 'fg' => '#ffffff' ],
+	$event3_id => [ 'label' => 'Contributor Day',   'bg' => '#33f078', 'fg' => '#1a1919' ],
+	$event4_id => [ 'label' => 'Release Party',     'bg' => '#fff972', 'fg' => '#1a1919' ],
+];
+
+$upload_dir = wp_upload_dir();
+
+foreach ( $event_colors as $eid => $meta ) {
+	if ( is_wp_error( $eid ) || ! $eid ) {
+		continue;
+	}
+
+	// Skip if a featured image is already set.
+	if ( get_post_thumbnail_id( $eid ) ) {
+		continue;
+	}
+
+	// Create a simple 1200x400 placeholder PNG with GD.
+	if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+		echo "⚠ GD library not available; skipping placeholder images.\n";
+		break;
+	}
+
+	$img = imagecreatetruecolor( 1200, 400 );
+	list( $r, $g, $b ) = sscanf( $meta['bg'], '#%02x%02x%02x' );
+	$bg_color = imagecolorallocate( $img, $r, $g, $b );
+	imagefill( $img, 0, 0, $bg_color );
+
+	// Add text label.
+	list( $fr, $fg_val, $fb ) = sscanf( $meta['fg'], '#%02x%02x%02x' );
+	$text_color = imagecolorallocate( $img, $fr, $fg_val, $fb );
+	$text       = $meta['label'];
+	imagestring( $img, 5, 560, 190, $text, $text_color );
+
+	$filename = 'event-placeholder-' . $eid . '.png';
+	$filepath = $upload_dir['path'] . '/' . $filename;
+
+	imagepng( $img, $filepath );
+	imagedestroy( $img );
+
+	// Insert as attachment.
+	$attachment_id = wp_insert_attachment(
+		[
+			'post_mime_type' => 'image/png',
+			'post_title'     => 'Event placeholder: ' . $meta['label'],
+			'post_status'    => 'inherit',
+		],
+		$filepath,
+		$eid
+	);
+
+	if ( ! is_wp_error( $attachment_id ) ) {
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$attach_data = wp_generate_attachment_metadata( $attachment_id, $filepath );
+		wp_update_attachment_metadata( $attachment_id, $attach_data );
+		set_post_thumbnail( $eid, $attachment_id );
+	}
+}
+
+echo "✓ Event featured images set.\n";
+
 // Create RSVPs (as comments).
 $rsvp_events = [ $event1_id, $event2_id, $event3_id ];
 $rsvp_users  = [ $organizer_id, $member1_id, $member2_id, $member3_id ];
@@ -284,5 +349,6 @@ echo "  - 4 users (organizer + 3 members)\n";
 echo "  - 2 venues\n";
 echo "  - 4 events (3 upcoming, 1 past)\n";
 echo "  - RSVPs for all events\n";
+echo "  - Featured images on events\n";
 echo "  - Front page and Members page configured\n";
 echo "\nLogin: admin / password (or organizer / password)\n";
