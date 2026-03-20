@@ -232,6 +232,10 @@ $pages = [
 		'title'   => 'About',
 		'content' => "<!-- wp:heading -->\n<h2>About WordPress Melbourne</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>We're a friendly community of WordPress enthusiasts in Melbourne, Australia. We meet regularly to learn, share, and connect.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Whether you're a developer, designer, content creator, or just getting started with WordPress — you're welcome here!</p>\n<!-- /wp:paragraph -->",
 	],
+	'settings' => [
+		'title'   => 'Settings',
+		'content' => "<!-- wp:heading -->\n<h2>Your Settings</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Manage your notification preferences and account settings.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:groups/notification-preferences /-->",
+	],
 ];
 
 foreach ( $pages as $slug => $page_data ) {
@@ -247,7 +251,7 @@ foreach ( $pages as $slug => $page_data ) {
 		] );
 	}
 }
-echo "✓ Pages created (events, members, about).\n";
+echo "✓ Pages created (events, members, about, settings).\n";
 
 // Set front page to show events.
 $front = get_page_by_path( 'events' );
