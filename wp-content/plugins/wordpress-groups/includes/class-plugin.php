@@ -96,5 +96,8 @@ class Plugin {
 
 		$directory_controller = new REST\Directory_Controller();
 		$directory_controller->register_routes();
+
+		$preferences_controller = new REST\Preferences_Controller();
+		$preferences_controller->register_routes();
 	}
 }
