@@ -84,5 +84,8 @@ class Plugin {
 
 		$venue_controller = new REST\Venue_Controller();
 		$venue_controller->register_routes();
+
+		$directory_controller = new REST\Directory_Controller();
+		$directory_controller->register_routes();
 	}
 }
