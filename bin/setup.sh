@@ -52,10 +52,28 @@ echo "🌱 Seeding Melbourne with sample data..."
 npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php --url="$MELBOURNE_URL" 2>/dev/null || true
 
 echo ""
+echo "🌏 Creating Tokyo sub-site..."
+npx wp-env run cli wp site create --slug=tokyo --title="WordPress Tokyo" --email=organizer-tokyo@example.com 2>/dev/null || echo "  (already exists)"
+
+TOKYO_URL="${SITE_URL}/tokyo/"
+echo "  Tokyo URL: $TOKYO_URL"
+
+echo ""
+echo "🎨 Setting up Tokyo sub-site..."
+npx wp-env run cli wp theme activate groups-site --url="$TOKYO_URL" 2>/dev/null || true
+npx wp-env run cli wp option update blogname "WordPress Tokyo" --url="$TOKYO_URL" 2>/dev/null || true
+npx wp-env run cli wp option update blogdescription "Tokyo WordPress Community Group" --url="$TOKYO_URL" 2>/dev/null || true
+
+echo ""
+echo "🌱 Seeding Tokyo with sample data..."
+npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data-tokyo.php --url="$TOKYO_URL" 2>/dev/null || true
+
+echo ""
 echo "✅ Setup complete!"
 echo ""
 echo "  Main site:     $SITE_URL/"
 echo "  Melbourne:     $MELBOURNE_URL"
+echo "  Tokyo:         $TOKYO_URL"
 echo "  Admin:         $SITE_URL/wp-admin/"
 echo "  Login:         admin / password"
 echo ""
