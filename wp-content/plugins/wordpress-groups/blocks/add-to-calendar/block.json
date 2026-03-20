@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/add-to-calendar",
+	"version": "0.1.0",
+	"title": "Add to Calendar",
+	"category": "widgets",
+	"description": "A dropdown button that lets users add an event to Google Calendar, Outlook, or download an iCal file.",
+	"textdomain": "wordpress-groups",
+	"attributes": {
+		"eventId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"usesContext": [ "postId", "postType" ],
+	"supports": {
+		"html": false,
+		"align": false
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

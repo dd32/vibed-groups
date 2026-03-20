@@ -1,0 +1,105 @@
+/**
+ * Add to Calendar block styles.
+ *
+ * CSS-only dropdown using <details>/<summary>.
+ */
+
+.wp-block-groups-add-to-calendar {
+	display: inline-flex;
+	position: relative;
+
+	&__dropdown {
+		position: relative;
+	}
+
+	// The trigger button (summary element).
+	&__btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 10px 24px;
+		border: 2px solid var(--wp--preset--color--light-grey-1);
+		border-radius: 4px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.5;
+		cursor: pointer;
+		min-height: 44px; // WCAG 2.1 AA touch target.
+		background-color: transparent;
+		color: var(--wp--preset--color--charcoal-1);
+		transition: background-color 0.15s ease, border-color 0.15s ease;
+		list-style: none;
+		user-select: none;
+
+		// Remove default marker in Safari / Chrome.
+		&::-webkit-details-marker {
+			display: none;
+		}
+
+		&::marker {
+			content: "";
+		}
+
+		&:hover {
+			background-color: var(--wp--preset--color--light-grey-1);
+			border-color: var(--wp--preset--color--charcoal-4);
+		}
+
+		// Accessible focus styles.
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white);
+		}
+	}
+
+	// Dropdown arrow icon.
+	&__icon {
+		font-size: 12px;
+		transition: transform 0.15s ease;
+	}
+
+	// Rotate arrow when open.
+	&__dropdown[open] &__icon {
+		transform: rotate( 180deg );
+	}
+
+	// Dropdown menu.
+	&__menu {
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		z-index: 10;
+		min-width: 200px;
+		margin: 0;
+		padding: 4px 0;
+		background: var(--wp--preset--color--white, #fff);
+		border: 1px solid var(--wp--preset--color--light-grey-1);
+		border-radius: 4px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		list-style: none;
+	}
+
+	// Individual menu links.
+	&__link {
+		display: block;
+		padding: 10px 16px;
+		font-size: 14px;
+		line-height: 1.4;
+		color: var(--wp--preset--color--charcoal-1);
+		text-decoration: none;
+		transition: background-color 0.1s ease;
+
+		&:hover {
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-1);
+			text-decoration: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1);
+			outline-offset: -2px;
+		}
+	}
+}
