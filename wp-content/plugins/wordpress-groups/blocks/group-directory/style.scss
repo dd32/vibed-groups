@@ -1,0 +1,223 @@
+/**
+ * Group Directory block styles.
+ *
+ * Responsive grid layout for group cards with search and pagination.
+ * Uses WordPress theme design tokens where available.
+ */
+
+.wp-block-groups-group-directory {
+	max-width: 1200px;
+	margin: 0 auto;
+
+	// Loading state.
+	&__loading {
+		padding: 48px 24px;
+		text-align: center;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+	}
+
+	// Inner wrapper for the hydrated directory.
+	&__inner {
+		padding: 0;
+	}
+
+	// Header with title, search, and count.
+	&__header {
+		margin-bottom: 32px;
+	}
+
+	&__title {
+		margin: 0 0 16px;
+		font-size: 28px;
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+	}
+
+	&__search {
+		margin-bottom: 12px;
+	}
+
+	&__search-input {
+		display: block;
+		width: 100%;
+		padding: 12px 16px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+		border-radius: 4px;
+		font-size: 16px;
+		line-height: 1.5;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		background-color: var(--wp--preset--color--white, #fff);
+		box-sizing: border-box;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+		&::placeholder {
+			color: var(--wp--preset--color--charcoal-4, #50575e);
+		}
+
+		&:focus {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			box-shadow: 0 0 0 1px var(--wp--preset--color--blueberry-1, #3858e9);
+			outline: none;
+		}
+	}
+
+	&__count {
+		margin: 0;
+		font-size: 14px;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+	}
+
+	// Error state.
+	&__error {
+		padding: 12px 16px;
+		margin-bottom: 16px;
+		background-color: #fcf0f1;
+		border: 1px solid #cc1818;
+		border-radius: 4px;
+		color: #cc1818;
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	// Empty state.
+	&__empty {
+		padding: 48px 24px;
+		text-align: center;
+		background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+		border-radius: 8px;
+
+		p {
+			margin: 0;
+			font-size: 16px;
+			color: var(--wp--preset--color--charcoal-4, #50575e);
+		}
+	}
+
+	// Group card grid.
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat( 3, 1fr );
+		gap: 24px;
+		margin-bottom: 32px;
+	}
+
+	// Individual group card.
+	&__card {
+		padding: 24px;
+		background: var(--wp--preset--color--white, #fff);
+		border: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+		border-radius: 8px;
+		transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+		&:hover {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		}
+	}
+
+	&__card-name {
+		margin: 0 0 8px;
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		line-height: 1.3;
+
+		a {
+			color: var(--wp--preset--color--blueberry-1, #3858e9);
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	&__card-city {
+		margin: 0 0 4px;
+		font-size: 14px;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		line-height: 1.4;
+	}
+
+	&__card-members {
+		margin: 0;
+		font-size: 13px;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		font-weight: 500;
+	}
+
+	// Pagination.
+	&__pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 4px;
+		margin-top: 32px;
+	}
+
+	&__page-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 40px;
+		height: 40px;
+		padding: 8px 12px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #fff);
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+		&:hover:not(:disabled) {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+
+		&.is-active {
+			background-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--white, #fff);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+			outline-offset: 2px;
+		}
+	}
+}
+
+// Responsive: 2 columns on tablets.
+@media ( max-width: 960px ) {
+	.wp-block-groups-group-directory {
+		&__grid {
+			grid-template-columns: repeat( 2, 1fr );
+			gap: 16px;
+		}
+	}
+}
+
+// Responsive: single column on mobile.
+@media ( max-width: 600px ) {
+	.wp-block-groups-group-directory {
+		&__title {
+			font-size: 22px;
+		}
+
+		&__grid {
+			grid-template-columns: 1fr;
+			gap: 12px;
+		}
+
+		&__card {
+			padding: 16px;
+		}
+	}
+}
