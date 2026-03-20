@@ -1,0 +1,440 @@
+/**
+ * Application Form block styles.
+ *
+ * Multi-step form with progress indicator, field validation, and responsive layout.
+ * Follows WordPress.org design language with accessible focus styles.
+ */
+
+.wp-block-groups-application-form {
+	max-width: 680px;
+	margin: 0 auto;
+
+	// Login prompt for logged-out users.
+	&__login-prompt {
+		text-align: center;
+		padding: 48px 24px;
+		background: var(--wp--preset--color--light-grey-2, #f6f7f7);
+		border-radius: 8px;
+
+		h2 {
+			margin: 0 0 16px;
+			font-size: 24px;
+			font-weight: 600;
+			color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		}
+
+		p {
+			margin: 0 0 24px;
+			color: var(--wp--preset--color--charcoal-4, #50575e);
+			font-size: 16px;
+			line-height: 1.6;
+		}
+	}
+
+	&__login-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 12px 32px;
+		background-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		color: var(--wp--preset--color--white, #fff);
+		border: 2px solid transparent;
+		border-radius: 4px;
+		font-size: 16px;
+		font-weight: 600;
+		text-decoration: none;
+		min-height: 44px;
+		cursor: pointer;
+		transition: background-color 0.15s ease;
+
+		&:hover {
+			background-color: var(--wp--preset--color--deep-blueberry, #2145e6);
+			color: var(--wp--preset--color--white, #fff);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+			outline-offset: 2px;
+		}
+	}
+
+	// Loading state.
+	&__loading {
+		padding: 48px 24px;
+		text-align: center;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+	}
+
+	// Inner wrapper for the hydrated form.
+	&__inner {
+		padding: 0;
+	}
+
+	&__title {
+		margin: 0 0 24px;
+		font-size: 28px;
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+	}
+
+	// Progress indicator.
+	&__progress {
+		margin-bottom: 32px;
+	}
+
+	&__steps {
+		display: flex;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		counter-reset: step;
+		gap: 4px;
+	}
+
+	&__step-item {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		position: relative;
+		text-align: center;
+
+		// Connector line between steps.
+		&::after {
+			content: "";
+			position: absolute;
+			top: 16px;
+			left: calc(50% + 18px);
+			width: calc(100% - 36px);
+			height: 2px;
+			background-color: var(--wp--preset--color--light-grey-1, #dcdcde);
+		}
+
+		&:last-child::after {
+			display: none;
+		}
+
+		&.is-complete::after {
+			background-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+	}
+
+	&__step-number {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		font-size: 14px;
+		font-weight: 600;
+		background-color: var(--wp--preset--color--light-grey-1, #dcdcde);
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		position: relative;
+		z-index: 1;
+		transition: background-color 0.2s ease, color 0.2s ease;
+
+		.is-current & {
+			background-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--white, #fff);
+		}
+
+		.is-complete & {
+			background-color: #00a32a;
+			color: var(--wp--preset--color--white, #fff);
+		}
+	}
+
+	&__step-label {
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		line-height: 1.3;
+
+		.is-current & {
+			color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+			font-weight: 600;
+		}
+
+		.is-complete & {
+			color: #00a32a;
+		}
+	}
+
+	// Fieldset and legend.
+	&__fieldset {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	&__legend {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		margin: 0 0 20px;
+		padding: 0;
+	}
+
+	// Form fields.
+	&__field {
+		margin-bottom: 20px;
+
+		&--checkbox {
+			margin-top: 24px;
+		}
+	}
+
+	&__label {
+		display: block;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		margin-bottom: 6px;
+	}
+
+	&__required {
+		color: #cc1818;
+	}
+
+	&__input {
+		display: block;
+		width: 100%;
+		padding: 10px 12px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+		border-radius: 4px;
+		font-size: 16px;
+		line-height: 1.5;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+		background-color: var(--wp--preset--color--white, #fff);
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+		box-sizing: border-box;
+
+		&:focus {
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			box-shadow: 0 0 0 1px var(--wp--preset--color--blueberry-1, #3858e9);
+			outline: none;
+		}
+
+		&.has-error {
+			border-color: #cc1818;
+
+			&:focus {
+				box-shadow: 0 0 0 1px #cc1818;
+			}
+		}
+	}
+
+	textarea#{&}__input {
+		resize: vertical;
+		min-height: 100px;
+	}
+
+	&__help {
+		margin: 6px 0 0;
+		font-size: 13px;
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		line-height: 1.4;
+	}
+
+	&__error {
+		margin: 6px 0 0;
+		font-size: 13px;
+		color: #cc1818;
+		line-height: 1.4;
+	}
+
+	// Checkbox field.
+	&__checkbox-label {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		cursor: pointer;
+		font-size: 14px;
+		line-height: 1.5;
+		color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+	}
+
+	&__checkbox {
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
+		margin-top: 2px;
+		accent-color: var(--wp--preset--color--blueberry-1, #3858e9);
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+			outline-offset: 2px;
+		}
+	}
+
+	// Review step.
+	&__review-list {
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+
+		dt {
+			font-size: 13px;
+			font-weight: 600;
+			color: var(--wp--preset--color--charcoal-4, #50575e);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-top: 12px;
+
+			&:first-child {
+				margin-top: 0;
+			}
+		}
+
+		dd {
+			margin: 0;
+			font-size: 16px;
+			line-height: 1.6;
+			color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+			white-space: pre-wrap;
+			word-break: break-word;
+
+			a {
+				color: var(--wp--preset--color--blueberry-1, #3858e9);
+			}
+		}
+	}
+
+	// Submit error.
+	&__submit-error {
+		padding: 12px 16px;
+		margin-bottom: 16px;
+		background-color: #fcf0f1;
+		border: 1px solid #cc1818;
+		border-radius: 4px;
+		color: #cc1818;
+		font-size: 14px;
+		line-height: 1.5;
+	}
+
+	// Action buttons.
+	&__actions {
+		display: flex;
+		gap: 12px;
+		margin-top: 28px;
+		padding-top: 24px;
+		border-top: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+	}
+
+	&__btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 10px 24px;
+		border: 2px solid transparent;
+		border-radius: 4px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.5;
+		cursor: pointer;
+		min-height: 44px;
+		transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+		&--primary {
+			background-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			color: var(--wp--preset--color--white, #fff);
+			border-color: var(--wp--preset--color--blueberry-1, #3858e9);
+			margin-left: auto;
+
+			&:hover {
+				background-color: var(--wp--preset--color--deep-blueberry, #2145e6);
+				border-color: var(--wp--preset--color--deep-blueberry, #2145e6);
+			}
+
+			&:active {
+				background-color: var(--wp--preset--color--dark-blueberry, #183fc5);
+				border-color: var(--wp--preset--color--dark-blueberry, #183fc5);
+			}
+		}
+
+		&--secondary {
+			background-color: transparent;
+			color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+			border-color: var(--wp--preset--color--light-grey-1, #dcdcde);
+
+			&:hover {
+				border-color: var(--wp--preset--color--charcoal-4, #50575e);
+			}
+		}
+
+		&:disabled {
+			opacity: 0.7;
+			cursor: not-allowed;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white, #fff);
+		}
+	}
+
+	// Success message.
+	&__success {
+		text-align: center;
+		padding: 48px 24px;
+		background: #f0f6e8;
+		border-radius: 8px;
+		border: 1px solid #00a32a;
+
+		h2 {
+			margin: 0 0 16px;
+			font-size: 24px;
+			font-weight: 600;
+			color: #007017;
+		}
+
+		p {
+			margin: 0 0 12px;
+			font-size: 16px;
+			line-height: 1.6;
+			color: var(--wp--preset--color--charcoal-1, #1e1e1e);
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
+// Responsive: Stack step labels on small screens.
+@media (max-width: 600px) {
+	.wp-block-groups-application-form {
+		&__steps {
+			gap: 2px;
+		}
+
+		&__step-label {
+			font-size: 11px;
+		}
+
+		&__step-item::after {
+			left: calc(50% + 14px);
+			width: calc(100% - 28px);
+		}
+
+		&__title {
+			font-size: 22px;
+		}
+
+		&__actions {
+			flex-direction: column-reverse;
+		}
+
+		&__btn {
+			width: 100%;
+
+			&--primary {
+				margin-left: 0;
+			}
+		}
+	}
+}
