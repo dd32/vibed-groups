@@ -51,7 +51,7 @@ jobs:
           "
 
       - name: Install Composer dependencies
-        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups composer install --no-interaction
+        run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups composer require --dev phpunit/phpunit:"^9.6" yoast/phpunit-polyfills:"^2.0" --no-interaction
 
       - name: Run PHPUnit
         run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups vendor/bin/phpunit
