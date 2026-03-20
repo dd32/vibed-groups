@@ -55,7 +55,7 @@ $links = [
 		'url'   => $share_url,
 		'icon'  => $icon_link,
 		'class' => 'wp-block-groups-social-share__link--copy',
-		'extra' => ' data-share-url="' . esc_attr( get_the_permalink() ) . '" onclick="navigator.clipboard.writeText(this.dataset.shareUrl);this.querySelector(\'span\').textContent=\'' . esc_js( __( 'Copied!', 'wordpress-groups' ) ) . '\';return false;"',
+		'extra' => ' data-share-url="' . esc_attr( get_the_permalink() ) . '" role="button" onclick="navigator.clipboard.writeText(this.dataset.shareUrl);var s=this.querySelector(\'span\');s.textContent=\'' . esc_js( __( 'Copied!', 'wordpress-groups' ) ) . '\';this.setAttribute(\'aria-live\',\'polite\');setTimeout(function(){s.textContent=\'' . esc_js( __( 'Copy link', 'wordpress-groups' ) ) . '\';},2000);return false;"',
 	],
 ];
 ?>

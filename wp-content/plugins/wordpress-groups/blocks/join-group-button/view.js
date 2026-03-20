@@ -85,7 +85,7 @@ export function JoinGroupButton( { initialState, loginUrl } ) {
 
 	return createElement(
 		'div',
-		{ className: 'wp-block-groups-join-group-button__inner' },
+		{ className: 'wp-block-groups-join-group-button__inner', 'aria-live': 'polite' },
 		createElement(
 			'button',
 			{
