@@ -7,7 +7,15 @@
 	<h1 class="wp-block-heading has-heading-1-font-size">Events</h1>
 	<!-- /wp:heading -->
 
-	<!-- wp:search {"label":"Search events","placeholder":"Search events\u2026","query":{"post_type":"event"},"buttonText":"Search","buttonPosition":"button-inside","buttonUseIcon":true,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|60"}}},"className":"wp-block-groups-event-search"} /-->
+	<!-- wp:group {"layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap","verticalAlignment":"center"},"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|40"}}} -->
+	<div class="wp-block-group">
+		<!-- wp:search {"label":"Search events","placeholder":"Search events\u2026","query":{"post_type":"event"},"buttonText":"Search","buttonPosition":"button-inside","buttonUseIcon":true,"className":"wp-block-groups-event-search"} /-->
+
+		<!-- wp:paragraph {"fontSize":"small"} -->
+		<p class="has-small-font-size"><a href="?ical=1">Subscribe to Calendar (.ics)</a></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
 
 	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|50","margin":{"bottom":"var:preset|spacing|80"}}},"layout":{"type":"constrained","wideSize":"1280px","justifyContent":"left"}} -->
 	<div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--80)">
