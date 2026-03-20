@@ -10,6 +10,13 @@ if ( ! getenv( 'WP_MULTISITE' ) ) {
 	putenv( 'WP_MULTISITE=1' );
 }
 
+// Load PHPUnit Polyfills if available via Composer.
+$_polyfills_path = dirname( __DIR__, 2 ) . '/vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
+if ( file_exists( $_polyfills_path ) ) {
+	require_once $_polyfills_path;
+}
+unset( $_polyfills_path );
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
