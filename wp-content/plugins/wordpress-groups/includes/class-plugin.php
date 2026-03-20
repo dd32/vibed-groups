@@ -64,6 +64,7 @@ class Plugin {
 		Models\Recurrence_Generator::schedule_cron();
 		new Integrations\Slack_Notifier();
 		new Integrations\Official_Events_API();
+		new Integrations\WordPress_Org_Profile();
 		new Admin\Application_Tracker();
 		new Admin\Reports();
 		new Workflow\Organizer_Onboarding();
