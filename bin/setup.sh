@@ -50,6 +50,7 @@ npx wp-env run cli wp option update blogdescription "Melbourne WordPress Communi
 echo ""
 echo "🌱 Seeding Melbourne with sample data..."
 npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php --url="$MELBOURNE_URL" 2>/dev/null || true
+npx wp-env run cli wp rewrite flush --url="$MELBOURNE_URL" 2>/dev/null || true
 
 echo ""
 echo "🌏 Creating Tokyo sub-site..."
@@ -67,6 +68,11 @@ npx wp-env run cli wp option update blogdescription "Tokyo WordPress Community G
 echo ""
 echo "🌱 Seeding Tokyo with sample data..."
 npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data-tokyo.php --url="$TOKYO_URL" 2>/dev/null || true
+npx wp-env run cli wp rewrite flush --url="$TOKYO_URL" 2>/dev/null || true
+
+echo ""
+echo "🔄 Flushing rewrite rules..."
+npx wp-env run cli wp rewrite flush 2>/dev/null || true
 
 echo ""
 echo "✅ Setup complete!"
