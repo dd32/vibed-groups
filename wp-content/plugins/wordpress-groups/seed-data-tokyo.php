@@ -105,7 +105,7 @@ $events_data = [
 	],
 	[
 		'title'  => 'WordPress Translation Day',
-		'content' => "We contributed to translating WordPress core and plugins into Japanese.\n\n12 new strings translated!",
+		'content' => "We contributed to translating WordPress core and plugins into Japanese.\n\n12 new strings translated!\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Event Photos</h3>\n<!-- /wp:heading -->\n\n<!-- wp:gallery {\"linkTo\":\"none\",\"columns\":3,\"className\":\"groups-site-event-photo-gallery\"} -->\n<figure class=\"wp-block-gallery has-nested-images columns-3 is-cropped groups-site-event-photo-gallery\">\n<!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://picsum.photos/seed/tokyo-translate1/800/600\" alt=\"Translation sprint in progress\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://picsum.photos/seed/tokyo-translate2/800/600\" alt=\"Team celebrating completed translations\"/></figure>\n<!-- /wp:image -->\n</figure>\n<!-- /wp:gallery -->",
 		'offset' => '-14 days',
 		'time'   => '10:00:00',
 		'hours'  => 4,
@@ -162,6 +162,47 @@ foreach ( $event_ids as $eid ) {
 	}
 }
 echo "✓ $rsvp_count RSVPs.\n";
+
+// Discussion comments on the past event.
+$past_event_id = $event_ids[3] ?? 0;
+if ( $past_event_id ) {
+	$discussion_comments = [
+		[
+			'user'    => 'sakura',
+			'content' => 'This was such a productive day! I learned a lot about the translation workflow.',
+		],
+		[
+			'user'    => 'kenji',
+			'content' => 'Great work everyone. 12 strings is a solid contribution for one session!',
+		],
+		[
+			'user'    => 'yuki',
+			'content' => 'Thanks to all who participated. We will schedule another translation sprint next month.',
+		],
+	];
+
+	$dc_count = 0;
+	foreach ( $discussion_comments as $dc ) {
+		$uid  = $user_ids[ $dc['user'] ] ?? 0;
+		$user = $uid ? get_user_by( 'ID', $uid ) : null;
+		if ( ! $user ) {
+			continue;
+		}
+		$cid = wp_insert_comment( [
+			'comment_post_ID'      => $past_event_id,
+			'user_id'              => $uid,
+			'comment_author'       => $user->display_name,
+			'comment_author_email' => $user->user_email,
+			'comment_type'         => 'comment',
+			'comment_approved'     => 1,
+			'comment_content'      => $dc['content'],
+		] );
+		if ( $cid ) {
+			$dc_count++;
+		}
+	}
+	echo "✓ $dc_count discussion comments.\n";
+}
 
 // Pages.
 foreach ( [ 'events' => 'Events', 'members' => 'Members', 'about' => 'About' ] as $slug => $title ) {

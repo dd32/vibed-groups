@@ -141,7 +141,7 @@ $events = [
 	],
 	[
 		'title'   => 'WordPress 6.7 Release Party',
-		'content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came.",
+		'content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came.\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Event Photos</h3>\n<!-- /wp:heading -->\n\n<!-- wp:gallery {\"linkTo\":\"none\",\"columns\":3,\"className\":\"groups-site-event-photo-gallery\"} -->\n<figure class=\"wp-block-gallery has-nested-images columns-3 is-cropped groups-site-event-photo-gallery\">\n<!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://picsum.photos/seed/wp67-party1/800/600\" alt=\"Attendees gathering for the release party\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://picsum.photos/seed/wp67-party2/800/600\" alt=\"Lightning talk presentation\"/></figure>\n<!-- /wp:image -->\n\n<!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://picsum.photos/seed/wp67-party3/800/600\" alt=\"Group photo at the end of the event\"/></figure>\n<!-- /wp:image -->\n</figure>\n<!-- /wp:gallery -->",
 		'offset'  => '-7 days',
 		'time'    => '18:30:00',
 		'hours'   => 2,
@@ -217,6 +217,53 @@ foreach ( $event_ids as $event_id ) {
 	}
 }
 echo "✓ $rsvp_count RSVPs created.\n";
+
+// --- Discussion comments on the past event ---
+$past_event_id = $event_ids[3] ?? 0; // The release party (4th event).
+if ( $past_event_id ) {
+	$discussion_comments = [
+		[
+			'user'    => 'member1',
+			'content' => 'Great event! The lightning talks were really informative. Looking forward to the next one.',
+		],
+		[
+			'user'    => 'member2',
+			'content' => 'Thanks for organising this! The demo of the new block editor features was my favourite part.',
+		],
+		[
+			'user'    => 'organizer',
+			'content' => 'Thanks everyone for coming! We had a fantastic turnout. Slides from the talks will be posted soon.',
+		],
+		[
+			'user'    => 'member3',
+			'content' => 'Does anyone have a link to that theme customisation tool that was mentioned during the Q&A?',
+		],
+	];
+
+	$comment_count = 0;
+	foreach ( $discussion_comments as $dc ) {
+		$uid  = $user_ids[ $dc['user'] ] ?? 0;
+		$user = $uid ? get_user_by( 'ID', $uid ) : null;
+		if ( ! $user ) {
+			continue;
+		}
+
+		$cid = wp_insert_comment( [
+			'comment_post_ID'      => $past_event_id,
+			'user_id'              => $uid,
+			'comment_author'       => $user->display_name,
+			'comment_author_email' => $user->user_email,
+			'comment_type'         => 'comment',
+			'comment_approved'     => 1,
+			'comment_content'      => $dc['content'],
+		] );
+
+		if ( $cid ) {
+			$comment_count++;
+		}
+	}
+	echo "✓ $comment_count discussion comments created on past event.\n";
+}
 
 // --- Pages ---
 $pages = [
