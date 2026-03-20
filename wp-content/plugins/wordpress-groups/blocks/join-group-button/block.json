@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/join-group-button",
+	"version": "0.1.0",
+	"title": "Join Group Button",
+	"category": "widgets",
+	"description": "An interactive button that lets users join or leave the current group.",
+	"textdomain": "wordpress-groups",
+	"supports": {
+		"html": false,
+		"align": false
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,125 @@
+/**
+ * Join Group Button block styles.
+ *
+ * Follows WordPress.org design language with accessible focus styles.
+ */
+
+.wp-block-groups-join-group-button {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&__inner {
+		display: inline-flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	// Button base (also applies to <a> tags used as buttons for logged-out users).
+	&__btn {
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 10px 24px;
+		border: 2px solid transparent;
+		border-radius: 4px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.5;
+		cursor: pointer;
+		transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+		min-height: 44px; // WCAG 2.1 AA touch target.
+		min-width: 120px;
+		text-align: center;
+
+		// Not a member — primary action.
+		&--not-member {
+			background-color: var(--wp--preset--color--blueberry-1);
+			color: var(--wp--preset--color--white);
+			border-color: var(--wp--preset--color--blueberry-1);
+
+			&:hover {
+				background-color: var(--wp--preset--color--deep-blueberry);
+				border-color: var(--wp--preset--color--deep-blueberry);
+			}
+
+			&:active {
+				background-color: var(--wp--preset--color--dark-blueberry);
+				border-color: var(--wp--preset--color--dark-blueberry);
+			}
+		}
+
+		// Already a member — secondary/destructive action.
+		&--member {
+			background-color: transparent;
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
+
+			&:hover {
+				background-color: #cc1818;
+				color: var(--wp--preset--color--white);
+				border-color: #cc1818;
+			}
+
+			&:active {
+				background-color: #a31313;
+				color: var(--wp--preset--color--white);
+				border-color: #a31313;
+			}
+		}
+
+		// Not logged in.
+		&--not-logged-in {
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
+		}
+
+		// Loading state.
+		&--loading {
+			background-color: var(--wp--preset--color--light-grey-1);
+			color: var(--wp--preset--color--charcoal-4);
+			border-color: var(--wp--preset--color--light-grey-1);
+			cursor: wait;
+		}
+
+		// Disabled.
+		&:disabled {
+			opacity: 0.7;
+			cursor: not-allowed;
+		}
+
+		// Accessible focus styles.
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white);
+		}
+	}
+
+	// Loading spinner.
+	&__spinner {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		border: 2px solid currentColor;
+		border-right-color: transparent;
+		border-radius: 50%;
+		animation: groups-join-spin 0.75s linear infinite;
+	}
+
+	// Error message.
+	&__error {
+		color: #cc1818;
+		font-size: 14px;
+		margin: 4px 0 0;
+	}
+}
+
+@keyframes groups-join-spin {
+	to {
+		transform: rotate( 360deg );
+	}
+}
