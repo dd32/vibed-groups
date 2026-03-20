@@ -42,8 +42,8 @@ class Event_Controller extends WP_REST_Controller {
 	 * @var string[]
 	 */
 	const META_KEYS = [
-		'_event_start_date',
-		'_event_end_date',
+		'_event_start_utc',
+		'_event_end_utc',
 		'_event_timezone',
 		'_event_venue_id',
 		'_event_online_link',
@@ -363,7 +363,7 @@ class Event_Controller extends WP_REST_Controller {
 			'posts_per_page' => absint( $request->get_param( 'per_page' ) ) ?: 10,
 			'paged'          => absint( $request->get_param( 'page' ) ) ?: 1,
 			'orderby'        => 'meta_value',
-			'meta_key'       => '_event_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'       => '_event_start_utc', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'          => 'ASC',
 			'post_status'    => $this->get_allowed_statuses_for_request(),
 		];
@@ -391,7 +391,7 @@ class Event_Controller extends WP_REST_Controller {
 
 			if ( $after ) {
 				$meta_query[] = [
-					'key'     => '_event_start_date',
+					'key'     => '_event_start_utc',
 					'value'   => sanitize_text_field( $after ),
 					'compare' => '>=',
 					'type'    => 'DATETIME',
@@ -400,7 +400,7 @@ class Event_Controller extends WP_REST_Controller {
 
 			if ( $before ) {
 				$meta_query[] = [
-					'key'     => '_event_start_date',
+					'key'     => '_event_start_utc',
 					'value'   => sanitize_text_field( $before ),
 					'compare' => '<=',
 					'type'    => 'DATETIME',
@@ -605,7 +605,9 @@ class Event_Controller extends WP_REST_Controller {
 		foreach ( self::META_KEYS as $key ) {
 			$value = get_post_meta( $post->ID, $key, true );
 			// Strip the leading underscore and prefix for the public key name.
-			$public_key          = preg_replace( '/^_event_/', '', $key );
+			$public_key = preg_replace( '/^_event_/', '', $key );
+			// Keep stable API field names: _event_start_utc → start_date, _event_end_utc → end_date.
+			$public_key = str_replace( [ 'start_utc', 'end_utc' ], [ 'start_date', 'end_date' ], $public_key );
 			$meta[ $public_key ] = $this->escape_meta_value( $key, $value );
 		}
 
@@ -725,6 +727,12 @@ class Event_Controller extends WP_REST_Controller {
 			return;
 		}
 
+		// Map public field names to internal meta keys where they differ.
+		$field_to_meta = [
+			'start_date' => '_event_start_utc',
+			'end_date'   => '_event_end_utc',
+		];
+
 		$sanitizers = [
 			'start_date'       => 'sanitize_text_field',
 			'end_date'         => 'sanitize_text_field',
@@ -741,7 +749,7 @@ class Event_Controller extends WP_REST_Controller {
 
 		foreach ( $sanitizers as $field => $sanitizer ) {
 			if ( array_key_exists( $field, $meta ) ) {
-				$meta_key = '_event_' . $field;
+				$meta_key = $field_to_meta[ $field ] ?? ( '_event_' . $field );
 				$value    = call_user_func( $sanitizer, $meta[ $field ] );
 				update_post_meta( $post_id, $meta_key, $value );
 			}

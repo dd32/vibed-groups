@@ -413,11 +413,11 @@ class Directory_Controller extends WP_REST_Controller {
 			'paged'          => $page,
 			'post_status'    => [ 'event-scheduled', 'event-active' ],
 			'orderby'        => 'meta_value',
-			'meta_key'       => '_event_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'       => '_event_start_utc', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'order'          => 'ASC',
 			'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				[
-					'key'     => '_event_start_date',
+					'key'     => '_event_start_utc',
 					'value'   => $now,
 					'compare' => '>=',
 					'type'    => 'DATETIME',
@@ -514,8 +514,8 @@ class Directory_Controller extends WP_REST_Controller {
 			'id'         => (int) $post->ID,
 			'title'      => esc_html( $post->post_title ),
 			'status'     => esc_html( $post->post_status ),
-			'start_date' => sanitize_text_field( get_post_meta( $post->ID, '_event_start_date', true ) ),
-			'end_date'   => sanitize_text_field( get_post_meta( $post->ID, '_event_end_date', true ) ),
+			'start_date' => sanitize_text_field( get_post_meta( $post->ID, '_event_start_utc', true ) ),
+			'end_date'   => sanitize_text_field( get_post_meta( $post->ID, '_event_end_utc', true ) ),
 			'timezone'   => sanitize_text_field( get_post_meta( $post->ID, '_event_timezone', true ) ),
 			'excerpt'    => esc_html( $post->post_excerpt ),
 			'link'       => esc_url( get_permalink( $post ) ),

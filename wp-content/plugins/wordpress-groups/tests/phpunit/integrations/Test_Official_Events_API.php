@@ -76,8 +76,8 @@ class Test_Official_Events_API extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create( array_merge( $defaults, $args ) );
 
 		$meta_defaults = [
-			'_event_start_date' => '2026-06-15 18:00:00',
-			'_event_end_date'   => '2026-06-15 20:00:00',
+			'_event_start_utc' => '2026-06-15 18:00:00',
+			'_event_end_utc'   => '2026-06-15 20:00:00',
 		];
 
 		$meta = array_merge( $meta_defaults, $args['meta'] ?? [] );
@@ -140,8 +140,8 @@ class Test_Official_Events_API extends WP_UnitTestCase {
 			'post_title'   => 'Melbourne WordPress Meetup',
 			'post_content' => 'Monthly WordPress meetup in Melbourne.',
 			'meta'         => [
-				'_event_start_date' => '2026-07-01 08:00:00',
-				'_event_end_date'   => '2026-07-01 10:00:00',
+				'_event_start_utc' => '2026-07-01 08:00:00',
+				'_event_end_utc'   => '2026-07-01 10:00:00',
 				'_event_venue_id'   => $venue_id,
 			],
 		] );
@@ -230,8 +230,8 @@ class Test_Official_Events_API extends WP_UnitTestCase {
 			$this->create_event( [
 				'post_title' => "Event {$i}",
 				'meta'       => [
-					'_event_start_date' => sprintf( '2026-08-%02d 18:00:00', $i ),
-					'_event_end_date'   => sprintf( '2026-08-%02d 20:00:00', $i ),
+					'_event_start_utc' => sprintf( '2026-08-%02d 18:00:00', $i ),
+					'_event_end_utc'   => sprintf( '2026-08-%02d 20:00:00', $i ),
 				],
 			] );
 		}
@@ -272,11 +272,11 @@ class Test_Official_Events_API extends WP_UnitTestCase {
 	public function test_events_sorted_by_start_date(): void {
 		$this->create_event( [
 			'post_title' => 'Later Event',
-			'meta'       => [ '_event_start_date' => '2026-12-01 18:00:00' ],
+			'meta'       => [ '_event_start_utc' => '2026-12-01 18:00:00' ],
 		] );
 		$this->create_event( [
 			'post_title' => 'Earlier Event',
-			'meta'       => [ '_event_start_date' => '2026-06-01 18:00:00' ],
+			'meta'       => [ '_event_start_utc' => '2026-06-01 18:00:00' ],
 		] );
 
 		$request  = new WP_REST_Request( 'GET', '/groups/v1/integration/events-feed' );

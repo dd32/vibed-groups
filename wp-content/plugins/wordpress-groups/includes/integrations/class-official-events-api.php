@@ -174,7 +174,7 @@ class Official_Events_API extends WP_REST_Controller {
 				'post_type'      => Event::POST_TYPE,
 				'post_status'    => [ 'event-scheduled', 'event-active' ],
 				'posts_per_page' => -1,
-				'meta_key'       => '_event_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'       => '_event_start_utc', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'orderby'        => 'meta_value',
 				'order'          => 'ASC',
 			] );
@@ -208,8 +208,8 @@ class Official_Events_API extends WP_REST_Controller {
 					'group_name' => $group_name,
 					'group_url'  => $group_url,
 					'location'   => $location,
-					'start_date' => (string) get_post_meta( $post->ID, '_event_start_date', true ),
-					'end_date'   => (string) get_post_meta( $post->ID, '_event_end_date', true ),
+					'start_date' => (string) get_post_meta( $post->ID, '_event_start_utc', true ),
+					'end_date'   => (string) get_post_meta( $post->ID, '_event_end_utc', true ),
 					'permalink'  => get_permalink( $post ),
 				];
 			}

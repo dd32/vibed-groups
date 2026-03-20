@@ -464,6 +464,16 @@
 			"name": "single-venue",
 			"title": "Single Venue",
 			"postTypes": [ "venue" ]
+		},
+		{
+			"name": "page-members",
+			"title": "Members Page",
+			"postTypes": [ "page" ]
+		},
+		{
+			"name": "page-dashboard",
+			"title": "Organizer Dashboard Page",
+			"postTypes": [ "page" ]
 		}
 	]
 }
