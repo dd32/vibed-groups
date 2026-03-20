@@ -124,7 +124,7 @@ $cards = [
 	[
 		'key'   => 'next-event',
 		'icon'  => 'clock',
-		'value' => $next_event_display ? $next_event_display : '&mdash;',
+		'value' => $next_event_display ? $next_event_display : "\u{2014}",
 		'label' => __( 'Next Event', 'wordpress-groups' ),
 	],
 ];

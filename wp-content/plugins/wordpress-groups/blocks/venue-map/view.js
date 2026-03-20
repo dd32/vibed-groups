@@ -25,8 +25,13 @@ function initMap( container ) {
 
 	container.dataset.initialized = 'true';
 
-	// Remove the role="img" once the interactive map is loaded.
-	container.removeAttribute( 'role' );
+	// Replace the static role="img" with an interactive application role.
+	container.setAttribute( 'role', 'application' );
+	container.setAttribute(
+		'aria-label',
+		container.getAttribute( 'aria-label' ) ||
+			( name ? 'Interactive map showing location of ' + name : 'Interactive venue map' )
+	);
 
 	const map = window.L.map( container, {
 		scrollWheelZoom: false,

@@ -6,7 +6,7 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
-import { createElement, createRoot, useState, useCallback, useRef } from '@wordpress/element';
+import { createElement, createRoot, useState, useCallback, useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -416,6 +416,19 @@ function ApplicationForm() {
 	const [ submitError, setSubmitError ] = useState( '' );
 	const [ isSubmitted, setIsSubmitted ] = useState( false );
 	const formRef = useRef( null );
+
+	/**
+	 * Focus the step heading (legend) when the step changes, for screen readers.
+	 */
+	useEffect( () => {
+		if ( formRef.current ) {
+			const legend = formRef.current.querySelector( 'legend' );
+			if ( legend ) {
+				legend.setAttribute( 'tabindex', '-1' );
+				legend.focus();
+			}
+		}
+	}, [ step ] );
 
 	/**
 	 * Update a single form field value and clear its error.
