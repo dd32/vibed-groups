@@ -29,6 +29,7 @@ $waitlist_count  = 0;
 $attending_comments = get_comments(
 	[
 		'post_id'    => $event_id,
+		'type'       => 'groups_rsvp',
 		'status'     => 'approve',
 		'meta_key'   => '_rsvp_status',
 		'meta_value' => 'attending',
@@ -40,6 +41,7 @@ $attending_count = absint( $attending_comments );
 $waitlist_comments = get_comments(
 	[
 		'post_id'    => $event_id,
+		'type'       => 'groups_rsvp',
 		'status'     => 'approve',
 		'meta_key'   => '_rsvp_status',
 		'meta_value' => 'waitlisted',
@@ -54,6 +56,7 @@ if ( $is_logged_in ) {
 		[
 			'post_id' => $event_id,
 			'user_id' => $current_user->ID,
+			'type'    => 'groups_rsvp',
 			'status'  => 'approve',
 			'number'  => 1,
 		]
