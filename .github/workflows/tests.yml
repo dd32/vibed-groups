@@ -55,3 +55,28 @@ jobs:
 
       - name: Run PHPUnit
         run: npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups vendor/bin/phpunit
+
+  e2e:
+    name: E2E Smoke Tests
+    runs-on: ubuntu-latest
+    needs: phpunit
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Start wp-env
+        run: npx wp-env start
+
+      - name: Run setup
+        run: bash bin/setup.sh
+
+      - name: Run E2E smoke tests
+        run: bash bin/e2e-smoke-tests.sh
