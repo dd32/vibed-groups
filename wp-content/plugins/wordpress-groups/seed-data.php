@@ -1,11 +1,10 @@
 <?php
 /**
- * Seed data for local development.
+ * Seed data for a group sub-site in local development.
  *
- * Run via: npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php
+ * Run via: npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php --url=http://localhost:8888/melbourne/
  *
- * Creates sample groups, events, venues, RSVPs, and users
- * so the local environment has data to display.
+ * Idempotent — safe to run multiple times.
  *
  * @package Groups
  */
@@ -14,62 +13,67 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo "Seeding WordPress Groups development data...\n";
-
-// Ensure plugin is loaded.
-if ( ! class_exists( 'Groups\Plugin' ) ) {
-	echo "Error: WordPress Groups plugin not active.\n";
-	exit( 1 );
+// Skip if already seeded.
+$existing_events = get_posts( [
+	'post_type'   => 'event',
+	'post_status' => 'any',
+	'numberposts' => 1,
+] );
+if ( ! empty( $existing_events ) ) {
+	echo "Already seeded — skipping.\n";
+	return;
 }
 
-// Create custom tables.
+echo "Seeding group site data...\n";
+
+// Ensure custom tables exist.
 if ( class_exists( 'Groups\Database\Schema' ) ) {
 	\Groups\Database\Schema::create_tables();
-	echo "✓ Custom tables created.\n";
 }
 
-// Register CPTs and roles.
-do_action( 'init' );
+$blog_id = get_current_blog_id();
 
-// Create test users.
-$organizer_id = wp_create_user( 'organizer', 'password', 'organizer@example.com' );
-if ( is_wp_error( $organizer_id ) ) {
-	$organizer = get_user_by( 'login', 'organizer' );
-	$organizer_id = $organizer->ID;
+// --- Users ---
+$users = [
+	'organizer' => [ 'Jane', 'Organizer', 'organizer@example.com', 'organizer' ],
+	'member1'   => [ 'Alex', 'Member', 'member1@example.com', 'member' ],
+	'member2'   => [ 'Sam', 'Contributor', 'member2@example.com', 'member' ],
+	'member3'   => [ 'Taylor', 'Developer', 'member3@example.com', 'member' ],
+];
+
+$user_ids = [];
+foreach ( $users as $login => $info ) {
+	$user_id = username_exists( $login );
+	if ( ! $user_id ) {
+		$user_id = wp_create_user( $login, 'password', $info[2] );
+	}
+	if ( ! is_wp_error( $user_id ) ) {
+		wp_update_user( [
+			'ID'           => $user_id,
+			'display_name' => $info[0] . ' ' . $info[1],
+			'first_name'   => $info[0],
+			'last_name'    => $info[1],
+		] );
+		// Add to this site with the correct role.
+		if ( ! is_user_member_of_blog( $user_id, $blog_id ) ) {
+			add_user_to_blog( $blog_id, $user_id, $info[3] );
+		}
+		$user_ids[ $login ] = $user_id;
+	}
 }
-wp_update_user( [ 'ID' => $organizer_id, 'display_name' => 'Jane Organizer', 'first_name' => 'Jane', 'last_name' => 'Organizer' ] );
+echo "✓ " . count( $user_ids ) . " users created/updated.\n";
 
-$member1_id = wp_create_user( 'member1', 'password', 'member1@example.com' );
-if ( is_wp_error( $member1_id ) ) {
-	$member1 = get_user_by( 'login', 'member1' );
-	$member1_id = $member1->ID;
-}
-wp_update_user( [ 'ID' => $member1_id, 'display_name' => 'Alex Member' ] );
+$organizer_id = $user_ids['organizer'] ?? 1;
 
-$member2_id = wp_create_user( 'member2', 'password', 'member2@example.com' );
-if ( is_wp_error( $member2_id ) ) {
-	$member2 = get_user_by( 'login', 'member2' );
-	$member2_id = $member2->ID;
-}
-wp_update_user( [ 'ID' => $member2_id, 'display_name' => 'Sam Contributor' ] );
-
-$member3_id = wp_create_user( 'member3', 'password', 'member3@example.com' );
-if ( is_wp_error( $member3_id ) ) {
-	$member3 = get_user_by( 'login', 'member3' );
-	$member3_id = $member3->ID;
-}
-wp_update_user( [ 'ID' => $member3_id, 'display_name' => 'Taylor Developer' ] );
-
-echo "✓ Test users created.\n";
-
-// Create venues.
+// --- Venues ---
 $venue1_id = wp_insert_post( [
 	'post_type'   => 'venue',
 	'post_title'  => 'Community Hub Coworking',
 	'post_status' => 'publish',
-	'post_content' => 'A modern coworking space in the heart of the city with great facilities for meetups.',
+	'post_author' => $organizer_id,
+	'post_content' => 'A modern coworking space with great facilities for meetups.',
 ] );
-if ( ! is_wp_error( $venue1_id ) ) {
+if ( $venue1_id && ! is_wp_error( $venue1_id ) ) {
 	update_post_meta( $venue1_id, '_venue_address', '123 Main Street' );
 	update_post_meta( $venue1_id, '_venue_city', 'Melbourne' );
 	update_post_meta( $venue1_id, '_venue_state', 'VIC' );
@@ -79,16 +83,16 @@ if ( ! is_wp_error( $venue1_id ) ) {
 	update_post_meta( $venue1_id, '_venue_longitude', 144.9631 );
 	update_post_meta( $venue1_id, '_venue_capacity', 50 );
 	update_post_meta( $venue1_id, '_venue_accessibility_notes', 'Wheelchair accessible. Elevator available.' );
-	update_post_meta( $venue1_id, '_venue_website', 'https://example.com/community-hub' );
 }
 
 $venue2_id = wp_insert_post( [
 	'post_type'   => 'venue',
 	'post_title'  => 'City Library Meeting Room',
 	'post_status' => 'publish',
+	'post_author' => $organizer_id,
 	'post_content' => 'Free meeting room at the public library. Projector and whiteboard available.',
 ] );
-if ( ! is_wp_error( $venue2_id ) ) {
+if ( $venue2_id && ! is_wp_error( $venue2_id ) ) {
 	update_post_meta( $venue2_id, '_venue_address', '456 Library Lane' );
 	update_post_meta( $venue2_id, '_venue_city', 'Melbourne' );
 	update_post_meta( $venue2_id, '_venue_state', 'VIC' );
@@ -98,257 +102,158 @@ if ( ! is_wp_error( $venue2_id ) ) {
 	update_post_meta( $venue2_id, '_venue_longitude', 144.9650 );
 	update_post_meta( $venue2_id, '_venue_capacity', 30 );
 }
+echo "✓ 2 venues created.\n";
 
-echo "✓ Venues created.\n";
-
-// Create events.
+// --- Events ---
 $now = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 
-// Upcoming event 1: next week.
-$next_week = clone $now;
-$next_week->modify( '+7 days' )->setTime( 18, 0, 0 );
-$next_week_end = clone $next_week;
-$next_week_end->modify( '+2 hours' );
-
-$event1_id = wp_insert_post( [
-	'post_type'    => 'event',
-	'post_title'   => 'Introduction to Block Themes',
-	'post_status'  => 'event-scheduled',
-	'post_content' => "Join us for an evening exploring WordPress block themes! We'll cover:\n\n- What are block themes and how they differ from classic themes\n- Creating your first block theme\n- Using theme.json for design tokens\n- Building custom templates and template parts\n\nAll skill levels welcome. Bring your laptop!",
-	'post_author'  => $organizer_id,
-] );
-if ( ! is_wp_error( $event1_id ) ) {
-	update_post_meta( $event1_id, '_event_start_utc', $next_week->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event1_id, '_event_end_utc', $next_week_end->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event1_id, '_event_timezone', 'Australia/Melbourne' );
-	update_post_meta( $event1_id, '_event_venue_id', $venue1_id );
-	update_post_meta( $event1_id, '_event_attendee_limit', 30 );
-	update_post_meta( $event1_id, '_event_waitlist_enabled', 1 );
-
-	// Add categories.
-	wp_set_post_terms( $event1_id, [ 'Workshop', 'In-person' ], 'category' );
-}
-
-// Upcoming event 2: two weeks.
-$two_weeks = clone $now;
-$two_weeks->modify( '+14 days' )->setTime( 19, 0, 0 );
-$two_weeks_end = clone $two_weeks;
-$two_weeks_end->modify( '+1 hour 30 minutes' );
-
-$event2_id = wp_insert_post( [
-	'post_type'    => 'event',
-	'post_title'   => 'WordPress Performance Optimization',
-	'post_status'  => 'event-scheduled',
-	'post_content' => "Let's dive into making WordPress sites faster!\n\n- Caching strategies (object cache, page cache, transients)\n- Database optimization\n- Image optimization and lazy loading\n- Core Web Vitals and how to measure them\n\nPresenter: Jane Organizer",
-	'post_author'  => $organizer_id,
-] );
-if ( ! is_wp_error( $event2_id ) ) {
-	update_post_meta( $event2_id, '_event_start_utc', $two_weeks->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event2_id, '_event_end_utc', $two_weeks_end->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event2_id, '_event_timezone', 'Australia/Melbourne' );
-	update_post_meta( $event2_id, '_event_venue_id', $venue2_id );
-	update_post_meta( $event2_id, '_event_attendee_limit', 25 );
-	wp_set_post_terms( $event2_id, [ 'Presentation', 'In-person' ], 'category' );
-}
-
-// Online event: three weeks.
-$three_weeks = clone $now;
-$three_weeks->modify( '+21 days' )->setTime( 12, 0, 0 );
-$three_weeks_end = clone $three_weeks;
-$three_weeks_end->modify( '+1 hour' );
-
-$event3_id = wp_insert_post( [
-	'post_type'    => 'event',
-	'post_title'   => 'Contributor Day: Documentation Sprint',
-	'post_status'  => 'event-scheduled',
-	'post_content' => "Join our online contributor day focused on improving WordPress documentation.\n\nNo prior experience needed — we'll pair newcomers with experienced contributors.\n\nMeet link will be shared before the event.",
-	'post_author'  => $organizer_id,
-] );
-if ( ! is_wp_error( $event3_id ) ) {
-	update_post_meta( $event3_id, '_event_start_utc', $three_weeks->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event3_id, '_event_end_utc', $three_weeks_end->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event3_id, '_event_timezone', 'Australia/Melbourne' );
-	update_post_meta( $event3_id, '_event_online_link', 'https://meet.example.com/wp-docs' );
-	wp_set_post_terms( $event3_id, [ 'Social', 'Online' ], 'category' );
-}
-
-// Past event.
-$last_week = clone $now;
-$last_week->modify( '-7 days' )->setTime( 18, 30, 0 );
-$last_week_end = clone $last_week;
-$last_week_end->modify( '+2 hours' );
-
-$event4_id = wp_insert_post( [
-	'post_type'    => 'event',
-	'post_title'   => 'WordPress 6.7 Release Party',
-	'post_status'  => 'event-past',
-	'post_content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came — great turnout!",
-	'post_author'  => $organizer_id,
-] );
-if ( ! is_wp_error( $event4_id ) ) {
-	update_post_meta( $event4_id, '_event_start_utc', $last_week->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event4_id, '_event_end_utc', $last_week_end->format( 'Y-m-d H:i:s' ) );
-	update_post_meta( $event4_id, '_event_timezone', 'Australia/Melbourne' );
-	update_post_meta( $event4_id, '_event_venue_id', $venue1_id );
-	wp_set_post_terms( $event4_id, [ 'Social', 'In-person' ], 'category' );
-}
-
-echo "✓ Events created.\n";
-
-// Assign placeholder featured images to events.
-// Generate simple colored PNG placeholder images for each event.
-$event_colors = [
-	$event1_id => [ 'label' => 'Block Themes',    'bg' => '#3858e9', 'fg' => '#ffffff' ],
-	$event2_id => [ 'label' => 'Performance',      'bg' => '#e26f56', 'fg' => '#ffffff' ],
-	$event3_id => [ 'label' => 'Contributor Day',   'bg' => '#33f078', 'fg' => '#1a1919' ],
-	$event4_id => [ 'label' => 'Release Party',     'bg' => '#fff972', 'fg' => '#1a1919' ],
+$events = [
+	[
+		'title'   => 'Introduction to Block Themes',
+		'content' => "Join us for an evening exploring WordPress block themes!\n\n- What are block themes\n- Creating your first block theme\n- Using theme.json for design tokens\n- Building custom templates\n\nAll skill levels welcome. Bring your laptop!",
+		'offset'  => '+7 days',
+		'time'    => '18:00:00',
+		'hours'   => 2,
+		'venue'   => $venue1_id,
+		'status'  => 'event-scheduled',
+		'limit'   => 30,
+	],
+	[
+		'title'   => 'WordPress Performance Optimization',
+		'content' => "Let's dive into making WordPress sites faster!\n\n- Caching strategies\n- Database optimization\n- Image optimization\n- Core Web Vitals",
+		'offset'  => '+14 days',
+		'time'    => '19:00:00',
+		'hours'   => 1.5,
+		'venue'   => $venue2_id,
+		'status'  => 'event-scheduled',
+		'limit'   => 25,
+	],
+	[
+		'title'   => 'Contributor Day: Documentation Sprint',
+		'content' => "Join our online contributor day focused on WordPress documentation.\n\nNo prior experience needed — we'll pair newcomers with experienced contributors.",
+		'offset'  => '+21 days',
+		'time'    => '12:00:00',
+		'hours'   => 1,
+		'venue'   => 0,
+		'status'  => 'event-scheduled',
+		'limit'   => 0,
+		'online'  => 'https://meet.example.com/wp-docs',
+	],
+	[
+		'title'   => 'WordPress 6.7 Release Party',
+		'content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came.",
+		'offset'  => '-7 days',
+		'time'    => '18:30:00',
+		'hours'   => 2,
+		'venue'   => $venue1_id,
+		'status'  => 'event-past',
+		'limit'   => 0,
+	],
 ];
 
-$upload_dir = wp_upload_dir();
+$event_ids = [];
+foreach ( $events as $event_data ) {
+	$start = clone $now;
+	$start->modify( $event_data['offset'] );
+	$time_parts = explode( ':', $event_data['time'] );
+	$start->setTime( (int) $time_parts[0], (int) $time_parts[1], 0 );
 
-foreach ( $event_colors as $eid => $meta ) {
-	if ( is_wp_error( $eid ) || ! $eid ) {
-		continue;
-	}
+	$end = clone $start;
+	$end->modify( '+' . ( $event_data['hours'] * 60 ) . ' minutes' );
 
-	// Skip if a featured image is already set.
-	if ( get_post_thumbnail_id( $eid ) ) {
-		continue;
-	}
+	$event_id = wp_insert_post( [
+		'post_type'    => 'event',
+		'post_title'   => $event_data['title'],
+		'post_status'  => $event_data['status'],
+		'post_content' => $event_data['content'],
+		'post_author'  => $organizer_id,
+	] );
 
-	// Create a simple 1200x400 placeholder PNG with GD.
-	if ( ! function_exists( 'imagecreatetruecolor' ) ) {
-		echo "⚠ GD library not available; skipping placeholder images.\n";
-		break;
-	}
+	if ( $event_id && ! is_wp_error( $event_id ) ) {
+		update_post_meta( $event_id, '_event_start_utc', $start->format( 'Y-m-d H:i:s' ) );
+		update_post_meta( $event_id, '_event_end_utc', $end->format( 'Y-m-d H:i:s' ) );
+		update_post_meta( $event_id, '_event_timezone', 'Australia/Melbourne' );
 
-	$img = imagecreatetruecolor( 1200, 400 );
-	list( $r, $g, $b ) = sscanf( $meta['bg'], '#%02x%02x%02x' );
-	$bg_color = imagecolorallocate( $img, $r, $g, $b );
-	imagefill( $img, 0, 0, $bg_color );
+		if ( ! empty( $event_data['venue'] ) ) {
+			update_post_meta( $event_id, '_event_venue_id', $event_data['venue'] );
+		}
+		if ( ! empty( $event_data['online'] ) ) {
+			update_post_meta( $event_id, '_event_online_link', $event_data['online'] );
+		}
+		if ( ! empty( $event_data['limit'] ) ) {
+			update_post_meta( $event_id, '_event_attendee_limit', $event_data['limit'] );
+			update_post_meta( $event_id, '_event_waitlist_enabled', 1 );
+		}
 
-	// Add text label.
-	list( $fr, $fg_val, $fb ) = sscanf( $meta['fg'], '#%02x%02x%02x' );
-	$text_color = imagecolorallocate( $img, $fr, $fg_val, $fb );
-	$text       = $meta['label'];
-	imagestring( $img, 5, 560, 190, $text, $text_color );
-
-	$filename = 'event-placeholder-' . $eid . '.png';
-	$filepath = $upload_dir['path'] . '/' . $filename;
-
-	imagepng( $img, $filepath );
-	imagedestroy( $img );
-
-	// Insert as attachment.
-	$attachment_id = wp_insert_attachment(
-		[
-			'post_mime_type' => 'image/png',
-			'post_title'     => 'Event placeholder: ' . $meta['label'],
-			'post_status'    => 'inherit',
-		],
-		$filepath,
-		$eid
-	);
-
-	if ( ! is_wp_error( $attachment_id ) ) {
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$attach_data = wp_generate_attachment_metadata( $attachment_id, $filepath );
-		wp_update_attachment_metadata( $attachment_id, $attach_data );
-		set_post_thumbnail( $eid, $attachment_id );
+		$event_ids[] = $event_id;
 	}
 }
+echo "✓ " . count( $event_ids ) . " events created.\n";
 
-echo "✓ Event featured images set.\n";
-
-// Create RSVPs (as comments).
-$rsvp_events = [ $event1_id, $event2_id, $event3_id ];
-$rsvp_users  = [ $organizer_id, $member1_id, $member2_id, $member3_id ];
-
-foreach ( $rsvp_events as $event_id ) {
-	foreach ( $rsvp_users as $user_id ) {
+// --- RSVPs (as comments) ---
+$rsvp_count = 0;
+foreach ( $event_ids as $event_id ) {
+	foreach ( $user_ids as $login => $user_id ) {
 		$user = get_user_by( 'ID', $user_id );
 		if ( ! $user ) {
 			continue;
 		}
 
 		$comment_id = wp_insert_comment( [
-			'comment_post_ID'  => $event_id,
-			'user_id'          => $user_id,
-			'comment_author'   => $user->display_name,
+			'comment_post_ID'      => $event_id,
+			'user_id'              => $user_id,
+			'comment_author'       => $user->display_name,
 			'comment_author_email' => $user->user_email,
-			'comment_type'     => 'groups_rsvp',
-			'comment_approved' => 1,
-			'comment_content'  => '',
+			'comment_type'         => 'groups_rsvp',
+			'comment_approved'     => 1,
+			'comment_content'      => '',
 		] );
 
 		if ( $comment_id ) {
 			update_comment_meta( $comment_id, '_rsvp_status', 'attending' );
 			update_comment_meta( $comment_id, '_rsvp_guest_count', 0 );
-
-			// Mark first member as newcomer on first event.
-			if ( $user_id === $member3_id && $event_id === $event1_id ) {
-				update_comment_meta( $comment_id, '_rsvp_is_first_event', 1 );
-			}
+			$rsvp_count++;
 		}
 	}
 }
+echo "✓ $rsvp_count RSVPs created.\n";
 
-// Past event: mark attendance.
-foreach ( $rsvp_users as $user_id ) {
-	$user = get_user_by( 'ID', $user_id );
-	if ( ! $user ) {
-		continue;
-	}
+// --- Pages ---
+$pages = [
+	'events'  => [
+		'title'   => 'Events',
+		'content' => '<!-- wp:groups/upcoming-events /-->',
+	],
+	'members' => [
+		'title'   => 'Members',
+		'content' => '<!-- wp:groups/group-members /-->',
+	],
+	'about'   => [
+		'title'   => 'About',
+		'content' => "<!-- wp:heading -->\n<h2>About WordPress Melbourne</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>We're a friendly community of WordPress enthusiasts in Melbourne, Australia. We meet regularly to learn, share, and connect.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Whether you're a developer, designer, content creator, or just getting started with WordPress — you're welcome here!</p>\n<!-- /wp:paragraph -->",
+	],
+];
 
-	$comment_id = wp_insert_comment( [
-		'comment_post_ID'  => $event4_id,
-		'user_id'          => $user_id,
-		'comment_author'   => $user->display_name,
-		'comment_author_email' => $user->user_email,
-		'comment_type'     => 'groups_rsvp',
-		'comment_approved' => 1,
-	] );
-
-	if ( $comment_id ) {
-		update_comment_meta( $comment_id, '_rsvp_status', 'attending' );
-		update_comment_meta( $comment_id, '_rsvp_attendance_confirmed', 1 );
+foreach ( $pages as $slug => $page_data ) {
+	$existing = get_page_by_path( $slug );
+	if ( ! $existing ) {
+		wp_insert_post( [
+			'post_type'    => 'page',
+			'post_title'   => $page_data['title'],
+			'post_status'  => 'publish',
+			'post_name'    => $slug,
+			'post_content' => $page_data['content'],
+			'post_author'  => $organizer_id,
+		] );
 	}
 }
+echo "✓ Pages created (events, members, about).\n";
 
-echo "✓ RSVPs created.\n";
-
-// Set up the front page.
-$front_page = wp_insert_post( [
-	'post_type'    => 'page',
-	'post_title'   => 'Home',
-	'post_status'  => 'publish',
-	'post_content' => '<!-- wp:groups/upcoming-events /-->',
-] );
-update_option( 'show_on_front', 'page' );
-update_option( 'page_on_front', $front_page );
-
-echo "✓ Front page configured.\n";
-
-// Add members page.
-wp_insert_post( [
-	'post_type'    => 'page',
-	'post_title'   => 'Members',
-	'post_status'  => 'publish',
-	'post_name'    => 'members',
-	'post_content' => '<!-- wp:groups/group-members /-->',
-] );
-
-echo "✓ Members page created.\n";
-
-// Set site title.
-update_option( 'blogname', 'WordPress Melbourne' );
-update_option( 'blogdescription', 'Melbourne WordPress Community Group' );
+// Set front page to show events.
+$front = get_page_by_path( 'events' );
+if ( $front ) {
+	update_option( 'show_on_front', 'page' );
+	update_option( 'page_on_front', $front->ID );
+}
 
 echo "\n✅ Seed data complete!\n";
-echo "  - 4 users (organizer + 3 members)\n";
-echo "  - 2 venues\n";
-echo "  - 4 events (3 upcoming, 1 past)\n";
-echo "  - RSVPs for all events\n";
-echo "  - Featured images on events\n";
-echo "  - Front page and Members page configured\n";
-echo "\nLogin: admin / password (or organizer / password)\n";
