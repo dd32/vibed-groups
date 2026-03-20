@@ -318,6 +318,7 @@ class Test_Email_Templates extends WP_UnitTestCase {
 			'event-reminder',
 			'group-announcement',
 			'rsvp-confirmation',
+			'rsvp-promotion',
 			'welcome-organizer',
 		];
 

@@ -65,6 +65,7 @@ class Plugin {
 		new Integrations\Slack_Notifier();
 		new Integrations\Official_Events_API();
 		new Admin\Application_Tracker();
+		new Notifications\Rsvp_Notifications();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
