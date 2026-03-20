@@ -10,6 +10,7 @@
 
 namespace Groups\REST;
 
+use Groups\Cache;
 use Groups\Models\Location_Query;
 use Groups\Post_Types\Event;
 use WP_Error;
@@ -204,6 +205,26 @@ class Directory_Controller extends WP_REST_Controller {
 			return $this->get_items_by_location( $request, (float) $lat, (float) $lon, (float) $radius );
 		}
 
+		// Build a cache key from the request parameters.
+		$cache_params = [
+			'per_page' => $per_page,
+			'page'     => $page,
+			'search'   => $request->get_param( 'search' ) ?? '',
+			'status'   => $request->get_param( 'status' ) ?? '',
+			'country'  => $request->get_param( 'country' ) ?? '',
+			'admin'    => is_user_logged_in() && is_super_admin() ? '1' : '0',
+		];
+		$cache_key    = 'directory_list_' . md5( wp_json_encode( $cache_params ) );
+
+		$cached = Cache::get( $cache_key, Cache::GROUP_DIRECTORY );
+		if ( false !== $cached ) {
+			$response = new WP_REST_Response( $cached['groups'], 200 );
+			$response->header( 'X-WP-Total', $cached['total'] );
+			$response->header( 'X-WP-TotalPages', $cached['total_pages'] );
+
+			return $response;
+		}
+
 		$main_site_id = get_main_site_id();
 		switch_to_blog( $main_site_id );
 
@@ -250,9 +271,23 @@ class Directory_Controller extends WP_REST_Controller {
 
 		restore_current_blog();
 
+		$total       = (int) $query->found_posts;
+		$total_pages = (int) $query->max_num_pages;
+
+		// Cache the result for 5 minutes.
+		Cache::set(
+			$cache_key,
+			[
+				'groups'      => $groups,
+				'total'       => $total,
+				'total_pages' => $total_pages,
+			],
+			Cache::GROUP_DIRECTORY
+		);
+
 		$response = new WP_REST_Response( $groups, 200 );
-		$response->header( 'X-WP-Total', (int) $query->found_posts );
-		$response->header( 'X-WP-TotalPages', (int) $query->max_num_pages );
+		$response->header( 'X-WP-Total', $total );
+		$response->header( 'X-WP-TotalPages', $total_pages );
 
 		return $response;
 	}
@@ -356,6 +391,18 @@ class Directory_Controller extends WP_REST_Controller {
 			);
 		}
 
+		// Check the per-site event cache.
+		$cache_key = 'upcoming_events_' . $blog_id . '_' . $per_page . '_' . $page;
+		$cached    = Cache::get( $cache_key, Cache::GROUP_EVENTS );
+
+		if ( false !== $cached ) {
+			$response = new WP_REST_Response( $cached['events'], 200 );
+			$response->header( 'X-WP-Total', $cached['total'] );
+			$response->header( 'X-WP-TotalPages', $cached['total_pages'] );
+
+			return $response;
+		}
+
 		switch_to_blog( $blog_id );
 
 		$now = current_time( 'mysql', true );
@@ -387,9 +434,23 @@ class Directory_Controller extends WP_REST_Controller {
 
 		restore_current_blog();
 
+		$total       = (int) $query->found_posts;
+		$total_pages = (int) $query->max_num_pages;
+
+		// Cache for 5 minutes.
+		Cache::set(
+			$cache_key,
+			[
+				'events'      => $events,
+				'total'       => $total,
+				'total_pages' => $total_pages,
+			],
+			Cache::GROUP_EVENTS
+		);
+
 		$response = new WP_REST_Response( $events, 200 );
-		$response->header( 'X-WP-Total', (int) $query->found_posts );
-		$response->header( 'X-WP-TotalPages', (int) $query->max_num_pages );
+		$response->header( 'X-WP-Total', $total );
+		$response->header( 'X-WP-TotalPages', $total_pages );
 
 		return $response;
 	}
