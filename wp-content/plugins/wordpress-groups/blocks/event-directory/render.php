@@ -23,11 +23,11 @@ $query_args = [
 	'posts_per_page' => $per_page,
 	'post_status'    => [ 'event-scheduled', 'event-active', 'publish' ],
 	'orderby'        => 'meta_value',
-	'meta_key'       => '_event_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+	'meta_key'       => '_event_start_utc', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 	'order'          => 'ASC',
 	'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		[
-			'key'     => '_event_start_date',
+			'key'     => '_event_start_utc',
 			'value'   => gmdate( 'Y-m-d H:i:s' ),
 			'compare' => '>=',
 			'type'    => 'DATETIME',
@@ -77,7 +77,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 						<?php $events_query->the_post(); ?>
 						<?php
 						$event_id   = get_the_ID();
-						$start_date = get_post_meta( $event_id, '_event_start_date', true );
+						$start_date = get_post_meta( $event_id, '_event_start_utc', true );
 						$timezone   = get_post_meta( $event_id, '_event_timezone', true );
 						$venue_id   = (int) get_post_meta( $event_id, '_event_venue_id', true );
 						$online     = get_post_meta( $event_id, '_event_online_link', true );

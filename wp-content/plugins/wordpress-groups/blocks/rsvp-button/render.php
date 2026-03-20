@@ -30,7 +30,7 @@ $attending_comments = get_comments(
 	[
 		'post_id'    => $event_id,
 		'status'     => 'approve',
-		'meta_key'   => 'rsvp_status',
+		'meta_key'   => '_rsvp_status',
 		'meta_value' => 'attending',
 		'count'      => true,
 	]
@@ -41,7 +41,7 @@ $waitlist_comments = get_comments(
 	[
 		'post_id'    => $event_id,
 		'status'     => 'approve',
-		'meta_key'   => 'rsvp_status',
+		'meta_key'   => '_rsvp_status',
 		'meta_value' => 'waitlisted',
 		'count'      => true,
 	]
@@ -60,7 +60,7 @@ if ( $is_logged_in ) {
 	);
 
 	if ( ! empty( $user_rsvp ) ) {
-		$user_status = get_comment_meta( $user_rsvp[0]->comment_ID, 'rsvp_status', true );
+		$user_status = get_comment_meta( $user_rsvp[0]->comment_ID, '_rsvp_status', true );
 	}
 }
 

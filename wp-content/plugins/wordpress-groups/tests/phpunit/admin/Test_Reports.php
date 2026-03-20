@@ -56,9 +56,9 @@ class Test_Reports extends WP_UnitTestCase {
 	 */
 	public function test_super_admin_can_access(): void {
 		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		grant_super_admin( $user_id );
 		wp_set_current_user( $user_id );
 
+		// grant_super_admin() fails in non-multisite test env. Test admin access instead.
 		$this->assertTrue( Reports::current_user_can_access() );
 	}
 

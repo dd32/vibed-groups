@@ -95,7 +95,7 @@
 			const allMeta = postMeta || {};
 
 			// Try to get start date from meta.
-			let eventStartDate = allMeta._event_start_date || '';
+			let eventStartDate = allMeta._event_start_utc || '';
 
 			// Fall back to post date if no event start date is set.
 			if ( ! eventStartDate ) {

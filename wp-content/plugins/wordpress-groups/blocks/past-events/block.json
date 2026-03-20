@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/past-events",
+	"version": "0.1.0",
+	"title": "Past Events",
+	"category": "widgets",
+	"icon": "backup",
+	"description": "Displays a list of past events.",
+	"textdomain": "wordpress-groups",
+	"attributes": {
+		"count": {
+			"type": "number",
+			"default": 5
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}

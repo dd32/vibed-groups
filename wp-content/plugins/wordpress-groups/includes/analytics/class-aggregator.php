@@ -226,7 +226,7 @@ class Aggregator {
 			] );
 
 			foreach ( $comments as $comment ) {
-				$rsvp_status = get_comment_meta( $comment->comment_ID, 'rsvp_status', true );
+				$rsvp_status = get_comment_meta( $comment->comment_ID, '_rsvp_status', true );
 
 				if ( ! $rsvp_status ) {
 					continue;

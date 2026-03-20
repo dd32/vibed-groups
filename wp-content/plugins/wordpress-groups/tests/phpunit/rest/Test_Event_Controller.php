@@ -116,8 +116,8 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create( array_merge( $defaults, $args ) );
 
 		$default_meta = [
-			'_event_start_date' => '2026-06-15 18:00:00',
-			'_event_end_date'   => '2026-06-15 20:00:00',
+			'_event_start_utc' => '2026-06-15 18:00:00',
+			'_event_end_utc'   => '2026-06-15 20:00:00',
 			'_event_timezone'   => 'Australia/Melbourne',
 		];
 
@@ -152,8 +152,8 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		$post_id = $this->create_event(
 			[ 'post_title' => 'Single Event' ],
 			[
-				'_event_start_date'  => '2026-07-01 10:00:00',
-				'_event_end_date'    => '2026-07-01 12:00:00',
+				'_event_start_utc'  => '2026-07-01 10:00:00',
+				'_event_end_utc'    => '2026-07-01 12:00:00',
 				'_event_timezone'    => 'America/New_York',
 				'_event_online_link' => 'https://meet.example.com/abc',
 			]
@@ -300,17 +300,17 @@ class Test_Event_Controller extends WP_UnitTestCase {
 	public function test_date_range_filtering(): void {
 		$this->create_event(
 			[ 'post_title' => 'January Event' ],
-			[ '_event_start_date' => '2026-01-15 18:00:00' ]
+			[ '_event_start_utc' => '2026-01-15 18:00:00' ]
 		);
 
 		$this->create_event(
 			[ 'post_title' => 'June Event' ],
-			[ '_event_start_date' => '2026-06-15 18:00:00' ]
+			[ '_event_start_utc' => '2026-06-15 18:00:00' ]
 		);
 
 		$this->create_event(
 			[ 'post_title' => 'December Event' ],
-			[ '_event_start_date' => '2026-12-15 18:00:00' ]
+			[ '_event_start_utc' => '2026-12-15 18:00:00' ]
 		);
 
 		// Filter: only events in first half of year.
@@ -336,12 +336,12 @@ class Test_Event_Controller extends WP_UnitTestCase {
 	public function test_date_range_after_only(): void {
 		$this->create_event(
 			[ 'post_title' => 'Early Event' ],
-			[ '_event_start_date' => '2025-06-01 18:00:00' ]
+			[ '_event_start_utc' => '2025-06-01 18:00:00' ]
 		);
 
 		$this->create_event(
 			[ 'post_title' => 'Late Event' ],
-			[ '_event_start_date' => '2027-06-01 18:00:00' ]
+			[ '_event_start_utc' => '2027-06-01 18:00:00' ]
 		);
 
 		$request = new WP_REST_Request( 'GET', '/groups/v1/events' );

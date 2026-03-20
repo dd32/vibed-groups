@@ -114,8 +114,8 @@ class Test_Rsvp_Controller extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create( array_merge( $defaults, $args ) );
 
 		$default_meta = [
-			'_event_start_date'      => '2026-06-15 18:00:00',
-			'_event_end_date'        => '2026-06-15 20:00:00',
+			'_event_start_utc'      => '2026-06-15 18:00:00',
+			'_event_end_utc'        => '2026-06-15 20:00:00',
 			'_event_timezone'        => 'Australia/Melbourne',
 			'_event_attendee_limit'  => 0,
 			'_event_waitlist_enabled' => false,

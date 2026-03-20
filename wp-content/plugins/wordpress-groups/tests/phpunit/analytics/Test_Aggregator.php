@@ -123,7 +123,7 @@ class Test_Aggregator extends WP_UnitTestCase {
 			'user_id'          => 1,
 		] );
 
-		update_comment_meta( $comment_id, 'rsvp_status', 'attending' );
+		update_comment_meta( $comment_id, '_rsvp_status', 'attending' );
 
 		// Create a user on this blog so we have at least 1 member.
 		$user_id = self::factory()->user->create( [ 'role' => 'subscriber' ] );
@@ -215,7 +215,7 @@ class Test_Aggregator extends WP_UnitTestCase {
 				'comment_approved' => 1,
 				'user_id'          => $i + 10,
 			] );
-			update_comment_meta( $attending, 'rsvp_status', 'attending' );
+			update_comment_meta( $attending, '_rsvp_status', 'attending' );
 
 			// Add a newcomer on the first event.
 			if ( 0 === $i ) {
@@ -224,7 +224,7 @@ class Test_Aggregator extends WP_UnitTestCase {
 					'comment_approved' => 1,
 					'user_id'          => 100,
 				] );
-				update_comment_meta( $newcomer, 'rsvp_status', 'attending' );
+				update_comment_meta( $newcomer, '_rsvp_status', 'attending' );
 				update_comment_meta( $newcomer, 'is_first_event', 1 );
 			}
 
@@ -235,7 +235,7 @@ class Test_Aggregator extends WP_UnitTestCase {
 					'comment_approved' => 1,
 					'user_id'          => 200,
 				] );
-				update_comment_meta( $no_show, 'rsvp_status', 'no_show' );
+				update_comment_meta( $no_show, '_rsvp_status', 'no_show' );
 			}
 		}
 
