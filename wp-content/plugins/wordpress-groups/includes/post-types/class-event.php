@@ -76,7 +76,7 @@ class Event {
 			'rest_base'           => 'events',
 			'menu_position'       => 5,
 			'menu_icon'           => 'dashicons-calendar-alt',
-			'supports'            => [ 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ],
+			'supports'            => [ 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'comments' ],
 			'has_archive'         => true,
 			'rewrite'             => [ 'slug' => 'event' ],
 			'capability_type'     => 'post',
