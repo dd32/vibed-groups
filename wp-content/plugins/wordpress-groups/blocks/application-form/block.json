@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/application-form",
+	"version": "0.1.0",
+	"title": "Application Form",
+	"category": "widgets",
+	"description": "A multi-step form for applying to organize a WordPress community group.",
+	"textdomain": "wordpress-groups",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}
