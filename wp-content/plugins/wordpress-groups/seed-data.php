@@ -2,10 +2,14 @@
 /**
  * Seed data for local development.
  *
- * Run via: npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php
+ * Run via: npm run env:seed
+ * (or)   npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php --url='http://localhost:8888/melbourne/'
  *
- * Creates sample groups, events, venues, RSVPs, and users
- * so the local environment has data to display.
+ * Designed to run on a sub-site (e.g. /melbourne/) in a multisite network.
+ * Creates sample events, venues, RSVPs, and users so the local environment
+ * has data to display.
+ *
+ * Idempotent: safe to run multiple times.
  *
  * @package Groups
  */
@@ -14,7 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo "Seeding WordPress Groups development data...\n";
+$current_blog_id = get_current_blog_id();
+echo "Seeding WordPress Groups development data on site {$current_blog_id}...\n";
 
 // Ensure plugin is loaded.
 if ( ! class_exists( 'Groups\Plugin' ) ) {
@@ -22,51 +27,93 @@ if ( ! class_exists( 'Groups\Plugin' ) ) {
 	exit( 1 );
 }
 
-// Create custom tables.
+// Idempotency check: skip if seed data already exists on this site.
+$existing_events = get_posts( [
+	'post_type'   => 'event',
+	'post_status' => 'any',
+	'numberposts' => 1,
+] );
+if ( ! empty( $existing_events ) ) {
+	echo "Seed data already exists on this site. Skipping.\n";
+	exit( 0 );
+}
+
+// Create custom tables for this site.
 if ( class_exists( 'Groups\Database\Schema' ) ) {
 	\Groups\Database\Schema::create_tables();
-	echo "✓ Custom tables created.\n";
+	echo "Custom tables created.\n";
 }
 
 // Register CPTs and roles.
 do_action( 'init' );
 
-// Create test users.
-$organizer_id = wp_create_user( 'organizer', 'password', 'organizer@example.com' );
-if ( is_wp_error( $organizer_id ) ) {
-	$organizer = get_user_by( 'login', 'organizer' );
-	$organizer_id = $organizer->ID;
-}
-wp_update_user( [ 'ID' => $organizer_id, 'display_name' => 'Jane Organizer', 'first_name' => 'Jane', 'last_name' => 'Organizer' ] );
+// Create test users (network-level, then add to this site).
+$users = [
+	'organizer' => [
+		'email'        => 'organizer@example.com',
+		'display_name' => 'Jane Organizer',
+		'first_name'   => 'Jane',
+		'last_name'    => 'Organizer',
+		'role'         => 'editor',
+	],
+	'member1' => [
+		'email'        => 'member1@example.com',
+		'display_name' => 'Alex Member',
+		'first_name'   => 'Alex',
+		'last_name'    => 'Member',
+		'role'         => 'subscriber',
+	],
+	'member2' => [
+		'email'        => 'member2@example.com',
+		'display_name' => 'Sam Contributor',
+		'first_name'   => 'Sam',
+		'last_name'    => 'Contributor',
+		'role'         => 'subscriber',
+	],
+	'member3' => [
+		'email'        => 'member3@example.com',
+		'display_name' => 'Taylor Developer',
+		'first_name'   => 'Taylor',
+		'last_name'    => 'Developer',
+		'role'         => 'subscriber',
+	],
+];
 
-$member1_id = wp_create_user( 'member1', 'password', 'member1@example.com' );
-if ( is_wp_error( $member1_id ) ) {
-	$member1 = get_user_by( 'login', 'member1' );
-	$member1_id = $member1->ID;
-}
-wp_update_user( [ 'ID' => $member1_id, 'display_name' => 'Alex Member' ] );
+$user_ids = [];
+foreach ( $users as $login => $data ) {
+	$user_id = wp_create_user( $login, 'password', $data['email'] );
+	if ( is_wp_error( $user_id ) ) {
+		$user    = get_user_by( 'login', $login );
+		$user_id = $user->ID;
+	}
 
-$member2_id = wp_create_user( 'member2', 'password', 'member2@example.com' );
-if ( is_wp_error( $member2_id ) ) {
-	$member2 = get_user_by( 'login', 'member2' );
-	$member2_id = $member2->ID;
-}
-wp_update_user( [ 'ID' => $member2_id, 'display_name' => 'Sam Contributor' ] );
+	wp_update_user( [
+		'ID'           => $user_id,
+		'display_name' => $data['display_name'],
+		'first_name'   => $data['first_name'],
+		'last_name'    => $data['last_name'],
+	] );
 
-$member3_id = wp_create_user( 'member3', 'password', 'member3@example.com' );
-if ( is_wp_error( $member3_id ) ) {
-	$member3 = get_user_by( 'login', 'member3' );
-	$member3_id = $member3->ID;
-}
-wp_update_user( [ 'ID' => $member3_id, 'display_name' => 'Taylor Developer' ] );
+	// In multisite, ensure the user is a member of this sub-site.
+	if ( is_multisite() && ! is_user_member_of_blog( $user_id, $current_blog_id ) ) {
+		add_user_to_blog( $current_blog_id, $user_id, $data['role'] );
+	}
 
-echo "✓ Test users created.\n";
+	$user_ids[ $login ] = $user_id;
+}
+
+$organizer_id = $user_ids['organizer'];
+$member1_id   = $user_ids['member1'];
+$member2_id   = $user_ids['member2'];
+$member3_id   = $user_ids['member3'];
+
+echo "Test users created and added to site.\n";
 
 // Create venues.
 $venue1_id = wp_insert_post( [
-	'post_type'   => 'venue',
-	'post_title'  => 'Community Hub Coworking',
-	'post_status' => 'publish',
+	'post_type'    => 'venue',
+	'post_title'   => 'Community Hub Coworking',
+	'post_status'  => 'publish',
 	'post_content' => 'A modern coworking space in the heart of the city with great facilities for meetups.',
 ] );
 if ( ! is_wp_error( $venue1_id ) ) {
@@ -83,9 +130,9 @@ if ( ! is_wp_error( $venue1_id ) ) {
 }
 
 $venue2_id = wp_insert_post( [
-	'post_type'   => 'venue',
-	'post_title'  => 'City Library Meeting Room',
-	'post_status' => 'publish',
+	'post_type'    => 'venue',
+	'post_title'   => 'City Library Meeting Room',
+	'post_status'  => 'publish',
 	'post_content' => 'Free meeting room at the public library. Projector and whiteboard available.',
 ] );
 if ( ! is_wp_error( $venue2_id ) ) {
@@ -99,7 +146,7 @@ if ( ! is_wp_error( $venue2_id ) ) {
 	update_post_meta( $venue2_id, '_venue_capacity', 30 );
 }
 
-echo "✓ Venues created.\n";
+echo "Venues created.\n";
 
 // Create events.
 $now = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
@@ -124,8 +171,6 @@ if ( ! is_wp_error( $event1_id ) ) {
 	update_post_meta( $event1_id, '_event_venue_id', $venue1_id );
 	update_post_meta( $event1_id, '_event_attendee_limit', 30 );
 	update_post_meta( $event1_id, '_event_waitlist_enabled', 1 );
-
-	// Add categories.
 	wp_set_post_terms( $event1_id, [ 'Workshop', 'In-person' ], 'category' );
 }
 
@@ -161,7 +206,7 @@ $event3_id = wp_insert_post( [
 	'post_type'    => 'event',
 	'post_title'   => 'Contributor Day: Documentation Sprint',
 	'post_status'  => 'event-scheduled',
-	'post_content' => "Join our online contributor day focused on improving WordPress documentation.\n\nNo prior experience needed — we'll pair newcomers with experienced contributors.\n\nMeet link will be shared before the event.",
+	'post_content' => "Join our online contributor day focused on improving WordPress documentation.\n\nNo prior experience needed - we'll pair newcomers with experienced contributors.\n\nMeet link will be shared before the event.",
 	'post_author'  => $organizer_id,
 ] );
 if ( ! is_wp_error( $event3_id ) ) {
@@ -182,7 +227,7 @@ $event4_id = wp_insert_post( [
 	'post_type'    => 'event',
 	'post_title'   => 'WordPress 6.7 Release Party',
 	'post_status'  => 'event-past',
-	'post_content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came — great turnout!",
+	'post_content' => "We celebrated the release of WordPress 6.7 with demos, lightning talks, and cake!\n\nThanks to everyone who came - great turnout!",
 	'post_author'  => $organizer_id,
 ] );
 if ( ! is_wp_error( $event4_id ) ) {
@@ -193,7 +238,7 @@ if ( ! is_wp_error( $event4_id ) ) {
 	wp_set_post_terms( $event4_id, [ 'Social', 'In-person' ], 'category' );
 }
 
-echo "✓ Events created.\n";
+echo "Events created.\n";
 
 // Create RSVPs (as comments).
 $rsvp_events = [ $event1_id, $event2_id, $event3_id ];
@@ -207,13 +252,13 @@ foreach ( $rsvp_events as $event_id ) {
 		}
 
 		$comment_id = wp_insert_comment( [
-			'comment_post_ID'  => $event_id,
-			'user_id'          => $user_id,
-			'comment_author'   => $user->display_name,
+			'comment_post_ID'      => $event_id,
+			'user_id'              => $user_id,
+			'comment_author'       => $user->display_name,
 			'comment_author_email' => $user->user_email,
-			'comment_type'     => 'groups_rsvp',
-			'comment_approved' => 1,
-			'comment_content'  => '',
+			'comment_type'         => 'groups_rsvp',
+			'comment_approved'     => 1,
+			'comment_content'      => '',
 		] );
 
 		if ( $comment_id ) {
@@ -236,12 +281,12 @@ foreach ( $rsvp_users as $user_id ) {
 	}
 
 	$comment_id = wp_insert_comment( [
-		'comment_post_ID'  => $event4_id,
-		'user_id'          => $user_id,
-		'comment_author'   => $user->display_name,
+		'comment_post_ID'      => $event4_id,
+		'user_id'              => $user_id,
+		'comment_author'       => $user->display_name,
 		'comment_author_email' => $user->user_email,
-		'comment_type'     => 'groups_rsvp',
-		'comment_approved' => 1,
+		'comment_type'         => 'groups_rsvp',
+		'comment_approved'     => 1,
 	] );
 
 	if ( $comment_id ) {
@@ -250,19 +295,19 @@ foreach ( $rsvp_users as $user_id ) {
 	}
 }
 
-echo "✓ RSVPs created.\n";
+echo "RSVPs created.\n";
 
-// Set up the front page.
+// Set up the front page with the event directory block.
 $front_page = wp_insert_post( [
 	'post_type'    => 'page',
-	'post_title'   => 'Home',
+	'post_title'   => 'Upcoming Events',
 	'post_status'  => 'publish',
-	'post_content' => '<!-- wp:groups/upcoming-events /-->',
+	'post_content' => '<!-- wp:groups/event-directory {"align":"wide"} /-->',
 ] );
 update_option( 'show_on_front', 'page' );
 update_option( 'page_on_front', $front_page );
 
-echo "✓ Front page configured.\n";
+echo "Front page configured.\n";
 
 // Add members page.
 wp_insert_post( [
@@ -273,13 +318,13 @@ wp_insert_post( [
 	'post_content' => '<!-- wp:groups/group-members /-->',
 ] );
 
-echo "✓ Members page created.\n";
+echo "Members page created.\n";
 
-// Set site title.
+// Set sub-site title.
 update_option( 'blogname', 'WordPress Melbourne' );
 update_option( 'blogdescription', 'Melbourne WordPress Community Group' );
 
-echo "\n✅ Seed data complete!\n";
+echo "\nSeed data complete!\n";
 echo "  - 4 users (organizer + 3 members)\n";
 echo "  - 2 venues\n";
 echo "  - 4 events (3 upcoming, 1 past)\n";

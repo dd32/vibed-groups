@@ -7,7 +7,8 @@
 		"start:blocks": "wp-scripts start --webpack-src-dir=wp-content/plugins/wordpress-groups/blocks --output-path=wp-content/plugins/wordpress-groups/build",
 		"build:blocks": "wp-scripts build --webpack-src-dir=wp-content/plugins/wordpress-groups/blocks --output-path=wp-content/plugins/wordpress-groups/build",
 		"test:js": "wp-scripts test-unit-js --config jest.config.js",
-		"env:seed": "npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php",
+		"env:setup": "bash bin/setup.sh",
+		"env:seed": "npx wp-env run cli wp eval-file wp-content/plugins/wordpress-groups/seed-data.php --url='http://localhost:8888/melbourne/'",
 		"env:start": "wp-env start",
 		"env:stop": "wp-env stop",
 		"env:destroy": "wp-env destroy"
