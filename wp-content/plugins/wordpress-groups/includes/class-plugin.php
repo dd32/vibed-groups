@@ -62,6 +62,7 @@ class Plugin {
 		new Models\Recurrence_Generator();
 		Models\Recurrence_Generator::schedule_cron();
 		new Integrations\Slack_Notifier();
+		new Integrations\Official_Events_API();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
