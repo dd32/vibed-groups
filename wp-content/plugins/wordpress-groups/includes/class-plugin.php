@@ -65,6 +65,8 @@ class Plugin {
 		new Integrations\Slack_Notifier();
 		new Integrations\Official_Events_API();
 		new Admin\Application_Tracker();
+		new Admin\Reports();
+		new Workflow\Organizer_Onboarding();
 		new Notifications\Rsvp_Notifications();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
