@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "groups/event-directory",
+	"version": "0.1.0",
+	"title": "Event Directory",
+	"category": "widgets",
+	"icon": "calendar",
+	"description": "A browsable directory of events with list/calendar views and date filtering.",
+	"textdomain": "wordpress-groups",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"multiple": false
+	},
+	"editorScript": "file:./index.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php"
+}
