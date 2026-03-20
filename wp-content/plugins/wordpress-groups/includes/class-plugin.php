@@ -70,6 +70,7 @@ class Plugin {
 		new Workflow\Organizer_Onboarding();
 		new Notifications\Rsvp_Notifications();
 		new Blocks\Recurrence_Panel();
+		new SEO();
 
 		Cache::register_hooks();
 
