@@ -205,7 +205,7 @@
 				},
 				{
 					"name": "Heading 1",
-					"size": "clamp(36px, 2.25rem + 2.5vw, 70px)",
+					"size": "clamp(30px, 2rem + 2vw, 50px)",
 					"slug": "heading-1"
 				}
 			]
@@ -266,8 +266,8 @@
 			]
 		},
 		"layout": {
-			"contentSize": "680px",
-			"wideSize": "1160px"
+			"contentSize": "960px",
+			"wideSize": "1600px"
 		},
 		"custom": {
 			"body": {
