@@ -1,0 +1,63 @@
+/**
+ * Social Share block styles.
+ *
+ * Horizontal row of icon buttons with accessible focus styles.
+ */
+
+.wp-block-groups-social-share {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+
+	&__link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 14px;
+		border: 1px solid var(--wp--preset--color--light-grey-1, #dcdcde);
+		border-radius: 4px;
+		background: var(--wp--preset--color--white, #fff);
+		color: var(--wp--preset--color--charcoal-4, #50575e);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.4;
+		text-decoration: none;
+		transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+		min-height: 40px;
+		cursor: pointer;
+
+		svg {
+			flex-shrink: 0;
+		}
+
+		&:hover {
+			background-color: var(--wp--preset--color--light-grey-2, #f0f0f1);
+			border-color: var(--wp--preset--color--charcoal-4, #50575e);
+			color: var(--wp--preset--color--charcoal-1, #1d2327);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp--preset--color--blueberry-1, #3858e9);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 2px var(--wp--preset--color--white, #fff);
+		}
+
+		// Platform-specific hover colours.
+		&--x:hover {
+			color: #000;
+		}
+
+		&--facebook:hover {
+			color: #1877f2;
+		}
+
+		&--linkedin:hover {
+			color: #0a66c2;
+		}
+
+		&--copy:hover {
+			color: var(--wp--preset--color--blueberry-1, #3858e9);
+		}
+	}
+}
