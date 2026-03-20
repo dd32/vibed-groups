@@ -229,11 +229,30 @@ class Rsvp_Controller extends WP_REST_Controller {
 		$status   = $request->get_param( 'status' ) ?? '';
 
 		$rsvps = Rsvp::get_rsvps( $event_id, sanitize_text_field( $status ) );
-		$data  = [];
+		$items = [];
 
 		foreach ( $rsvps as $rsvp ) {
-			$data[] = Rsvp::prepare_for_response( $rsvp );
+			$items[] = Rsvp::prepare_for_response( $rsvp );
 		}
+
+		// Build summary counts expected by the rsvp-button block's view.js.
+		$attending_count = count( Rsvp::get_rsvps( $event_id, 'attending' ) );
+		$waitlist_count  = count( Rsvp::get_rsvps( $event_id, 'waitlisted' ) );
+
+		$user_status = null;
+		if ( is_user_logged_in() ) {
+			$user_rsvp = Rsvp::get_user_rsvp( $event_id, get_current_user_id() );
+			if ( $user_rsvp ) {
+				$user_status = get_comment_meta( $user_rsvp->comment_ID, '_rsvp_status', true );
+			}
+		}
+
+		$data = [
+			'rsvps'           => $items,
+			'attending_count' => $attending_count,
+			'waitlist_count'  => $waitlist_count,
+			'user_status'     => $user_status,
+		];
 
 		return new WP_REST_Response( $data, 200 );
 	}
