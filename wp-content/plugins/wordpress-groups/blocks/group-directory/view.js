@@ -280,12 +280,20 @@ export function GroupDirectory( { perPage, initialGroups, initialTotal, initialP
 			isLoading &&
 				createElement(
 					'div',
-					{ className: 'wp-block-groups-group-directory__loading' },
-					createElement( 'span', {
-						className: 'wp-block-groups-group-directory__spinner',
-						'aria-hidden': 'true',
-					} ),
-					__( 'Loading groups\u2026', 'wordpress-groups' )
+					{
+						className: 'wp-block-groups-group-directory__skeleton',
+						role: 'status',
+						'aria-label': __( 'Loading groups\u2026', 'wordpress-groups' ),
+					},
+					...Array.from( { length: Math.min( perPage, 6 ) }, ( _, i ) =>
+						createElement(
+							'div',
+							{ key: i, className: 'wp-block-groups-group-directory__skeleton-card' },
+							createElement( 'div', { className: 'wp-block-groups-group-directory__skeleton-line wp-block-groups-group-directory__skeleton-line--name' } ),
+							createElement( 'div', { className: 'wp-block-groups-group-directory__skeleton-line wp-block-groups-group-directory__skeleton-line--location' } ),
+							createElement( 'div', { className: 'wp-block-groups-group-directory__skeleton-line wp-block-groups-group-directory__skeleton-line--meta' } )
+						)
+					)
 				),
 			! isLoading && groups.length === 0 &&
 				createElement(

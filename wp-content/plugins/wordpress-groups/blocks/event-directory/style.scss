@@ -386,8 +386,8 @@
 		font-size: var(--wp--preset--font-size--small, 14px);
 	}
 
-	// Noscript fallback.
-	&__noscript {
+	// Server-rendered content (visible by default, hidden once React hydrates).
+	&__server-rendered {
 		.wp-block-groups-event-directory__heading {
 			font-family: var(--wp--preset--font-family--eb-garamond, serif);
 			font-size: var(--wp--preset--font-size--x-large, 24px);
@@ -419,6 +419,72 @@
 			font-size: var(--wp--preset--font-size--small, 14px);
 			color: var(--wp--preset--color--charcoal-4, #656a71);
 			margin-top: 4px;
+		}
+	}
+
+	// Hide server-rendered content once React has hydrated.
+	&.is-hydrated &__server-rendered {
+		display: none;
+	}
+
+	// Noscript notice.
+	&__noscript-notice {
+		padding: var(--wp--preset--spacing--20, 16px);
+		background: var(--wp--preset--color--light-grey-2, #f6f6f6);
+		border-radius: 4px;
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		margin-top: var(--wp--preset--spacing--20, 16px);
+	}
+
+	// Loading skeleton.
+	&__skeleton {
+		display: grid;
+		gap: var(--wp--preset--spacing--20, 16px);
+	}
+
+	&__skeleton-card {
+		border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-radius: 4px;
+		padding: var(--wp--preset--spacing--30, 20px);
+		background: var(--wp--preset--color--white, #ffffff);
+	}
+
+	&__skeleton-line {
+		height: 14px;
+		border-radius: 4px;
+		background: linear-gradient(
+			90deg,
+			var(--wp--preset--color--light-grey-2, #f0f0f0) 25%,
+			var(--wp--preset--color--light-grey-1, #e0e0e0) 50%,
+			var(--wp--preset--color--light-grey-2, #f0f0f0) 75%
+		);
+		background-size: 200% 100%;
+		animation: groups-skeleton-pulse 1.5s ease-in-out infinite;
+
+		&--title {
+			height: 20px;
+			width: 60%;
+			margin-bottom: 12px;
+		}
+
+		&--date {
+			width: 40%;
+			margin-bottom: 8px;
+		}
+
+		&--venue {
+			width: 30%;
+		}
+	}
+
+	@keyframes groups-skeleton-pulse {
+		0% {
+			background-position: 200% 0;
+		}
+
+		100% {
+			background-position: -200% 0;
 		}
 	}
 

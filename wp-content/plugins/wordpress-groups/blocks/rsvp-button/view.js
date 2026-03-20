@@ -34,6 +34,7 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 	const [ attending, setAttending ] = useState( initialAttending );
 	const [ waitlisted, setWaitlisted ] = useState( initialWaitlisted );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ isInitializing, setIsInitializing ] = useState( initialState !== STATE.NOT_LOGGED_IN );
 	const [ error, setError ] = useState( '' );
 	const stateRef = useRef( state );
 
@@ -61,6 +62,8 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 			}
 		} catch {
 			// Silently fall back to server-rendered state on fetch failure.
+		} finally {
+			setIsInitializing( false );
 		}
 	}, [ eventId ] );
 
@@ -115,6 +118,25 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 			setIsLoading( false );
 		}
 	}, [ eventId, isLoading, loginUrl, refreshState ] );
+
+	// Show skeleton during initial data fetch.
+	if ( isInitializing ) {
+		return createElement(
+			'div',
+			{
+				className: 'wp-block-groups-rsvp-button__skeleton',
+				role: 'status',
+				'aria-label': __( 'Loading RSVP status\u2026', 'wordpress-groups' ),
+			},
+			createElement( 'div', { className: 'wp-block-groups-rsvp-button__skeleton-btn' } ),
+			createElement(
+				'div',
+				{ className: 'wp-block-groups-rsvp-button__skeleton-counts' },
+				createElement( 'div', { className: 'wp-block-groups-rsvp-button__skeleton-line' } ),
+				createElement( 'div', { className: 'wp-block-groups-rsvp-button__skeleton-line' } )
+			)
+		);
+	}
 
 	const currentState = isLoading ? STATE.LOADING : state;
 

@@ -681,8 +681,18 @@ function EventDirectory( { perPage, categories } ) {
 		)
 	);
 
-	// Loading state.
+	// Loading state — show skeleton cards.
 	if ( loading ) {
+		const skeletonCards = Array.from( { length: Math.min( perPage, 3 ) }, ( _, i ) =>
+			createElement(
+				'div',
+				{ key: i, className: 'wp-block-groups-event-directory__skeleton-card' },
+				createElement( 'div', { className: 'wp-block-groups-event-directory__skeleton-line wp-block-groups-event-directory__skeleton-line--title' } ),
+				createElement( 'div', { className: 'wp-block-groups-event-directory__skeleton-line wp-block-groups-event-directory__skeleton-line--date' } ),
+				createElement( 'div', { className: 'wp-block-groups-event-directory__skeleton-line wp-block-groups-event-directory__skeleton-line--venue' } )
+			)
+		);
+
 		return createElement(
 			'div',
 			{ className: 'wp-block-groups-event-directory__inner' },
@@ -690,12 +700,12 @@ function EventDirectory( { perPage, categories } ) {
 			createElement(
 				'div',
 				{
-					className: 'wp-block-groups-event-directory__loading',
+					className: 'wp-block-groups-event-directory__skeleton',
 					role: 'status',
 					'aria-live': 'polite',
+					'aria-label': __( 'Loading events\u2026', 'wordpress-groups' ),
 				},
-				createElement( 'span', { className: 'wp-block-groups-event-directory__spinner' } ),
-				__( 'Loading events\u2026', 'wordpress-groups' )
+				...skeletonCards
 			)
 		);
 	}
@@ -821,6 +831,7 @@ function init() {
 			categories = [];
 		}
 
+		container.classList.add( 'is-hydrated' );
 		const root = createRoot( container );
 		root.render(
 			createElement( EventDirectory, { perPage, categories } )
