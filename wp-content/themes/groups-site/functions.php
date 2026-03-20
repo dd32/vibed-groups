@@ -20,17 +20,25 @@ add_action( 'after_setup_theme', 'groups_site_setup' );
  * Enqueue fonts and theme stylesheets.
  */
 function groups_site_enqueue_assets() {
+	// Google Fonts: Plus Jakarta Sans (headings) + Inter (body) + JetBrains Mono (mono).
 	wp_enqueue_style(
 		'groups-site-google-fonts',
-		'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap',
 		[],
 		null
 	);
 
 	wp_enqueue_style(
+		'groups-site-custom',
+		get_theme_file_uri( 'assets/css/custom.css' ),
+		[ 'groups-site-google-fonts' ],
+		filemtime( get_theme_file_path( 'assets/css/custom.css' ) )
+	);
+
+	wp_enqueue_style(
 		'groups-site-responsive',
 		get_theme_file_uri( 'assets/css/responsive.css' ),
-		[],
+		[ 'groups-site-custom' ],
 		filemtime( get_theme_file_path( 'assets/css/responsive.css' ) )
 	);
 }
