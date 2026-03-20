@@ -75,18 +75,18 @@ foreach ( $groups as $group ) {
 	}
 }
 
-// Enqueue Leaflet CSS from CDN (same as venue-map block).
+// Enqueue Leaflet CSS locally (same as venue-map block).
 wp_enqueue_style(
 	'leaflet',
-	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+	plugins_url( 'assets/vendor/leaflet/leaflet.css', GROUPS_PLUGIN_FILE ),
 	[],
 	'1.9.4'
 );
 
-// Enqueue Leaflet JS from CDN (same as venue-map block).
+// Enqueue Leaflet JS locally (same as venue-map block).
 wp_enqueue_script(
 	'leaflet',
-	'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+	plugins_url( 'assets/vendor/leaflet/leaflet.js', GROUPS_PLUGIN_FILE ),
 	[],
 	'1.9.4',
 	true
