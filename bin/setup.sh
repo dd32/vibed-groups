@@ -34,7 +34,7 @@ fi
 echo ""
 echo "🌏 Creating Melbourne sub-site..."
 # Always try to create — wp-cli will error if it exists, which is fine.
-npx wp-env run cli wp site create --slug=melbourne --title="WordPress Melbourne" --email=organizer@example.com 2>/dev/null || echo "  (already exists or failed)"
+npx wp-env run cli wp site create --slug=melbourne --title="WordPress Melbourne" --email=test1@example.com 2>/dev/null || echo "  (already exists or failed)"
 
 # Get the actual site URL for the Melbourne site.
 SITE_URL=$(npx wp-env run cli wp option get siteurl 2>/dev/null | grep -oE 'http://[^ ]+' | head -1)

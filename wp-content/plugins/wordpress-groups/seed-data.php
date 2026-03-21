@@ -35,10 +35,10 @@ $blog_id = get_current_blog_id();
 
 // --- Users ---
 $users = [
-	'organizer' => [ 'Jane', 'Organizer', 'organizer@example.com', 'organizer' ],
-	'member1'   => [ 'Alex', 'Member', 'member1@example.com', 'member' ],
-	'member2'   => [ 'Sam', 'Contributor', 'member2@example.com', 'member' ],
-	'member3'   => [ 'Taylor', 'Developer', 'member3@example.com', 'member' ],
+	'organizer' => [ 'Jane', 'Organizer', 'test1@example.com', 'organizer' ],
+	'member1'   => [ 'Alex', 'Member', 'test2@example.com', 'member' ],
+	'member2'   => [ 'Sam', 'Contributor', 'test3@example.com', 'member' ],
+	'member3'   => [ 'Taylor', 'Developer', 'member3@wordpress.test', 'member' ],
 ];
 
 $user_ids = [];
@@ -50,6 +50,7 @@ foreach ( $users as $login => $info ) {
 	if ( ! is_wp_error( $user_id ) ) {
 		wp_update_user( [
 			'ID'           => $user_id,
+			'user_email'   => $info[2],
 			'display_name' => $info[0] . ' ' . $info[1],
 			'first_name'   => $info[0],
 			'last_name'    => $info[1],

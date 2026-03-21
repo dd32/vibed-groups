@@ -25,11 +25,11 @@ $blog_id = get_current_blog_id();
 
 // Users.
 $users = [
-	'yuki'    => [ 'Yuki', 'Tanaka', 'yuki@example.com', 'organizer' ],
-	'kenji'   => [ 'Kenji', 'Suzuki', 'kenji@example.com', 'co_organizer' ],
-	'sakura'  => [ 'Sakura', 'Yamamoto', 'sakura@example.com', 'member' ],
-	'hiroshi' => [ 'Hiroshi', 'Watanabe', 'hiroshi@example.com', 'member' ],
-	'aiko'    => [ 'Aiko', 'Sato', 'aiko@example.com', 'member' ],
+	'yuki'    => [ 'Yuki', 'Tanaka', 'yuki@wordpress.test', 'organizer' ],
+	'kenji'   => [ 'Kenji', 'Suzuki', 'kenji@wordpress.test', 'co_organizer' ],
+	'sakura'  => [ 'Sakura', 'Yamamoto', 'sakura@wordpress.test', 'member' ],
+	'hiroshi' => [ 'Hiroshi', 'Watanabe', 'hiroshi@wordpress.test', 'member' ],
+	'aiko'    => [ 'Aiko', 'Sato', 'aiko@wordpress.test', 'member' ],
 ];
 
 $user_ids = [];
@@ -41,6 +41,7 @@ foreach ( $users as $login => $info ) {
 	if ( ! is_wp_error( $user_id ) ) {
 		wp_update_user( [
 			'ID'           => $user_id,
+			'user_email'   => $info[2],
 			'display_name' => $info[0] . ' ' . $info[1],
 			'first_name'   => $info[0],
 			'last_name'    => $info[1],
