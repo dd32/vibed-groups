@@ -80,12 +80,15 @@ class Test_Location_Query extends WP_UnitTestCase {
 		// Geelong: ~75 km from Melbourne.
 		$this->create_venue( 'Geelong Venue', -38.1499, 144.3617 );
 
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 2, $results );
+		$this->assertNotWPError( $query_result );
+		$this->assertArrayHasKey( 'results', $query_result );
+		$this->assertArrayHasKey( 'total', $query_result );
+		$this->assertCount( 2, $query_result['results'] );
+		$this->assertSame( 2, $query_result['total'] );
 
-		$titles = wp_list_pluck( $results, 'post_title' );
+		$titles = wp_list_pluck( $query_result['results'], 'post_title' );
 		$this->assertContains( 'Melbourne Venue', $titles );
 		$this->assertContains( 'Geelong Venue', $titles );
 	}
@@ -101,11 +104,11 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_venue( 'Sydney Venue', -33.8688, 151.2093 );
 
 		// Search 100 km around Melbourne — Sydney should be excluded.
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 1, $results );
-		$this->assertSame( 'Melbourne Venue', $results[0]->post_title );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 1, $query_result['results'] );
+		$this->assertSame( 'Melbourne Venue', $query_result['results'][0]->post_title );
 	}
 
 	/**
@@ -122,9 +125,10 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_venue( 'Sydney Venue', -33.8688, 151.2093 );
 
 		// Search 1000 km from Melbourne — all three should appear.
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 1000.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 1000.0 );
 
-		$this->assertNotWPError( $results );
+		$this->assertNotWPError( $query_result );
+		$results = $query_result['results'];
 		$this->assertCount( 3, $results );
 
 		// Distance should increase: Melbourne (0) < Geelong (~75) < Sydney (~714).
@@ -148,13 +152,13 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_venue( 'Sydney Venue', -33.8688, 151.2093 );
 
 		// Search from Melbourne with a large radius to get Sydney.
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 1000.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 1000.0 );
 
-		$this->assertNotWPError( $results );
+		$this->assertNotWPError( $query_result );
 
 		// Find the Sydney result.
 		$sydney = null;
-		foreach ( $results as $result ) {
+		foreach ( $query_result['results'] as $result ) {
 			if ( 'Sydney Venue' === $result->post_title ) {
 				$sydney = $result;
 				break;
@@ -174,11 +178,11 @@ class Test_Location_Query extends WP_UnitTestCase {
 	public function test_distance_property_is_float(): void {
 		$this->create_venue( 'Test Venue', -37.8136, 144.9631 );
 
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 10.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 10.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 1, $results );
-		$this->assertIsFloat( $results[0]->distance );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 1, $query_result['results'] );
+		$this->assertIsFloat( $query_result['results'][0]->distance );
 	}
 
 	/**
@@ -189,10 +193,30 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_venue( 'Venue B', -37.8200, 144.9700 );
 		$this->create_venue( 'Venue C', -37.8300, 144.9800 );
 
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0, [ 'limit' => 2 ] );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0, [ 'limit' => 2 ] );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 2, $results );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 2, $query_result['results'] );
+		$this->assertSame( 3, $query_result['total'] );
+	}
+
+	/**
+	 * @covers ::find_nearby
+	 */
+	public function test_pagination_returns_correct_page(): void {
+		$this->create_venue( 'Venue A', -37.8136, 144.9631 );
+		$this->create_venue( 'Venue B', -37.8200, 144.9700 );
+		$this->create_venue( 'Venue C', -37.8300, 144.9800 );
+
+		$page1 = Location_Query::find_nearby( -37.8136, 144.9631, 100.0, [ 'limit' => 2, 'page' => 1 ] );
+		$page2 = Location_Query::find_nearby( -37.8136, 144.9631, 100.0, [ 'limit' => 2, 'page' => 2 ] );
+
+		$this->assertNotWPError( $page1 );
+		$this->assertNotWPError( $page2 );
+		$this->assertCount( 2, $page1['results'] );
+		$this->assertCount( 1, $page2['results'] );
+		$this->assertSame( 3, $page1['total'] );
+		$this->assertSame( 3, $page2['total'] );
 	}
 
 	/**
@@ -213,11 +237,11 @@ class Test_Location_Query extends WP_UnitTestCase {
 		update_post_meta( $draft_id, '_venue_longitude', 144.9700 );
 
 		// Default status is publish — draft should be excluded.
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 1, $results );
-		$this->assertSame( 'Published Venue', $results[0]->post_title );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 1, $query_result['results'] );
+		$this->assertSame( 'Published Venue', $query_result['results'][0]->post_title );
 	}
 
 	/**
@@ -231,16 +255,16 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_meetup( 'Sydney Group', -33.8688, 151.2093 );
 
 		// Search meetups near Melbourne.
-		$results = Location_Query::find_nearby(
+		$query_result = Location_Query::find_nearby(
 			-37.8136,
 			144.9631,
 			100.0,
 			[ 'post_type' => 'wp_meetup' ]
 		);
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 1, $results );
-		$this->assertSame( 'Melbourne Group', $results[0]->post_title );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 1, $query_result['results'] );
+		$this->assertSame( 'Melbourne Group', $query_result['results'][0]->post_title );
 	}
 
 	/**
@@ -251,11 +275,12 @@ class Test_Location_Query extends WP_UnitTestCase {
 		$this->create_venue( 'Far Away', 40.7128, -74.0060 ); // New York City.
 
 		// Search near Melbourne.
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertIsArray( $results );
-		$this->assertCount( 0, $results );
+		$this->assertNotWPError( $query_result );
+		$this->assertIsArray( $query_result['results'] );
+		$this->assertCount( 0, $query_result['results'] );
+		$this->assertSame( 0, $query_result['total'] );
 	}
 
 	/**
@@ -313,10 +338,10 @@ class Test_Location_Query extends WP_UnitTestCase {
 			]
 		);
 
-		$results = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
+		$query_result = Location_Query::find_nearby( -37.8136, 144.9631, 100.0 );
 
-		$this->assertNotWPError( $results );
-		$this->assertCount( 1, $results );
-		$this->assertSame( 'With Coords', $results[0]->post_title );
+		$this->assertNotWPError( $query_result );
+		$this->assertCount( 1, $query_result['results'] );
+		$this->assertSame( 'With Coords', $query_result['results'][0]->post_title );
 	}
 }

@@ -52,11 +52,12 @@ class Location_Query {
 	 *     @type string $post_type   Post type to query. Default 'venue'.
 	 *                               Accepts 'venue' or 'wp_meetup'.
 	 *     @type string $post_status Post status to filter by. Default 'publish'.
-	 *     @type int    $limit       Maximum number of results. Default 50.
+	 *     @type int    $limit       Maximum number of results per page. Default 50.
+	 *     @type int    $page        Page number (1-based). Default 1.
 	 * }
-	 * @return object[]|\WP_Error Array of post objects with a `distance` property
-	 *                            (in km), ordered by distance ascending, or WP_Error
-	 *                            on invalid arguments.
+	 * @return array{results: object[], total: int}|\WP_Error Associative array with
+	 *     'results' (post objects with a `distance` property in km, ordered by distance)
+	 *     and 'total' (total matching count), or WP_Error on invalid arguments.
 	 */
 	public static function find_nearby( float $lat, float $lon, float $radius_km, array $args = [] ): array|\WP_Error {
 		global $wpdb;
@@ -86,6 +87,8 @@ class Location_Query {
 		$post_type   = $args['post_type'] ?? 'venue';
 		$post_status = $args['post_status'] ?? 'publish';
 		$limit       = isset( $args['limit'] ) ? absint( $args['limit'] ) : 50;
+		$page        = isset( $args['page'] ) ? max( 1, absint( $args['page'] ) ) : 1;
+		$offset      = ( $page - 1 ) * $limit;
 
 		if ( ! isset( self::META_KEYS[ $post_type ] ) ) {
 			return new \WP_Error(
@@ -116,10 +119,7 @@ class Location_Query {
 			self::EARTH_RADIUS_KM
 		);
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql = $wpdb->prepare(
-			"SELECT * FROM (
-				SELECT p.*, {$haversine} AS distance
+		$inner_query = "SELECT p.*, {$haversine} AS distance
 				FROM {$wpdb->posts} p
 				INNER JOIN {$wpdb->postmeta} lat_meta
 					ON p.ID = lat_meta.post_id AND lat_meta.meta_key = %s
@@ -128,11 +128,33 @@ class Location_Query {
 				WHERE p.post_type = %s
 					AND p.post_status = %s
 					AND lat_meta.meta_value != ''
-					AND lon_meta.meta_value != ''
-			) AS nearby
+					AND lon_meta.meta_value != ''";
+
+		// Count total matching rows.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$count_sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM ( {$inner_query} ) AS nearby WHERE distance <= %f",
+			$lat,
+			$lon,
+			$lat,
+			$lat_key,
+			$lon_key,
+			$post_type,
+			$post_status,
+			$radius_km
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is fully prepared above.
+		$total = (int) $wpdb->get_var( $count_sql );
+
+		// Fetch the paginated results.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT * FROM ( {$inner_query} ) AS nearby
 			WHERE distance <= %f
 			ORDER BY distance ASC
-			LIMIT %d",
+			LIMIT %d OFFSET %d",
 			$lat,
 			$lon,
 			$lat,
@@ -141,7 +163,8 @@ class Location_Query {
 			$post_type,
 			$post_status,
 			$radius_km,
-			$limit
+			$limit,
+			$offset
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -160,6 +183,9 @@ class Location_Query {
 			$result->distance = (float) $result->distance;
 		}
 
-		return $results;
+		return [
+			'results' => $results,
+			'total'   => $total,
+		];
 	}
 }

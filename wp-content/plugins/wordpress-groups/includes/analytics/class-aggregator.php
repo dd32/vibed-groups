@@ -31,6 +31,20 @@ class Aggregator {
 	const CRON_HOOK = 'groups_daily_aggregation';
 
 	/**
+	 * Option key for tracking batch progress across cron runs.
+	 *
+	 * @var string
+	 */
+	const BATCH_OPTION = 'groups_aggregation_batch_offset';
+
+	/**
+	 * Number of groups to process per cron run.
+	 *
+	 * @var int
+	 */
+	const BATCH_SIZE = 50;
+
+	/**
 	 * Constructor. Registers the cron action hook.
 	 */
 	public function __construct() {
@@ -69,22 +83,53 @@ class Aggregator {
 	}
 
 	/**
-	 * Aggregate metrics for all active groups on a given date.
+	 * Aggregate metrics for a batch of active groups on a given date.
+	 *
+	 * Processes up to BATCH_SIZE groups starting from the stored offset.
+	 * When the full set has been processed, the offset is reset. Otherwise,
+	 * a follow-up single event is scheduled to continue processing.
 	 *
 	 * This is the main public entry point, also usable for backfilling.
 	 *
 	 * @param string $date Date in Y-m-d format.
 	 */
 	public static function aggregate_for_date( string $date ): void {
+		$batch_state = get_option( self::BATCH_OPTION, [] );
+		$offset      = 0;
+
+		// If we have stored state for this date, resume from where we left off.
+		if ( ! empty( $batch_state['date'] ) && $batch_state['date'] === $date ) {
+			$offset = (int) ( $batch_state['offset'] ?? 0 );
+		}
+
 		$posts = get_posts( [
 			'post_type'      => 'wp_meetup',
 			'post_status'    => 'meetup-active',
-			'posts_per_page' => -1,
+			'posts_per_page' => self::BATCH_SIZE,
+			'offset'         => $offset,
 			'fields'         => 'ids',
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
 		] );
 
 		foreach ( $posts as $post_id ) {
 			self::aggregate_group( (int) $post_id, $date );
+		}
+
+		if ( count( $posts ) < self::BATCH_SIZE ) {
+			// All groups processed -- reset for the next day.
+			delete_option( self::BATCH_OPTION );
+		} else {
+			// More groups remain -- save progress and schedule continuation.
+			update_option( self::BATCH_OPTION, [
+				'date'   => $date,
+				'offset' => $offset + self::BATCH_SIZE,
+			], false );
+
+			// Schedule a follow-up run if not already scheduled.
+			if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+				wp_schedule_single_event( time() + 30, self::CRON_HOOK );
+			}
 		}
 	}
 
