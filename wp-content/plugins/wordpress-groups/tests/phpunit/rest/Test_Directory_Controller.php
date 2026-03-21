@@ -6,7 +6,6 @@
  */
 
 use Groups\REST\Directory_Controller;
-use WP_REST_Server;
 
 /**
  * @coversDefaultClass \Groups\REST\Directory_Controller
