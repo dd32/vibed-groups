@@ -117,6 +117,19 @@ $button_text = match ( $initial_state ) {
 					<span class="wp-block-groups-rsvp-button__label"><?php esc_html_e( 'Create Account', 'wordpress-groups' ); ?></span>
 				</a>
 			<?php endif; ?>
+			<div class="wp-block-groups-rsvp-button__guest-divider">
+				<span><?php esc_html_e( 'or RSVP as a guest', 'wordpress-groups' ); ?></span>
+			</div>
+			<form class="wp-block-groups-rsvp-button__guest-form" data-event-id="<?php echo esc_attr( $event_id ); ?>" data-api-url="<?php echo esc_url( rest_url( 'groups/v1/events/' . $event_id . '/rsvps/guest-rsvp' ) ); ?>">
+				<input type="text" name="guest_name" placeholder="<?php esc_attr_e( 'Your name', 'wordpress-groups' ); ?>" required aria-label="<?php esc_attr_e( 'Your name', 'wordpress-groups' ); ?>" />
+				<input type="email" name="guest_email" placeholder="<?php esc_attr_e( 'Your email', 'wordpress-groups' ); ?>" required aria-label="<?php esc_attr_e( 'Your email', 'wordpress-groups' ); ?>" />
+				<button type="submit" class="wp-block-groups-rsvp-button__btn wp-block-groups-rsvp-button__btn--guest">
+					<span class="wp-block-groups-rsvp-button__label"><?php esc_html_e( 'RSVP as Guest', 'wordpress-groups' ); ?></span>
+				</button>
+				<p class="wp-block-groups-rsvp-button__guest-note">
+					<?php esc_html_e( 'We\'ll send a confirmation to your email.', 'wordpress-groups' ); ?>
+				</p>
+			</form>
 		</div>
 	<?php else : ?>
 		<button

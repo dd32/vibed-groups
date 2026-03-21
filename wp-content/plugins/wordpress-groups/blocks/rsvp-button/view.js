@@ -255,11 +255,56 @@ function init() {
 	} );
 }
 
+/**
+ * Handle guest RSVP forms (no React — plain DOM).
+ */
+function initGuestForms() {
+	document.querySelectorAll( '.wp-block-groups-rsvp-button__guest-form' ).forEach( ( form ) => {
+		form.addEventListener( 'submit', async ( e ) => {
+			e.preventDefault();
+			const btn = form.querySelector( 'button[type="submit"]' );
+			const eventId = form.dataset.eventId;
+			const name = form.querySelector( 'input[name="guest_name"]' ).value;
+			const email = form.querySelector( 'input[name="guest_email"]' ).value;
+
+			btn.disabled = true;
+			btn.textContent = 'Submitting…';
+
+			try {
+				const resp = await window.fetch( form.dataset.apiUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify( { event_id: parseInt( eventId, 10 ), email, name } ),
+				} );
+				const data = await resp.json();
+
+				if ( resp.ok ) {
+					form.innerHTML = '<p class="wp-block-groups-rsvp-button__guest-success" role="status">✓ ' +
+						( data.status === 'waitlisted' ? 'You\'re on the waitlist!' : 'You\'re confirmed!' ) +
+						' Check your email.</p>';
+				} else {
+					btn.disabled = false;
+					btn.textContent = 'RSVP as Guest';
+					const note = form.querySelector( '.wp-block-groups-rsvp-button__guest-note' );
+					if ( note ) {
+						note.textContent = data.message || 'Something went wrong.';
+						note.style.color = 'var(--wp--preset--color--error-700, #B91C1C)';
+					}
+				}
+			} catch {
+				btn.disabled = false;
+				btn.textContent = 'RSVP as Guest';
+			}
+		} );
+	} );
+}
+
 // Hydrate when the DOM is ready (skip during tests).
 if ( typeof document !== 'undefined' ) {
 	if ( document.readyState === 'loading' ) {
-		document.addEventListener( 'DOMContentLoaded', init );
+		document.addEventListener( 'DOMContentLoaded', () => { init(); initGuestForms(); } );
 	} else {
 		init();
+		initGuestForms();
 	}
 }
