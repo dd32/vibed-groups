@@ -77,7 +77,51 @@ class Plugin {
 		Cache::register_hooks();
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
+		add_action( 'init', [ $this, 'load_textdomain' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_google_fonts' ] );
+		REST\Rate_Limiter::register();
+	}
+
+	/**
+	 * Load plugin text domain for translations.
+	 */
+	public function load_textdomain(): void {
+		load_plugin_textdomain(
+			'wordpress-groups',
+			false,
+			dirname( plugin_basename( GROUPS_PLUGIN_FILE ) ) . '/languages'
+		);
+	}
+
+	/**
+	 * Conditionally enqueue Google Fonts.
+	 *
+	 * GDPR note: Loading fonts from fonts.googleapis.com transmits visitor IP
+	 * addresses to Google, which may violate GDPR in the EU. This filter allows
+	 * site operators to disable external font loading entirely.
+	 *
+	 * Usage: add_filter( 'groups_load_google_fonts', '__return_false' );
+	 *
+	 * When disabled, the theme or site should provide its own font stack.
+	 * Consider using locally-hosted fonts or the WordPress Webfonts API
+	 * (wp_register_webfonts) when available.
+	 */
+	public function maybe_enqueue_google_fonts(): void {
+		/**
+		 * Filters whether to load Google Fonts from the external CDN.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param bool $load Whether to load Google Fonts. Default true.
+		 */
+		if ( ! apply_filters( 'groups_load_google_fonts', true ) ) {
+			return;
+		}
+
+		// No external Google Fonts are currently enqueued by this plugin.
+		// This hook exists so that themes or child plugins that add Google
+		// Fonts via this plugin can be toggled off for GDPR compliance.
 	}
 
 	/**
