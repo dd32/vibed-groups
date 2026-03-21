@@ -55,3 +55,9 @@ register_activation_hook( __FILE__, 'groups_activate' );
 // Boot the plugin.
 require_once __DIR__ . '/includes/class-plugin.php';
 Groups\Plugin::get_instance();
+
+// Register WP-CLI commands when available.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once __DIR__ . '/includes/class-cli.php';
+	\WP_CLI::add_command( 'groups', Groups\CLI::class );
+}
