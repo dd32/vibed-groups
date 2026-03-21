@@ -133,6 +133,37 @@ class Rsvp_Controller extends WP_REST_Controller {
 			]
 		);
 
+		// POST /events/{event_id}/guest-rsvp — anonymous/guest RSVP.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/guest-rsvp',
+			[
+				[
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'create_guest_rsvp' ],
+					'permission_callback' => '__return_true', // Public endpoint.
+					'args'                => [
+						'event_id' => [
+							'description' => __( 'The event ID.', 'wordpress-groups' ),
+							'type'        => 'integer',
+							'required'    => true,
+						],
+						'email'    => [
+							'description' => __( 'Guest email address.', 'wordpress-groups' ),
+							'type'        => 'string',
+							'required'    => true,
+							'format'      => 'email',
+						],
+						'name'     => [
+							'description' => __( 'Guest display name.', 'wordpress-groups' ),
+							'type'        => 'string',
+							'required'    => true,
+						],
+					],
+				],
+			]
+		);
+
 		// POST /events/{event_id}/attendance — mark attendance (organizer only).
 		register_rest_route(
 			$this->namespace,
@@ -642,5 +673,35 @@ class Rsvp_Controller extends WP_REST_Controller {
 		];
 
 		return $this->add_additional_fields_schema( $this->schema );
+	}
+
+	/**
+	 * Create a guest RSVP (no authentication required).
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function create_guest_rsvp( $request ) {
+		$event_id = absint( $request->get_param( 'event_id' ) );
+		$email    = sanitize_email( $request->get_param( 'email' ) );
+		$name     = sanitize_text_field( $request->get_param( 'name' ) );
+
+		$result = \Groups\Models\Guest_Rsvp::create( $event_id, $email, $name );
+
+		if ( is_wp_error( $result ) ) {
+			return new \WP_Error(
+				$result->get_error_code(),
+				$result->get_error_message(),
+				[ 'status' => 400 ]
+			);
+		}
+
+		return new \WP_REST_Response(
+			[
+				'id'     => $result,
+				'status' => get_comment_meta( $result, '_rsvp_status', true ),
+			],
+			201
+		);
 	}
 }
