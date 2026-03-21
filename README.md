@@ -6,6 +6,26 @@
 
 A platform for WordPress community groups to manage events, members, and RSVPs — built as a WordPress multisite network. Each community group gets its own site with event management, while a central directory site provides discovery across all groups.
 
+## Screenshots
+
+### Directory Homepage
+![Directory Homepage](docs/screenshots/01-directory-homepage.png)
+
+### Group Homepage (Melbourne)
+![Melbourne Homepage](docs/screenshots/02-melbourne-homepage.png)
+
+### Single Event Page
+![Single Event](docs/screenshots/07-single-event.png)
+
+### Members Page
+![Members](docs/screenshots/04-melbourne-members.png)
+
+### Mobile View
+![Mobile](docs/screenshots/08-mobile-view.png)
+
+### Tokyo Group
+![Tokyo](docs/screenshots/06-tokyo-homepage.png)
+
 ## Architecture
 
 - **Multisite-per-group:** Each group gets its own sub-site (e.g., `/melbourne/`, `/tokyo/`)
