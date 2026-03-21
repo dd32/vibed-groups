@@ -303,39 +303,44 @@ class Directory_Controller extends WP_REST_Controller {
 	 */
 	private function get_items_by_location( WP_REST_Request $request, float $lat, float $lon, float $radius ) {
 		$per_page = absint( $request->get_param( 'per_page' ) ) ?: 10;
+		$page     = absint( $request->get_param( 'page' ) ) ?: 1;
 
 		$main_site_id = get_main_site_id();
 		switch_to_blog( $main_site_id );
 
-		$status = $request->get_param( 'status' );
+		$status           = $request->get_param( 'status' );
 		$allowed_statuses = $this->get_allowed_statuses( $request );
-		$post_status = ( $status && in_array( $status, $allowed_statuses, true ) )
+		$post_status      = ( $status && in_array( $status, $allowed_statuses, true ) )
 			? $status
 			: 'meetup-active';
 
-		$results = Location_Query::find_nearby( $lat, $lon, $radius, [
+		$query_result = Location_Query::find_nearby( $lat, $lon, $radius, [
 			'post_type'   => self::MEETUP_POST_TYPE,
 			'post_status' => $post_status,
 			'limit'       => $per_page,
+			'page'        => $page,
 		] );
 
-		if ( is_wp_error( $results ) ) {
+		if ( is_wp_error( $query_result ) ) {
 			restore_current_blog();
-			return $results;
+			return $query_result;
 		}
 
 		$groups = [];
-		foreach ( $results as $post ) {
-			$item     = $this->prepare_item_for_response( $post, $request )->get_data();
+		foreach ( $query_result['results'] as $post ) {
+			$item             = $this->prepare_item_for_response( $post, $request )->get_data();
 			$item['distance'] = round( $post->distance, 2 );
-			$groups[] = $item;
+			$groups[]         = $item;
 		}
 
 		restore_current_blog();
 
+		$total       = $query_result['total'];
+		$total_pages = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
+
 		$response = new WP_REST_Response( $groups, 200 );
-		$response->header( 'X-WP-Total', count( $groups ) );
-		$response->header( 'X-WP-TotalPages', 1 );
+		$response->header( 'X-WP-Total', $total );
+		$response->header( 'X-WP-TotalPages', $total_pages );
 
 		return $response;
 	}

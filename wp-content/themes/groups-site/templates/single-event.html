@@ -91,9 +91,14 @@
 		<div class="wp-block-column groups-site-event-sidebar" style="flex-basis:38%">
 			<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|20"},"border":{"radius":"12px","width":"1px","color":"var:preset|color|neutral-200"}},"backgroundColor":"neutral-0","layout":{"type":"constrained"},"className":"groups-site-event-info-card"} -->
 			<div class="wp-block-group groups-site-event-info-card has-border-color has-neutral-0-background-color has-background" style="border-color:var(--wp--preset--color--neutral-200);border-width:1px;border-radius:12px;padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)">
-				<!-- wp:heading {"level":3,"fontSize":"heading-5","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}}} -->
-				<h3 class="wp-block-heading has-heading-5-font-size" style="margin-bottom:var(--wp--preset--spacing--10)">Date &amp; Time</h3>
-				<!-- /wp:heading -->
+
+				<!-- wp:group {"className":"groups-site-event-info-card-header","layout":{"type":"constrained"}} -->
+				<div class="wp-block-group groups-site-event-info-card-header">
+					<!-- wp:heading {"level":3,"fontSize":"heading-4","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}}} -->
+					<h3 class="wp-block-heading has-heading-4-font-size" style="margin-bottom:var(--wp--preset--spacing--10)">Date &amp; Time</h3>
+					<!-- /wp:heading -->
+				</div>
+				<!-- /wp:group -->
 
 				<!-- wp:groups/event-datetime /-->
 

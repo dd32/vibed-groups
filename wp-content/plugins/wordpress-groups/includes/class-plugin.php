@@ -78,6 +78,7 @@ class Plugin {
 
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+		REST\Rate_Limiter::register();
 	}
 
 	/**
