@@ -69,6 +69,8 @@ class Plugin {
 		Analytics\Aggregator::schedule_cron();
 		new Analytics\Dormancy_Detector();
 		Analytics\Dormancy_Detector::schedule_cron();
+		new Models\Event_Lifecycle();
+		Models\Event_Lifecycle::schedule_cron();
 		new Calendar\ICal_Export();
 		new Notifications\Scheduler();
 		new Notifications\Announcements();
