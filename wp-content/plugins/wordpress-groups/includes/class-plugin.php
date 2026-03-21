@@ -85,6 +85,8 @@ class Plugin {
 		new Admin\Event_Duplicator();
 		new Workflow\Organizer_Onboarding();
 		new Notifications\Rsvp_Notifications();
+		new Cron\Post_Event_Cron();
+		Cron\Post_Event_Cron::schedule_cron();
 		new Blocks\Recurrence_Panel();
 		new SEO();
 		new Geocoder();

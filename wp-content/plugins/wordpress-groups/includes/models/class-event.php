@@ -40,7 +40,7 @@ class Event {
 	 */
 	const TRANSITIONS = [
 		'event-draft'     => [ 'event-scheduled', 'event-cancelled' ],
-		'event-scheduled' => [ 'event-active', 'event-cancelled', 'event-draft' ],
+		'event-scheduled' => [ 'event-active', 'event-past', 'event-cancelled', 'event-draft' ],
 		'event-active'    => [ 'event-past', 'event-cancelled' ],
 		'event-past'      => [],
 		'event-cancelled' => [ 'event-draft' ],
