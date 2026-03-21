@@ -189,6 +189,79 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 		<?php endforeach; ?>
 	</div>
 
+	<?php
+	// At-risk and dormant groups detail.
+	if ( $switched ) {
+		switch_to_blog( $main_site_id );
+	}
+	$at_risk_groups = get_posts( [
+		'post_type'      => 'wp_meetup',
+		'post_status'    => [ 'meetup-active', 'meetup-dormant' ],
+		'posts_per_page' => 10,
+		'meta_query'     => [
+			'relation' => 'OR',
+			[ 'key' => '_meetup_at_risk', 'value' => '1' ],
+			// Also include dormant.
+		],
+		'orderby'        => 'title',
+		'order'          => 'ASC',
+	] );
+	// Also get dormant ones directly.
+	$dormant_groups = get_posts( [
+		'post_type'      => 'wp_meetup',
+		'post_status'    => 'meetup-dormant',
+		'posts_per_page' => 10,
+		'fields'         => 'ids',
+	] );
+	$at_risk_ids = array_merge(
+		wp_list_pluck( $at_risk_groups, 'ID' ),
+		$dormant_groups
+	);
+	$at_risk_ids = array_unique( $at_risk_ids );
+
+	if ( $switched ) {
+		restore_current_blog();
+	}
+	?>
+
+	<?php if ( ! empty( $at_risk_ids ) ) : ?>
+		<div class="wp-block-groups-deputy-dashboard__section">
+			<h3 class="wp-block-groups-deputy-dashboard__section-title">
+				<?php esc_html_e( 'Groups Needing Attention', 'wordpress-groups' ); ?>
+			</h3>
+			<ul class="wp-block-groups-deputy-dashboard__risk-list">
+				<?php
+				foreach ( $at_risk_ids as $group_id ) {
+					$group_post   = get_post( $group_id );
+					if ( ! $group_post ) continue;
+					$is_dormant   = 'meetup-dormant' === get_post_status( $group_id );
+					$last_event   = get_post_meta( $group_id, '_meetup_last_event_date', true );
+					$days_ago     = $last_event ? floor( ( time() - strtotime( $last_event ) ) / DAY_IN_SECONDS ) : '?';
+					$badge_class  = $is_dormant ? 'dormant' : 'at-risk';
+					$badge_label  = $is_dormant ? __( 'Dormant', 'wordpress-groups' ) : __( 'At Risk', 'wordpress-groups' );
+					?>
+					<li class="wp-block-groups-deputy-dashboard__risk-item">
+						<span class="wp-block-groups-deputy-dashboard__risk-badge wp-block-groups-deputy-dashboard__risk-badge--<?php echo esc_attr( $badge_class ); ?>">
+							<?php echo esc_html( $badge_label ); ?>
+						</span>
+						<strong><?php echo esc_html( $group_post->post_title ); ?></strong>
+						<span class="wp-block-groups-deputy-dashboard__risk-meta">
+							<?php
+							printf(
+								/* translators: %s: number of days */
+								esc_html__( '%s days since last event', 'wordpress-groups' ),
+								esc_html( $days_ago )
+							);
+							?>
+						</span>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+		</div>
+	<?php endif; ?>
+
 	<?php if ( $recent_activity ) : ?>
 		<div class="wp-block-groups-deputy-dashboard__section">
 			<h3 class="wp-block-groups-deputy-dashboard__section-title">
