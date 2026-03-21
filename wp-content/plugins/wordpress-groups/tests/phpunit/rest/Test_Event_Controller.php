@@ -5,10 +5,8 @@
  * @package Groups\Tests\REST
  */
 
-
 use Groups\Post_Types\Event;
 use Groups\REST\Event_Controller;
-use WP_REST_Server;
 
 /**
  * @coversDefaultClass \Groups\REST\Event_Controller
