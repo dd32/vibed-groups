@@ -1,21 +1,37 @@
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
 
-<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|70","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}},"backgroundColor":"neutral-100","layout":{"type":"constrained","wideSize":"1280px"},"className":"groups-site-hero"} -->
-<div class="wp-block-group groups-site-hero has-neutral-100-background-color has-background" style="padding-top:var(--wp--preset--spacing--80);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--edge-space)">
-	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained","contentSize":"720px","justifyContent":"left"}} -->
-	<div class="wp-block-group">
-		<!-- wp:site-title {"level":1,"fontSize":"heading-1","style":{"elements":{"link":{"color":{"text":"var:preset|color|neutral-950"},"typography":{"textDecoration":"none"}}}}} /-->
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|80","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}},"layout":{"type":"constrained","wideSize":"1280px"},"className":"groups-site-hero"} -->
+<div class="wp-block-group groups-site-hero" style="padding-top:var(--wp--preset--spacing--90);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--80);padding-left:var(--wp--preset--spacing--edge-space)">
+	<!-- wp:html -->
+	<div class="groups-site-hero-illustration" aria-hidden="true"></div>
+	<!-- /wp:html -->
 
-		<!-- wp:paragraph {"fontSize":"body-lg","textColor":"neutral-600"} -->
-		<p class="has-neutral-600-color has-text-color has-body-lg-font-size">Welcome to our WordPress community group. Join us for local meetups, workshops, and learning opportunities.</p>
+	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"constrained","contentSize":"720px","justifyContent":"left"}} -->
+	<div class="wp-block-group">
+		<!-- wp:paragraph {"className":"groups-site-overline groups-site-overline--primary","fontSize":"caption"} -->
+		<p class="groups-site-overline groups-site-overline--primary has-caption-font-size">WordPress Community</p>
 		<!-- /wp:paragraph -->
+
+		<!-- wp:site-title {"level":1,"fontSize":"heading-1","style":{"elements":{"link":{"color":{"text":"var:preset|color|neutral-0"},"typography":{"textDecoration":"none"}}}}} /-->
+
+		<!-- wp:paragraph {"fontSize":"body-lg"} -->
+		<p class="has-body-lg-font-size">Welcome to our WordPress community group. Join us for local meetups, workshops, and learning opportunities.</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:buttons {"style":{"spacing":{"margin":{"top":"var:preset|spacing|40"}}}} -->
+		<div class="wp-block-buttons" style="margin-top:var(--wp--preset--spacing--40)">
+			<!-- wp:button {"backgroundColor":"accent-500","textColor":"neutral-0","style":{"border":{"radius":"8px"},"typography":{"fontWeight":"600"}},"fontSize":"body"} -->
+			<div class="wp-block-button has-custom-font-size has-body-font-size"><a class="wp-block-button__link has-neutral-0-color has-accent-500-background-color has-text-color has-background wp-element-button" style="border-radius:8px;font-weight:600">Browse Events</a></div>
+			<!-- /wp:button -->
+		</div>
+		<!-- /wp:buttons -->
 	</div>
 	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}},"layout":{"type":"constrained","wideSize":"1280px"}} -->
-<main class="wp-block-group" id="main" style="padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--edge-space)">
+<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}},"layout":{"type":"constrained","wideSize":"1280px"},"className":"groups-site-front-main"} -->
+<main class="wp-block-group groups-site-front-main" id="main" style="padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--edge-space)">
 
 	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|60","margin":{"bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained","wideSize":"1280px","justifyContent":"left"}} -->
 	<div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--70)">
