@@ -21,12 +21,14 @@ add_action( 'after_setup_theme', 'groups_site_setup' );
  */
 function groups_site_enqueue_assets() {
 	// Google Fonts: Plus Jakarta Sans (headings) + Inter (body) + JetBrains Mono (mono).
-	wp_enqueue_style(
-		'groups-site-google-fonts',
-		'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap',
-		[],
-		null
-	);
+	if ( apply_filters( 'groups_load_google_fonts', true ) ) {
+		wp_enqueue_style(
+			'groups-site-google-fonts',
+			'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap',
+			[],
+			null
+		);
+	}
 
 	wp_enqueue_style(
 		'groups-site-custom',

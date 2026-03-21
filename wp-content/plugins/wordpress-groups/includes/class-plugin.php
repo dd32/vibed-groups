@@ -76,9 +76,17 @@ class Plugin {
 
 		Cache::register_hooks();
 
+		add_action( 'init', [ $this, 'load_textdomain' ] );
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		REST\Rate_Limiter::register();
+	}
+
+	/**
+	 * Load the plugin text domain for translations.
+	 */
+	public function load_textdomain(): void {
+		load_plugin_textdomain( 'wordpress-groups', false, 'wordpress-groups/languages' );
 	}
 
 	/**
