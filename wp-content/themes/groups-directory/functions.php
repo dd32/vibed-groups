@@ -21,12 +21,14 @@ add_action( 'after_setup_theme', 'groups_directory_setup' );
  */
 function groups_directory_enqueue_assets() {
 	// Google Fonts: Plus Jakarta Sans (headings) + Inter (body) — matching groups-site.
-	wp_enqueue_style(
-		'groups-directory-google-fonts',
-		'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap',
-		[],
-		null
-	);
+	if ( apply_filters( 'groups_load_google_fonts', true ) ) {
+		wp_enqueue_style(
+			'groups-directory-google-fonts',
+			'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap',
+			[],
+			null
+		);
+	}
 
 	// Enqueue custom.css if the file exists.
 	$custom_css_path = get_theme_file_path( 'assets/css/custom.css' );

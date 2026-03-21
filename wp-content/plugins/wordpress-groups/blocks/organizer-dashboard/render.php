@@ -132,10 +132,19 @@ if ( $upcoming_query->have_posts() ) {
 			$tz = wp_timezone();
 		}
 
+		$rsvp_count = (int) get_comments( [
+			'post_id'    => $event_id,
+			'status'     => 'approve',
+			'meta_key'   => '_rsvp_status',
+			'meta_value' => 'attending',
+			'count'      => true,
+		] );
+
 		$upcoming_events[] = [
-			'title' => get_the_title(),
-			'url'   => get_permalink(),
-			'date'  => $start_utc ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $start_utc ), $tz ) : '',
+			'title'      => get_the_title(),
+			'url'        => get_permalink(),
+			'date'       => $start_utc ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $start_utc ), $tz ) : '',
+			'rsvp_count' => $rsvp_count,
 		];
 	}
 	wp_reset_postdata();
@@ -193,6 +202,15 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 								<?php echo esc_html( $event['date'] ); ?>
 							</span>
 						<?php endif; ?>
+						<span class="wp-block-groups-organizer-dashboard__event-rsvp-count">
+							<?php
+							printf(
+								/* translators: %s: number of attending RSVPs */
+								esc_html__( '%s attending', 'wordpress-groups' ),
+								esc_html( number_format_i18n( $event['rsvp_count'] ) )
+							);
+							?>
+						</span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
