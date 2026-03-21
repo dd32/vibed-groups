@@ -148,6 +148,18 @@ class Scheduler {
 			return;
 		}
 
+		// Convert UTC start time to the event's local timezone for display.
+		$timezone_str = $event_data['timezone'] ?? 'UTC';
+		try {
+			$utc_tz   = new \DateTimeZone( 'UTC' );
+			$event_tz = new \DateTimeZone( $timezone_str );
+			$dt       = new \DateTime( $event_data['start_utc'], $utc_tz );
+			$dt->setTimezone( $event_tz );
+			$local_date = $dt->format( 'l, F j, Y \a\t g:i A T' );
+		} catch ( \Exception $e ) {
+			$local_date = $event_data['start_utc'];
+		}
+
 		$notifier = new Email_Notifier();
 
 		foreach ( $rsvps as $rsvp ) {
@@ -178,7 +190,7 @@ class Scheduler {
 				'event-reminder',
 				[
 					'event_title' => $event_data['title'],
-					'event_date'  => $event_data['start_utc'],
+					'event_date'  => $local_date,
 					'event_url'   => get_permalink( $event_id ),
 					'user_name'   => $user->display_name,
 				]

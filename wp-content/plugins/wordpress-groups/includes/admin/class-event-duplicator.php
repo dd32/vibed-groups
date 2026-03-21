@@ -97,7 +97,7 @@ class Event_Duplicator {
 		}
 
 		// Copy all event meta.
-		foreach ( Event_Model::META_KEYS as $key => $meta_key ) {
+		foreach ( Event_Model::META_KEYS as $meta_key ) {
 			$value = get_post_meta( $post_id, $meta_key, true );
 			if ( '' !== $value ) {
 				update_post_meta( $new_post_id, $meta_key, $value );

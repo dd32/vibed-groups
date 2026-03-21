@@ -149,7 +149,7 @@ class Event_Controller extends WP_REST_Controller {
 		}
 
 		return in_array( 'organizer', (array) $user->roles, true )
-			|| in_array( 'co-organizer', (array) $user->roles, true );
+			|| in_array( 'co_organizer', (array) $user->roles, true );
 	}
 
 	/**
@@ -182,7 +182,7 @@ class Event_Controller extends WP_REST_Controller {
 		}
 
 		// Co-organizers can only manage their own events.
-		if ( in_array( 'co-organizer', (array) $user->roles, true ) ) {
+		if ( in_array( 'co_organizer', (array) $user->roles, true ) ) {
 			return (int) $post->post_author === get_current_user_id();
 		}
 
