@@ -64,8 +64,8 @@ class Test_Event_Controller extends WP_UnitTestCase {
 			add_role( 'organizer', 'Organizer', [ 'read' => true ] );
 		}
 
-		if ( ! get_role( 'co-organizer' ) ) {
-			add_role( 'co-organizer', 'Co-Organizer', [ 'read' => true ] );
+		if ( ! get_role( 'co_organizer' ) ) {
+			add_role( 'co_organizer', 'Co-Organizer', [ 'read' => true ] );
 		}
 	}
 
@@ -83,7 +83,7 @@ class Test_Event_Controller extends WP_UnitTestCase {
 		$this->admin_id         = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		$this->subscriber_id    = self::factory()->user->create( [ 'role' => 'subscriber' ] );
 		$this->organizer_id     = self::factory()->user->create( [ 'role' => 'organizer' ] );
-		$this->co_organizer_id  = self::factory()->user->create( [ 'role' => 'co-organizer' ] );
+		$this->co_organizer_id  = self::factory()->user->create( [ 'role' => 'co_organizer' ] );
 	}
 
 	/**

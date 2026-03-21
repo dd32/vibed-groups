@@ -118,7 +118,7 @@ class Venue_Controller extends WP_REST_Controller {
 		}
 
 		return in_array( 'organizer', (array) $user->roles, true )
-			|| in_array( 'co-organizer', (array) $user->roles, true );
+			|| in_array( 'co_organizer', (array) $user->roles, true );
 	}
 
 	/**
