@@ -159,4 +159,86 @@ class CLI {
 
 		WP_CLI::success( 'Dormancy check complete.' );
 	}
+
+	/**
+	 * Import events from a Meetup.com JSON export.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <file>
+	 * : Path to the Meetup JSON export file.
+	 *
+	 * --blog_id=<id>
+	 * : Target blog ID for the group site.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp groups import-events /path/to/events.json --blog_id=2
+	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Named arguments.
+	 */
+	public function import_events( array $args, array $assoc_args ): void {
+		$file    = $args[0];
+		$blog_id = (int) ( $assoc_args['blog_id'] ?? 0 );
+
+		if ( ! $blog_id ) {
+			WP_CLI::error( 'Please specify --blog_id for the target group site.' );
+		}
+
+		WP_CLI::log( sprintf( 'Importing events from %s to blog %d...', $file, $blog_id ) );
+
+		$result = Integrations\Meetup_Importer::import_events_from_json( $file, $blog_id );
+
+		WP_CLI::log( sprintf( 'Imported: %d, Skipped: %d', $result['imported'], $result['skipped'] ) );
+
+		if ( ! empty( $result['errors'] ) ) {
+			foreach ( $result['errors'] as $error ) {
+				WP_CLI::warning( $error );
+			}
+		}
+
+		WP_CLI::success( 'Import complete.' );
+	}
+
+	/**
+	 * Import members from a Meetup.com CSV export.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <file>
+	 * : Path to the Meetup CSV export file.
+	 *
+	 * --blog_id=<id>
+	 * : Target blog ID for the group site.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp groups import-members /path/to/members.csv --blog_id=2
+	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Named arguments.
+	 */
+	public function import_members( array $args, array $assoc_args ): void {
+		$file    = $args[0];
+		$blog_id = (int) ( $assoc_args['blog_id'] ?? 0 );
+
+		if ( ! $blog_id ) {
+			WP_CLI::error( 'Please specify --blog_id for the target group site.' );
+		}
+
+		WP_CLI::log( sprintf( 'Importing members from %s to blog %d...', $file, $blog_id ) );
+
+		$result = Integrations\Meetup_Importer::import_members_from_csv( $file, $blog_id );
+
+		WP_CLI::log( sprintf( 'Imported: %d, Skipped: %d', $result['imported'], $result['skipped'] ) );
+
+		if ( ! empty( $result['errors'] ) ) {
+			foreach ( $result['errors'] as $error ) {
+				WP_CLI::warning( $error );
+			}
+		}
+
+		WP_CLI::success( 'Import complete.' );
+	}
 }
