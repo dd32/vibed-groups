@@ -19,6 +19,7 @@ echo "🎨 Setting up main site (groups-directory theme)..."
 npx wp-env run cli wp theme activate groups-directory 2>/dev/null || true
 npx wp-env run cli wp option update blogname "WordPress Community Groups" 2>/dev/null || true
 npx wp-env run cli wp option update blogdescription "Find your local WordPress community" 2>/dev/null || true
+npx wp-env run cli wp option update avatar_default "robohash" 2>/dev/null || true
 
 # Create front page.
 npx wp-env run cli wp post list --post_type=page --name=home --field=ID 2>/dev/null | grep -q "[0-9]" || {
