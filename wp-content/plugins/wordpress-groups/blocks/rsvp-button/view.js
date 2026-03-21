@@ -20,6 +20,22 @@ const STATE = {
 };
 
 /**
+ * Check whether a REST API error indicates an expired session (401/403).
+ *
+ * @param {Object} err Error object from apiFetch.
+ * @return {boolean} True when the error is an authentication failure.
+ */
+function isSessionExpiredError( err ) {
+	const code = err?.code || err?.data?.status || err?.status;
+	return (
+		code === 401 ||
+		code === 403 ||
+		code === 'rest_not_logged_in' ||
+		code === 'rest_forbidden'
+	);
+}
+
+/**
  * RSVP Button component.
  *
  * @param {Object} props
@@ -35,6 +51,7 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 	const [ waitlisted, setWaitlisted ] = useState( initialWaitlisted );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ error, setError ] = useState( '' );
+	const [ sessionExpired, setSessionExpired ] = useState( false );
 	const stateRef = useRef( state );
 
 	// Keep the ref in sync with state.
@@ -88,6 +105,7 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 
 		setIsLoading( true );
 		setError( '' );
+		setSessionExpired( false );
 
 		try {
 			if ( stateRef.current === STATE.ATTENDING || stateRef.current === STATE.WAITLISTED ) {
@@ -110,7 +128,13 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 
 			await refreshState();
 		} catch ( err ) {
-			setError( err.message || __( 'Something went wrong. Please try again.', 'wordpress-groups' ) );
+			if ( isSessionExpiredError( err ) ) {
+				setState( STATE.NOT_LOGGED_IN );
+				setSessionExpired( true );
+				setError( __( 'Session expired \u2014 please log in again.', 'wordpress-groups' ) );
+			} else {
+				setError( err.message || __( 'Something went wrong. Please try again.', 'wordpress-groups' ) );
+			}
 		} finally {
 			setIsLoading( false );
 		}
@@ -125,6 +149,8 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 		[ STATE.WAITLISTED ]: __( 'Leave Waitlist', 'wordpress-groups' ),
 		[ STATE.LOADING ]: __( 'Updating\u2026', 'wordpress-groups' ),
 	};
+
+	const reLoginUrl = loginUrl || '/wp-login.php';
 
 	return createElement(
 		'div',
@@ -177,15 +203,29 @@ export function RsvpButton( { eventId, initialState, initialAttending, initialWa
 					)
 				)
 		),
-		error &&
-			createElement(
+		error && sessionExpired
+			? createElement(
 				'p',
 				{
-					className: 'wp-block-groups-rsvp-button__error',
+					className: 'wp-block-groups-rsvp-button__error wp-block-groups-rsvp-button__session-expired',
 					role: 'alert',
 				},
-				error
+				__( 'Session expired \u2014 ', 'wordpress-groups' ),
+				createElement(
+					'a',
+					{ href: reLoginUrl, className: 'wp-block-groups-rsvp-button__login-link' },
+					__( 'please log in again', 'wordpress-groups' )
+				)
 			)
+			: error &&
+				createElement(
+					'p',
+					{
+						className: 'wp-block-groups-rsvp-button__error',
+						role: 'alert',
+					},
+					error
+				)
 	);
 }
 
