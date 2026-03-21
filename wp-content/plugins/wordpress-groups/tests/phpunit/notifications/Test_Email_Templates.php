@@ -317,6 +317,7 @@ class Test_Email_Templates extends WP_UnitTestCase {
 			'dormancy-alert',
 			'event-reminder',
 			'group-announcement',
+			'post-event-thanks',
 			'rsvp-confirmation',
 			'rsvp-promotion',
 			'welcome-organizer',
