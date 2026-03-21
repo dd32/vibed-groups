@@ -1,0 +1,42 @@
+# Directories
+.github/
+.claude/
+bin/
+node_modules/
+tests/
+src/
+
+# Build tooling
+.wp-env.json
+.wp-env.override.json
+.nvmrc
+.gitignore
+.editorconfig
+.eslintrc*
+.stylelintrc*
+.phpcs.xml.dist
+phpcs.xml
+phpunit.xml
+phpunit.xml.dist
+wp-tests-config.php
+jest.config.js
+webpack.config.js
+package.json
+package-lock.json
+composer.json
+composer.lock
+
+# Documentation (except readme.txt which WordPress.org requires)
+*.md
+!readme.txt
+
+# Seed / test data
+seed-data*.php
+
+# IDE and OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
