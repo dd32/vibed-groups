@@ -14,7 +14,8 @@
 		"env:stop": "wp-env stop",
 		"env:destroy": "wp-env destroy",
 		"i18n:pot": "npx wp-env run cli wp i18n make-pot wp-content/plugins/wordpress-groups wp-content/plugins/wordpress-groups/languages/wordpress-groups.pot",
-		"lint:php": "npx wp-env run cli phpcs --standard=wp-content/plugins/wordpress-groups/.phpcs.xml.dist wp-content/plugins/wordpress-groups/includes/"
+		"lint:php": "npx wp-env run cli phpcs --standard=wp-content/plugins/wordpress-groups/.phpcs.xml.dist wp-content/plugins/wordpress-groups/includes/",
+		"analyze": "npx wp-env run cli --env-cwd=wp-content/plugins/wordpress-groups vendor/bin/phpstan analyse --configuration=phpstan.neon.dist"
 	},
 	"devDependencies": {
 		"@testing-library/jest-dom": "^6.9.1",
