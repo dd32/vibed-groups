@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Groups">
+	<description>PHP_CodeSniffer ruleset for the WordPress Groups plugin.</description>
+
+	<!-- What to scan. -->
+	<file>./includes</file>
+	<file>./wordpress-groups.php</file>
+	<file>./uninstall.php</file>
+
+	<!-- Exclude generated / third-party paths. -->
+	<exclude-pattern>./vendor/*</exclude-pattern>
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./build/*</exclude-pattern>
+	<exclude-pattern>./tests/*</exclude-pattern>
+
+	<!-- Use the WordPress-Extra ruleset (includes WordPress-Core). -->
+	<rule ref="WordPress-Extra">
+		<!-- Allow short array syntax. -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+	</rule>
+
+	<!-- Check for WordPress version compatibility. -->
+	<config name="minimum_wp_version" value="6.7"/>
+
+	<!-- Check for PHP cross-version compatibility. -->
+	<config name="testVersion" value="8.3-"/>
+
+	<!-- Text domain for I18N checks. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="wordpress-groups"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Prefixes for function / class / constant names. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="groups"/>
+				<element value="Groups"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Show colours and progress. -->
+	<arg name="colors"/>
+	<arg value="ps"/>
+
+	<!-- Use UTF-8. -->
+	<arg name="encoding" value="utf-8"/>
+</ruleset>

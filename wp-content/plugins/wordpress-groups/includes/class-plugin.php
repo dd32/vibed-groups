@@ -128,5 +128,8 @@ class Plugin {
 
 		$preferences_controller = new REST\Preferences_Controller();
 		$preferences_controller->register_routes();
+
+		$health_controller = new REST\Health_Controller();
+		$health_controller->register_routes();
 	}
 }

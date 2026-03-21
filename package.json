@@ -12,7 +12,8 @@
 		"env:start": "wp-env start",
 		"env:stop": "wp-env stop",
 		"env:destroy": "wp-env destroy",
-		"i18n:pot": "npx wp-env run cli wp i18n make-pot wp-content/plugins/wordpress-groups wp-content/plugins/wordpress-groups/languages/wordpress-groups.pot"
+		"i18n:pot": "npx wp-env run cli wp i18n make-pot wp-content/plugins/wordpress-groups wp-content/plugins/wordpress-groups/languages/wordpress-groups.pot",
+		"lint:php": "npx wp-env run cli phpcs --standard=wp-content/plugins/wordpress-groups/.phpcs.xml.dist wp-content/plugins/wordpress-groups/includes/"
 	},
 	"devDependencies": {
 		"@testing-library/jest-dom": "^6.9.1",
