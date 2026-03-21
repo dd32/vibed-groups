@@ -149,6 +149,54 @@ class Activity_Log_Table {
 	}
 
 	/**
+	 * Delete activity log entries older than a given number of days.
+	 *
+	 * @param int $days Number of days to retain. Entries older than this are deleted.
+	 * @return int|false Number of rows deleted, or false on failure.
+	 */
+	public static function prune_older_than( int $days ) {
+		global $wpdb;
+
+		$table = self::table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table} WHERE `created_at` < %s",
+				gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) )
+			)
+		);
+	}
+
+	/**
+	 * Cron callback: prune old activity log entries.
+	 *
+	 * Retention period defaults to 90 days and can be customised via the
+	 * `groups_activity_log_retention_days` filter.
+	 */
+	public static function cron_prune(): void {
+		/**
+		 * Filter the number of days to retain activity log entries.
+		 *
+		 * @param int $days Default 90.
+		 */
+		$days = (int) apply_filters( 'groups_activity_log_retention_days', 90 );
+
+		if ( $days > 0 ) {
+			self::prune_older_than( $days );
+		}
+	}
+
+	/**
+	 * Schedule the daily pruning cron event if not already scheduled.
+	 */
+	public static function schedule_cron(): void {
+		if ( ! wp_next_scheduled( 'groups_activity_log_prune' ) ) {
+			wp_schedule_event( time(), 'daily', 'groups_activity_log_prune' );
+		}
+	}
+
+	/**
 	 * Decode the meta JSON field on a row object.
 	 *
 	 * @param object $row Database row.

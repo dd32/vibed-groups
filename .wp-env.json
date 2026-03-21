@@ -12,7 +12,9 @@
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/mu-plugins/wporg-mu-plugins-loader.php": "./wp-content/mu-plugins/wporg-mu-plugins-loader.php",
 		"wp-content/wordcamp.org": "WordPress/wordcamp.org#production",
-		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wp-content/mu-plugins/wordcamp-mu-plugins-loader.php"
+		"wp-content/mu-plugins/wordcamp-mu-plugins-loader.php": "./wp-content/mu-plugins/wordcamp-mu-plugins-loader.php",
+		"seed-data.php": "./bin/seed-data.php",
+		"seed-data-tokyo.php": "./bin/seed-data-tokyo.php"
 	},
 	"testsEnvironment": false,
 	"lifecycleScripts": {
