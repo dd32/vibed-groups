@@ -38,7 +38,22 @@ class Plugin {
 	 * Constructor — private, use get_instance().
 	 */
 	private function __construct() {
+		$this->maybe_upgrade_database();
 		$this->init_components();
+	}
+
+	/**
+	 * Check the stored database version and run migrations if outdated.
+	 *
+	 * Uses dbDelta internally, which safely handles CREATE and ALTER TABLE,
+	 * so this is safe to run on every request when the version changes.
+	 */
+	private function maybe_upgrade_database(): void {
+		$current_version = Database\Schema::get_schema_version();
+
+		if ( $current_version < Database\Schema::VERSION ) {
+			Database\Schema::create_tables();
+		}
 	}
 
 	/**
@@ -75,6 +90,9 @@ class Plugin {
 		new Geocoder();
 
 		Cache::register_hooks();
+
+		Database\Activity_Log_Table::schedule_cron();
+		add_action( 'groups_activity_log_prune', [ Database\Activity_Log_Table::class, 'cron_prune' ] );
 
 		add_action( 'init', [ $this, 'load_textdomain' ] );
 		add_action( 'init', [ Models\Membership::class, 'register_roles' ] );
