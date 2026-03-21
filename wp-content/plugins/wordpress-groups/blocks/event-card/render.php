@@ -33,9 +33,10 @@ $timezone       = get_post_meta( $event_id, '_event_timezone', true );
 $venue_id       = (int) get_post_meta( $event_id, '_event_venue_id', true );
 $online_link    = get_post_meta( $event_id, '_event_online_link', true );
 
-// RSVP count — RSVPs are stored as comments with 'attending' status meta.
+// RSVP count — RSVPs are stored as 'groups_rsvp' comments with 'attending' status meta.
 $rsvp_comments = get_comments( [
 	'post_id'    => $event_id,
+	'type'       => 'groups_rsvp',
 	'status'     => 'approve',
 	'meta_key'   => '_rsvp_status',
 	'meta_value' => 'attending',

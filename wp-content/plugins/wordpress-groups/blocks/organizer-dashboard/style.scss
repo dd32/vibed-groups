@@ -1,4 +1,27 @@
 .wp-block-groups-organizer-dashboard {
+	&__loading {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: var(--wp--preset--spacing--30, 20px);
+		color: var(--wp--preset--color--charcoal-4, #656a71);
+		font-size: var(--wp--preset--font-size--small, 14px);
+	}
+
+	&__loading-spinner {
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		border: 2px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+		border-top-color: var(--wp--preset--color--blueberry-1, #3858e9);
+		border-radius: 50%;
+		animation: groups-dashboard-spin 0.8s linear infinite;
+	}
+
+	&[data-loaded] &__loading {
+		display: none;
+	}
+
 	&__heading {
 		font-size: var(--wp--preset--font-size--large, 24px);
 		margin-bottom: var(--wp--preset--spacing--30, 20px);
@@ -139,5 +162,11 @@
 			width: 16px;
 			height: 16px;
 		}
+	}
+}
+
+@keyframes groups-dashboard-spin {
+	to {
+		transform: rotate(360deg);
 	}
 }
