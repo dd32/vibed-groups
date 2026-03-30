@@ -173,15 +173,28 @@
 		"blocks": {
 			"core/site-title": {
 				"typography": { "fontFamily": "var(--wp--preset--font-family--heading)", "fontSize": "var(--wp--preset--font-size--heading-5)", "fontWeight": "700" },
-				"elements": { "link": { "color": { "text": "var(--wp--preset--color--neutral-950)" }, "typography": { "textDecoration": "none" } } }
+				"elements": { "link": { "color": { "text": "var(--wp--preset--color--neutral-950)" }, "typography": { "textDecoration": "none" }, ":hover": { "color": { "text": "var(--wp--preset--color--primary-700)" } } } }
 			},
-			"core/navigation": { "typography": { "fontSize": "var(--wp--preset--font-size--small)", "fontWeight": "500" } },
+			"core/navigation": {
+				"typography": { "fontSize": "var(--wp--preset--font-size--small)", "fontWeight": "500" },
+				"elements": {
+					"link": {
+						"color": { "text": "var(--wp--preset--color--neutral-700)" },
+						"typography": { "textDecoration": "none" },
+						":hover": { "color": { "text": "var(--wp--preset--color--primary-700)" } }
+					}
+				}
+			},
 			"core/post-title": {
 				"typography": { "fontSize": "var(--wp--preset--font-size--heading-1)" },
 				"elements": { "link": { "color": { "text": "var(--wp--preset--color--neutral-950)" }, "typography": { "textDecoration": "none" }, ":hover": { "color": { "text": "var(--wp--preset--color--primary-700)" } } } }
 			},
 			"core/query-pagination": { "typography": { "fontSize": "var(--wp--preset--font-size--small)" } },
-			"core/separator": { "color": { "text": "var(--wp--preset--color--neutral-200)" } }
+			"core/separator": { "color": { "text": "var(--wp--preset--color--neutral-200)" } },
+			"core/search": {
+				"border": { "radius": "8px", "width": "1px", "color": "var(--wp--preset--color--neutral-300)" },
+				"typography": { "fontSize": "var(--wp--preset--font-size--body)" }
+			}
 		}
 	},
 	"templateParts": [
@@ -190,6 +203,7 @@
 	],
 	"customTemplates": [
 		{ "name": "page-apply", "title": "Application Page", "postTypes": [ "page" ] },
-		{ "name": "page-deputy-dashboard", "title": "Deputy Dashboard", "postTypes": [ "page" ] }
+		{ "name": "page-deputy-dashboard", "title": "Deputy Dashboard", "postTypes": [ "page" ] },
+		{ "name": "page-groups", "title": "Groups Directory Page", "postTypes": [ "page" ] }
 	]
 }

@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies.
  */
 import metadata from './block.json';
+import './style.scss';
 
 registerBlockType( metadata.name, {
 	edit( { attributes, setAttributes } ) {

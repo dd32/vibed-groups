@@ -267,7 +267,38 @@ if ( $past_event_id ) {
 }
 
 // --- Pages ---
+$home_content = <<<BLOCKS
+<!-- wp:paragraph {"fontSize":"body-lg"} -->
+<p class="has-body-lg-font-size">WordPress Melbourne is a welcoming community of developers, designers, content creators, and WordPress enthusiasts based in Melbourne, Australia. We meet regularly to learn, share ideas, and build connections across the WordPress ecosystem.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Our meetups range from beginner-friendly introductions to deep technical dives. Whether you are launching your first site or contributing to WordPress core, there is a place for you here. We host monthly meetups, occasional workshops, and contributor days throughout the year.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">What to expect</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul class="wp-block-list">
+<li><strong>Monthly Meetups</strong> — Talks, demos, and discussions on WordPress topics</li>
+<li><strong>Workshops</strong> — Hands-on sessions for building themes, plugins, and blocks</li>
+<li><strong>Contributor Days</strong> — Join the global effort to improve WordPress</li>
+<li><strong>Social Events</strong> — Casual get-togethers to connect with fellow community members</li>
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>All events are free and open to everyone. No prior WordPress experience required — just bring your curiosity and a laptop.</p>
+<!-- /wp:paragraph -->
+BLOCKS;
+
 $pages = [
+	'home'    => [
+		'title'   => 'Home',
+		'content' => $home_content,
+	],
 	'events'  => [
 		'title'   => 'Events',
 		'content' => '<!-- wp:groups/upcoming-events /-->',
@@ -278,7 +309,7 @@ $pages = [
 	],
 	'about'   => [
 		'title'   => 'About',
-		'content' => "<!-- wp:heading -->\n<h2>About WordPress Melbourne</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>We're a friendly community of WordPress enthusiasts in Melbourne, Australia. We meet regularly to learn, share, and connect.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Whether you're a developer, designer, content creator, or just getting started with WordPress — you're welcome here!</p>\n<!-- /wp:paragraph -->",
+		'content' => $home_content,
 	],
 	'settings' => [
 		'title'   => 'Settings',
@@ -299,10 +330,10 @@ foreach ( $pages as $slug => $page_data ) {
 		] );
 	}
 }
-echo "✓ Pages created (events, members, about, settings).\n";
+echo "✓ Pages created (home, events, members, about, settings).\n";
 
-// Set front page to show events.
-$front = get_page_by_path( 'events' );
+// Set front page to the Home page.
+$front = get_page_by_path( 'home' );
 if ( $front ) {
 	update_option( 'show_on_front', 'page' );
 	update_option( 'page_on_front', $front->ID );

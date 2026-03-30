@@ -1,19 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "groups/upcoming-events",
+	"name": "groups/next-event",
 	"version": "0.1.0",
-	"title": "Upcoming Events",
+	"title": "Next Event",
 	"category": "widgets",
-	"icon": "calendar",
-	"description": "Displays a list of upcoming scheduled events.",
+	"icon": "calendar-alt",
+	"description": "Displays a callout banner linking to the next upcoming event.",
 	"textdomain": "wordpress-groups",
-	"attributes": {
-		"count": {
-			"type": "number",
-			"default": 5
-		}
-	},
+	"attributes": {},
 	"supports": {
 		"html": false,
 		"align": [ "wide", "full" ],
