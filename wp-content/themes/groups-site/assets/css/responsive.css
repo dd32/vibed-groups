@@ -1,19 +1,8 @@
 /**
  * Responsive styles for Groups Site theme.
  *
- * Breakpoints (from design spec):
- *   - Mobile:  0 - 639px
- *   - Tablet:  640px - 1023px
- *   - Desktop: 1024px - 1279px
- *   - Wide:    1280px - 1439px
- *   - Ultra:   1440px+
- *
  * @package Groups_Site
  */
-
-/* ==========================================================================
-   Mobile-first base adjustments
-   ========================================================================== */
 
 img,
 video,
@@ -25,14 +14,8 @@ iframe {
 /* ==========================================================================
    Small screens - up to 639px
    ========================================================================== */
+
 @media (max-width: 639px) {
-
-	.groups-site-local-header .wp-block-group > .wp-block-group {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
 	.groups-site-event-layout {
 		flex-direction: column !important;
 	}
@@ -44,25 +27,13 @@ iframe {
 	.wp-block-groups-event-card__thumbnail {
 		max-height: 160px;
 	}
-
-	.groups-site-community-callout .wp-block-group > .wp-block-group,
-	.groups-site-footer .wp-block-group > .wp-block-group {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	.groups-site-subnav {
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-	}
 }
 
 /* ==========================================================================
    Tablet - 640px to 1023px
    ========================================================================== */
-@media (min-width: 640px) and (max-width: 1023px) {
 
+@media (min-width: 640px) and (max-width: 1023px) {
 	.groups-site-event-layout {
 		flex-direction: column !important;
 	}
@@ -75,24 +46,24 @@ iframe {
 /* ==========================================================================
    Desktop - 1024px+
    ========================================================================== */
-@media (min-width: 1024px) {
 
+@media (min-width: 1024px) {
 	.groups-site-event-info-card {
 		position: sticky;
-		top: 92px;
+		top: 80px;
 	}
 }
 
 /* ==========================================================================
    Event hero banner
    ========================================================================== */
+
 .wp-block-groups-event-hero {
 	position: relative;
 	width: 100%;
 	overflow: hidden;
 	border-radius: 0;
-	margin-bottom: 32px;
-	background: linear-gradient(135deg, var(--wp--preset--color--primary-100), var(--wp--preset--color--accent-100));
+	background: var(--wp--preset--color--neutral-100);
 }
 
 .wp-block-groups-event-hero img {
@@ -100,18 +71,4 @@ iframe {
 	height: 100%;
 	object-fit: cover;
 	display: block;
-}
-
-/* ==========================================================================
-   Navigation overlay (hamburger)
-   ========================================================================== */
-.wp-block-navigation__responsive-container.is-menu-open {
-	background-color: var(--wp--preset--color--neutral-0, #ffffff);
-	color: var(--wp--preset--color--neutral-900);
-	padding: 32px;
-}
-
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a {
-	font-size: var(--wp--preset--font-size--body-lg, 18px);
-	padding: 8px 0;
 }

@@ -1,8 +1,9 @@
 /**
  * Custom styles for Groups Site theme.
  *
- * Implements component designs from the design spec (DESIGN-SPEC.md).
- * Uses CSS custom properties from theme.json.
+ * Provides component-level styling that complements theme.json.
+ * Keeps functional CSS (cards, buttons, badges, forms, grids) while
+ * removing decorative elements (gradients, pseudo-elements, overlays).
  *
  * @package Groups_Site
  */
@@ -17,28 +18,6 @@
 	--font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	--font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', monospace;
 
-	/* Type scale */
-	--text-h1: clamp(32px, 2rem + 1.8vw, 56px);
-	--text-h2: clamp(26px, 1.625rem + 1.2vw, 42px);
-	--text-h3: clamp(22px, 1.375rem + 0.6vw, 30px);
-	--text-h4: clamp(18px, 1.125rem + 0.4vw, 24px);
-	--text-h5: clamp(16px, 1rem + 0.2vw, 20px);
-	--text-h6: clamp(14px, 0.875rem + 0.1vw, 16px);
-	--text-body: clamp(15px, 0.9375rem + 0.1vw, 17px);
-	--text-body-lg: clamp(17px, 1.0625rem + 0.15vw, 19px);
-	--text-small: clamp(13px, 0.8125rem + 0.05vw, 14px);
-	--text-caption: clamp(11px, 0.6875rem, 12px);
-
-	/* Spacing */
-	--edge-space: clamp(16px, 4vw, 80px);
-
-	/* Layout widths */
-	--content-sm: 640px;
-	--content-md: 768px;
-	--content-lg: 960px;
-	--content-xl: 1120px;
-	--page-max: 1280px;
-
 	/* Border radius */
 	--radius-sm: 4px;
 	--radius-md: 8px;
@@ -50,7 +29,6 @@
 	--shadow-sm: 0 1px 2px rgba(20, 17, 24, 0.05);
 	--shadow-md: 0 2px 8px rgba(20, 17, 24, 0.08), 0 1px 2px rgba(20, 17, 24, 0.04);
 	--shadow-lg: 0 8px 24px rgba(20, 17, 24, 0.12), 0 2px 8px rgba(20, 17, 24, 0.06);
-	--shadow-xl: 0 16px 48px rgba(20, 17, 24, 0.16), 0 4px 12px rgba(20, 17, 24, 0.08);
 }
 
 /* ==========================================================================
@@ -62,7 +40,6 @@
 	outline-offset: 2px;
 }
 
-/* Skip link */
 .skip-link {
 	position: absolute;
 	top: -100px;
@@ -72,45 +49,39 @@
 	background: var(--wp--preset--color--primary-700);
 	color: var(--wp--preset--color--neutral-0);
 	font-family: var(--font-body);
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	font-weight: 600;
 	border-radius: var(--radius-md);
 	text-decoration: none;
 }
 
 .skip-link:focus {
+	position: fixed;
 	top: 8px;
+	z-index: 999;
+	clip: auto;
+	clip-path: none;
+	width: auto;
+	height: auto;
 }
 
 /* ==========================================================================
-   Local Header (Group navigation) - with accent line
+   Local Header - clean sticky bar
    ========================================================================== */
 
 .groups-site-local-header {
 	position: sticky;
 	top: 0;
 	z-index: 100;
-	backdrop-filter: blur(8px);
-	background: rgba(255, 255, 255, 0.95) !important;
-	border-bottom: none !important;
-}
-
-.groups-site-local-header::after {
-	content: '';
-	display: block;
-	height: 3px;
-	background: linear-gradient(90deg,
-		var(--wp--preset--color--primary-700),
-		var(--wp--preset--color--primary-500) 40%,
-		var(--wp--preset--color--accent-500) 70%,
-		var(--wp--preset--color--accent-400));
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 .groups-site-local-header .wp-block-navigation a {
 	color: var(--wp--preset--color--neutral-700);
 	text-decoration: none;
 	font-weight: 500;
-	font-size: var(--text-small);
 	transition: color 0.15s ease;
 }
 
@@ -120,120 +91,18 @@
 
 .groups-site-local-header .wp-block-navigation .current-menu-item > a {
 	color: var(--wp--preset--color--primary-700);
-	border-bottom: 2px solid var(--wp--preset--color--accent-500);
-	padding-bottom: 2px;
 }
 
 /* ==========================================================================
-   Sub-navigation (Group sections)
+   Hero section - clean, light background
    ========================================================================== */
 
-.groups-site-subnav {
-	overflow-x: auto;
-	-webkit-overflow-scrolling: touch;
-	scrollbar-width: none;
-}
-
-.groups-site-subnav::-webkit-scrollbar {
-	display: none;
-}
-
-.groups-site-subnav__nav .wp-block-navigation-item a {
-	display: block;
-	padding: 12px 16px;
-	text-decoration: none;
-	color: var(--wp--preset--color--neutral-600);
-	font-size: var(--text-small);
-	font-weight: 500;
-	border-bottom: 2px solid transparent;
-	transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.groups-site-subnav__nav .wp-block-navigation-item a:hover {
-	color: var(--wp--preset--color--neutral-800);
-}
-
-.groups-site-subnav__nav .wp-block-navigation-item.current-menu-item a {
-	color: var(--wp--preset--color--neutral-950);
-	border-bottom-color: var(--wp--preset--color--primary-500);
+.groups-site-hero h1 {
+	text-wrap: balance;
 }
 
 /* ==========================================================================
-   Hero section - warm gradient with decorative elements
-   ========================================================================== */
-
-.groups-site-hero {
-	background: linear-gradient(135deg, #1B2559 0%, #2D41A6 40%, #5570F1 70%, #EF6351 100%) !important;
-	color: var(--wp--preset--color--neutral-0) !important;
-	position: relative;
-	overflow: hidden;
-}
-
-/* Radial glow overlays for depth */
-.groups-site-hero::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background-image:
-		radial-gradient(circle at 20% 80%, rgba(239, 99, 81, 0.25) 0%, transparent 50%),
-		radial-gradient(circle at 80% 20%, rgba(85, 112, 241, 0.3) 0%, transparent 50%),
-		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
-	pointer-events: none;
-}
-
-/* Decorative community circles pattern */
-.groups-site-hero::after {
-	content: '';
-	position: absolute;
-	right: -60px;
-	top: -40px;
-	width: 400px;
-	height: 400px;
-	background:
-		radial-gradient(circle at 50% 50%, transparent 28%, rgba(255,255,255,0.05) 28%, rgba(255,255,255,0.05) 32%, transparent 32%),
-		radial-gradient(circle at 50% 50%, transparent 48%, rgba(255,255,255,0.04) 48%, rgba(255,255,255,0.04) 52%, transparent 52%),
-		radial-gradient(circle at 50% 50%, transparent 68%, rgba(255,255,255,0.03) 68%, rgba(255,255,255,0.03) 72%, transparent 72%),
-		radial-gradient(circle at 50% 50%, transparent 88%, rgba(255,255,255,0.02) 88%, rgba(255,255,255,0.02) 92%, transparent 92%);
-	pointer-events: none;
-}
-
-.groups-site-hero .wp-block-group {
-	position: relative;
-	z-index: 1;
-}
-
-.groups-site-hero h1.wp-block-site-title,
-.groups-site-hero .wp-block-site-title,
-.groups-site-hero .wp-block-site-title a {
-	color: var(--wp--preset--color--neutral-0) !important;
-}
-
-.groups-site-hero p {
-	color: rgba(255, 255, 255, 0.88) !important;
-}
-
-.groups-site-hero .groups-site-hero__stats {
-	font-size: var(--text-small);
-	color: rgba(255, 255, 255, 0.7);
-}
-
-/* Overline text pattern */
-.groups-site-overline {
-	font-family: var(--font-body);
-	font-size: var(--text-caption);
-	font-weight: 600;
-	line-height: 1.2;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: var(--wp--preset--color--neutral-500);
-}
-
-.groups-site-overline--primary {
-	color: var(--wp--preset--color--accent-500);
-}
-
-/* ==========================================================================
-   Event Cards - colorful with accent stripe
+   Event Cards
    ========================================================================== */
 
 .wp-block-groups-event-card {
@@ -247,19 +116,11 @@
 	min-width: 280px;
 	text-decoration: none;
 	color: inherit;
-	border-top: 4px solid var(--wp--preset--color--accent-500);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.wp-block-groups-event-card {
-		transition: box-shadow 0.2s ease-out, border-color 0.2s ease-out, transform 0.2s ease-out;
-	}
+	transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .wp-block-groups-event-card:hover {
 	box-shadow: var(--shadow-lg);
-	border-color: var(--wp--preset--color--primary-300);
-	border-top-color: var(--wp--preset--color--primary-600);
 	transform: translateY(-2px);
 }
 
@@ -280,18 +141,7 @@
 	height: 180px;
 	overflow: hidden;
 	position: relative;
-	background: linear-gradient(135deg, var(--wp--preset--color--primary-200), var(--wp--preset--color--accent-200));
-}
-
-/* Decorative pattern inside empty thumbnails */
-.wp-block-groups-event-card__thumbnail:not(:has(img))::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	opacity: 0.3;
-	background-image:
-		radial-gradient(circle at 30% 50%, var(--wp--preset--color--primary-300) 0%, transparent 40%),
-		radial-gradient(circle at 70% 40%, var(--wp--preset--color--accent-300) 0%, transparent 35%);
+	background: var(--wp--preset--color--neutral-100);
 }
 
 .wp-block-groups-event-card__thumbnail img {
@@ -299,16 +149,11 @@
 	height: 100%;
 	object-fit: cover;
 	display: block;
+	transition: transform 0.2s ease-out;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-	.wp-block-groups-event-card__thumbnail img {
-		transition: transform 0.2s ease-out;
-	}
-
-	.wp-block-groups-event-card:hover .wp-block-groups-event-card__thumbnail img {
-		transform: scale(1.03);
-	}
+.wp-block-groups-event-card:hover .wp-block-groups-event-card__thumbnail img {
+	transform: scale(1.03);
 }
 
 /* Past event overlay */
@@ -316,11 +161,7 @@
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: rgba(28, 25, 34, 0.4);
-}
-
-.wp-block-groups-event-card--past {
-	border-top-color: var(--wp--preset--color--neutral-400);
+	background: rgba(28, 25, 34, 0.35);
 }
 
 .wp-block-groups-event-card__past-badge {
@@ -329,7 +170,7 @@
 	right: 8px;
 	z-index: 1;
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
+	font-size: var(--wp--preset--font-size--caption);
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -350,18 +191,18 @@
 
 .wp-block-groups-event-card__date {
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
-	font-weight: 700;
-	letter-spacing: 0.08em;
+	font-size: var(--wp--preset--font-size--caption);
+	font-weight: 600;
+	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	color: var(--wp--preset--color--accent-600);
+	color: var(--wp--preset--color--primary-700);
 	line-height: 1.2;
 	margin-bottom: 8px;
 }
 
 .wp-block-groups-event-card__title {
 	font-family: var(--font-heading);
-	font-size: var(--text-h4);
+	font-size: var(--wp--preset--font-size--heading-4);
 	font-weight: 700;
 	color: var(--wp--preset--color--neutral-950);
 	line-height: 1.3;
@@ -374,7 +215,7 @@
 }
 
 .wp-block-groups-event-card__location {
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	color: var(--wp--preset--color--neutral-600);
 	display: flex;
 	align-items: center;
@@ -413,12 +254,12 @@
 }
 
 .wp-block-groups-event-card__attendees {
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	color: var(--wp--preset--color--neutral-500);
 }
 
 /* ==========================================================================
-   Event type/format badges - colorful
+   Event type/format badges
    ========================================================================== */
 
 .groups-site-event-type-badge {
@@ -426,8 +267,8 @@
 	align-items: center;
 	gap: 4px;
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
-	font-weight: 700;
+	font-size: var(--wp--preset--font-size--caption);
+	font-weight: 600;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	border-radius: var(--radius-full);
@@ -438,87 +279,21 @@
 .groups-site-event-type-badge--meetup {
 	color: var(--wp--preset--color--primary-800);
 	background: var(--wp--preset--color--primary-100);
-	border: 1px solid var(--wp--preset--color--primary-300);
 }
 
 .groups-site-event-type-badge--workshop {
 	color: var(--wp--preset--color--accent-700);
 	background: var(--wp--preset--color--accent-100);
-	border: 1px solid var(--wp--preset--color--accent-300);
 }
 
 .groups-site-event-type-badge--conference {
 	color: #7C3AED;
 	background: #F5F3FF;
-	border: 1px solid #DDD6FE;
 }
 
 .groups-site-event-type-badge--social {
 	color: var(--wp--preset--color--success-700);
 	background: var(--wp--preset--color--success-100);
-	border: 1px solid #BBF7D0;
-}
-
-/* ==========================================================================
-   Next Event Spotlight (front page)
-   ========================================================================== */
-
-.groups-site-next-event-card {
-	background: var(--wp--preset--color--neutral-0);
-	border: 1px solid var(--wp--preset--color--neutral-200);
-	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow-md);
-	overflow: hidden;
-	display: flex;
-	flex-direction: row;
-	border-top: 4px solid var(--wp--preset--color--accent-500);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.groups-site-next-event-card {
-		transition: box-shadow 0.2s ease-out;
-	}
-}
-
-.groups-site-next-event-card:hover {
-	box-shadow: var(--shadow-lg);
-}
-
-.groups-site-next-event-card__image {
-	width: 40%;
-	min-height: 280px;
-	background: linear-gradient(135deg, var(--wp--preset--color--primary-200), var(--wp--preset--color--accent-200));
-	overflow: hidden;
-}
-
-.groups-site-next-event-card__image img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	display: block;
-}
-
-.groups-site-next-event-card__content {
-	width: 60%;
-	padding: 32px;
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-}
-
-@media (max-width: 767px) {
-	.groups-site-next-event-card {
-		flex-direction: column;
-	}
-
-	.groups-site-next-event-card__image,
-	.groups-site-next-event-card__content {
-		width: 100%;
-	}
-
-	.groups-site-next-event-card__image {
-		min-height: 200px;
-	}
 }
 
 /* ==========================================================================
@@ -538,24 +313,17 @@
 	font-weight: 600;
 	border: none;
 	cursor: pointer;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.wp-block-groups-rsvp-button .groups-rsvp-btn {
-		transition: all 0.15s ease;
-	}
+	transition: all 0.15s ease;
 }
 
 /* Not Attending (default) */
 .wp-block-groups-rsvp-button .groups-rsvp-btn--default {
-	background: linear-gradient(135deg, var(--wp--preset--color--accent-500), var(--wp--preset--color--accent-600));
+	background: var(--wp--preset--color--accent-500);
 	color: var(--wp--preset--color--neutral-0);
-	box-shadow: 0 2px 8px rgba(239, 99, 81, 0.3);
 }
 
 .wp-block-groups-rsvp-button .groups-rsvp-btn--default:hover {
-	background: linear-gradient(135deg, var(--wp--preset--color--accent-600), var(--wp--preset--color--accent-700));
-	box-shadow: 0 4px 12px rgba(239, 99, 81, 0.4);
+	background: var(--wp--preset--color--accent-600);
 }
 
 /* Attending (confirmed) */
@@ -593,7 +361,7 @@
 	opacity: 0.7;
 }
 
-/* Disabled (past event / logged out) */
+/* Disabled */
 .wp-block-groups-rsvp-button .groups-rsvp-btn--disabled {
 	background: var(--wp--preset--color--neutral-100);
 	color: var(--wp--preset--color--neutral-400);
@@ -601,11 +369,9 @@
 	cursor: not-allowed;
 }
 
-/* Spinner animation */
+/* Spinner */
 @keyframes groups-rsvp-spin {
-	to {
-		transform: rotate(360deg);
-	}
+	to { transform: rotate(360deg); }
 }
 
 .wp-block-groups-rsvp-button .groups-rsvp-btn__spinner {
@@ -614,19 +380,13 @@
 	border: 2px solid var(--wp--preset--color--neutral-300);
 	border-top-color: var(--wp--preset--color--neutral-500);
 	border-radius: var(--radius-full);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.wp-block-groups-rsvp-button .groups-rsvp-btn__spinner {
-		animation: groups-rsvp-spin 0.8s linear infinite;
-	}
+	animation: groups-rsvp-spin 0.8s linear infinite;
 }
 
 /* ==========================================================================
    Member Avatars
    ========================================================================== */
 
-/* Inline variant (RSVP list, attendee row) */
 .groups-site-member-inline {
 	display: flex;
 	align-items: center;
@@ -643,12 +403,12 @@
 
 .groups-site-member-inline__name {
 	font-family: var(--font-body);
-	font-size: var(--text-body);
+	font-size: var(--wp--preset--font-size--body);
 	font-weight: 500;
 	color: var(--wp--preset--color--neutral-900);
 }
 
-/* Card variant (Members page grid) */
+/* Card variant */
 .groups-site-member-card {
 	background: var(--wp--preset--color--neutral-0);
 	border: 1px solid var(--wp--preset--color--neutral-200);
@@ -659,12 +419,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.groups-site-member-card {
-		transition: box-shadow 0.2s ease-out;
-	}
+	transition: box-shadow 0.2s ease-out;
 }
 
 .groups-site-member-card:hover {
@@ -681,19 +436,19 @@
 
 .groups-site-member-card__name {
 	font-family: var(--font-heading);
-	font-size: var(--text-h5);
+	font-size: var(--wp--preset--font-size--heading-5);
 	font-weight: 600;
 	color: var(--wp--preset--color--neutral-950);
 	margin-bottom: 4px;
 }
 
 .groups-site-member-card__username {
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	color: var(--wp--preset--color--neutral-500);
 	margin-bottom: 8px;
 }
 
-/* Avatar stack (overlapping) */
+/* Avatar stack */
 .groups-site-avatar-stack {
 	display: flex;
 }
@@ -719,7 +474,7 @@
 	font-family: var(--font-heading);
 	font-weight: 600;
 	color: var(--wp--preset--color--primary-700);
-	background: var(--wp--preset--color--primary-200);
+	background: var(--wp--preset--color--primary-100);
 }
 
 /* ==========================================================================
@@ -731,7 +486,7 @@
 	align-items: center;
 	gap: 4px;
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
+	font-size: var(--wp--preset--font-size--caption);
 	font-weight: 500;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -743,25 +498,21 @@
 .groups-site-badge--organizer {
 	color: var(--wp--preset--color--primary-800);
 	background: var(--wp--preset--color--primary-100);
-	border: 1px solid var(--wp--preset--color--primary-200);
 }
 
 .groups-site-badge--co-organizer {
 	color: var(--wp--preset--color--primary-700);
 	background: var(--wp--preset--color--primary-50);
-	border: 1px solid var(--wp--preset--color--primary-200);
 }
 
 .groups-site-badge--speaker {
 	color: var(--wp--preset--color--accent-700);
 	background: var(--wp--preset--color--accent-100);
-	border: 1px solid var(--wp--preset--color--accent-200);
 }
 
 .groups-site-badge--member {
 	color: var(--wp--preset--color--neutral-600);
 	background: var(--wp--preset--color--neutral-100);
-	border: 1px solid var(--wp--preset--color--neutral-200);
 }
 
 /* ==========================================================================
@@ -773,7 +524,7 @@
 	align-items: center;
 	gap: 6px;
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
+	font-size: var(--wp--preset--font-size--caption);
 	font-weight: 600;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -805,17 +556,12 @@
 
 .groups-site-status--happening-now .groups-site-status__dot {
 	background: var(--wp--preset--color--success-500);
+	animation: groups-pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes groups-pulse {
 	0%, 100% { opacity: 1; }
 	50% { opacity: 0.4; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.groups-site-status--happening-now .groups-site-status__dot {
-		animation: groups-pulse 1.5s ease-in-out infinite;
-	}
 }
 
 .groups-site-status--past {
@@ -859,63 +605,20 @@
 }
 
 /* ==========================================================================
-   Event Sidebar Info Card - with colored header
+   Event Sidebar Info Card - clean bordered card
    ========================================================================== */
 
 .groups-site-event-info-card {
-	border-radius: var(--radius-lg) !important;
-	box-shadow: var(--shadow-lg);
-	border-color: var(--wp--preset--color--neutral-200) !important;
-	overflow: hidden;
+	box-shadow: var(--shadow-sm);
 }
 
-/* Colored header bar for the Date & Time section */
-.groups-site-event-info-card-header {
-	background: linear-gradient(135deg, var(--wp--preset--color--primary-700), var(--wp--preset--color--primary-500)) !important;
-	color: var(--wp--preset--color--neutral-0) !important;
-	margin: calc(-1 * var(--wp--preset--spacing--50)) calc(-1 * var(--wp--preset--spacing--50)) 20px calc(-1 * var(--wp--preset--spacing--50)) !important;
-	padding: 24px var(--wp--preset--spacing--50) !important;
-	border-radius: 0 !important;
-}
-
-.groups-site-event-info-card-header h3 {
-	color: var(--wp--preset--color--neutral-0) !important;
-	font-size: var(--text-h4) !important;
-	margin-bottom: 4px !important;
-}
-
-.groups-site-event-info-card-header .groups-site-event-date-display {
-	font-size: var(--text-body-lg);
-	color: rgba(255, 255, 255, 0.9);
-	font-weight: 500;
-}
-
-.groups-site-event-info-card .groups-site-info-label {
-	font-family: var(--font-body);
-	font-size: var(--text-caption);
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: var(--wp--preset--color--primary-600);
-	line-height: 1.2;
-	margin-bottom: 8px;
-}
-
-.groups-site-event-info-card .groups-site-info-value {
-	font-size: var(--text-body-lg);
-	font-weight: 600;
-	color: var(--wp--preset--color--neutral-900);
+.groups-site-event-info-card h3.wp-block-heading {
+	color: var(--wp--preset--color--neutral-950);
 }
 
 .groups-site-event-info-card hr.wp-block-separator {
 	border-color: var(--wp--preset--color--neutral-150) !important;
-	margin: 20px 0 !important;
 	opacity: 1;
-}
-
-.groups-site-event-info-card h3.wp-block-heading {
-	color: var(--wp--preset--color--primary-800);
-	font-weight: 700;
 }
 
 /* ==========================================================================
@@ -937,24 +640,11 @@ select {
 	border: 1px solid var(--wp--preset--color--neutral-300);
 	border-radius: var(--radius-md);
 	font-family: var(--font-body);
-	font-size: var(--text-body);
+	font-size: var(--wp--preset--font-size--body);
 	color: var(--wp--preset--color--neutral-900);
 	width: 100%;
 	box-sizing: border-box;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	input[type="text"],
-	input[type="email"],
-	input[type="url"],
-	input[type="password"],
-	input[type="search"],
-	input[type="tel"],
-	input[type="number"],
-	textarea,
-	select {
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
-	}
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 textarea {
@@ -984,7 +674,6 @@ select:disabled {
 	cursor: not-allowed;
 }
 
-/* Error state */
 input.has-error,
 textarea.has-error,
 select.has-error {
@@ -992,11 +681,10 @@ select.has-error {
 	box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* Labels */
 .groups-site-label {
 	display: block;
 	font-family: var(--font-body);
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	font-weight: 600;
 	color: var(--wp--preset--color--neutral-800);
 	margin-bottom: 8px;
@@ -1007,9 +695,8 @@ select.has-error {
 	margin-left: 4px;
 }
 
-/* Helper text */
 .groups-site-helper {
-	font-size: var(--text-small);
+	font-size: var(--wp--preset--font-size--small);
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-500);
 	margin-top: 8px;
@@ -1019,7 +706,6 @@ select.has-error {
 	color: var(--wp--preset--color--error-700);
 }
 
-/* Select */
 select {
 	appearance: none;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A9A5B0' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -1028,7 +714,6 @@ select {
 	padding-right: 44px;
 }
 
-/* Checkbox / Radio */
 input[type="checkbox"],
 input[type="radio"] {
 	width: 18px;
@@ -1038,13 +723,8 @@ input[type="radio"] {
 	cursor: pointer;
 }
 
-input[type="checkbox"] {
-	border-radius: var(--radius-sm);
-}
-
-input[type="radio"] {
-	border-radius: var(--radius-full);
-}
+input[type="checkbox"] { border-radius: var(--radius-sm); }
+input[type="radio"] { border-radius: var(--radius-full); }
 
 input[type="checkbox"]:checked,
 input[type="radio"]:checked {
@@ -1052,12 +732,7 @@ input[type="radio"]:checked {
 	border-color: var(--wp--preset--color--primary-700);
 }
 
-input[type="checkbox"]:focus,
-input[type="radio"]:focus {
-	box-shadow: 0 0 0 3px var(--wp--preset--color--primary-200);
-}
-
-/* Search input within block search */
+/* Search block */
 .wp-block-search__input {
 	border-radius: var(--radius-md) !important;
 	border-color: var(--wp--preset--color--neutral-300) !important;
@@ -1079,81 +754,24 @@ input[type="radio"]:focus {
 }
 
 /* ==========================================================================
-   Community Callout Band - warm gradient
+   Community Callout - clean solid background
    ========================================================================== */
 
-.groups-site-community-callout {
-	background: linear-gradient(135deg, var(--wp--preset--color--primary-900) 0%, var(--wp--preset--color--primary-700) 50%, var(--wp--preset--color--accent-600) 100%) !important;
-	position: relative;
-	overflow: hidden;
-}
-
-.groups-site-community-callout::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background:
-		radial-gradient(ellipse at 10% 90%, rgba(239, 99, 81, 0.2) 0%, transparent 50%),
-		radial-gradient(ellipse at 90% 10%, rgba(85, 112, 241, 0.15) 0%, transparent 50%);
-	pointer-events: none;
-}
-
-.groups-site-community-callout > * {
-	position: relative;
-	z-index: 1;
-}
-
-.groups-site-community-callout p {
-	font-family: var(--font-heading);
-	font-weight: 600;
-}
-
-.groups-site-community-callout .wp-block-button.is-style-outline .wp-block-button__link {
-	border-color: rgba(255, 255, 255, 0.3) !important;
-	color: var(--wp--preset--color--neutral-0) !important;
-	border-radius: var(--radius-md);
-	font-weight: 600;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.groups-site-community-callout .wp-block-button.is-style-outline .wp-block-button__link {
-		transition: background 0.15s ease, border-color 0.15s ease;
-	}
-}
-
-.groups-site-community-callout .wp-block-button.is-style-outline .wp-block-button__link:hover {
-	background: rgba(255, 255, 255, 0.15) !important;
-	border-color: rgba(255, 255, 255, 0.5) !important;
+.groups-site-community-callout h2 {
+	text-wrap: balance;
 }
 
 /* ==========================================================================
-   Footer - warm with accent border
+   Footer
    ========================================================================== */
 
-.groups-site-footer {
-	background: var(--wp--preset--color--surface-dark-1) !important;
-	border-top: 3px solid var(--wp--preset--color--accent-500);
-}
-
 .groups-site-footer a {
-	color: var(--wp--preset--color--surface-dark-muted) !important;
 	text-decoration: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.groups-site-footer a {
-		transition: color 0.15s ease;
-	}
+	transition: color 0.15s ease;
 }
 
 .groups-site-footer a:hover {
-	color: var(--wp--preset--color--accent-300) !important;
-}
-
-.groups-site-footer .groups-site-code-is-poetry {
-	font-family: var(--font-mono);
-	font-size: var(--text-caption);
-	color: var(--wp--preset--color--neutral-500);
+	text-decoration: underline;
 }
 
 /* ==========================================================================
@@ -1164,7 +782,7 @@ input[type="radio"]:focus {
 	display: inline-flex;
 	align-items: center;
 	font-family: var(--font-body);
-	font-size: var(--text-caption);
+	font-size: var(--wp--preset--font-size--caption);
 	font-weight: 500;
 	color: var(--wp--preset--color--primary-700);
 	background: var(--wp--preset--color--primary-100);
@@ -1176,21 +794,11 @@ input[type="radio"]:focus {
    Pagination
    ========================================================================== */
 
-.wp-block-query-pagination {
-	font-family: var(--font-body);
-	font-size: var(--text-small);
-}
-
 .wp-block-query-pagination-numbers .page-numbers {
 	color: var(--wp--preset--color--neutral-600);
 	text-decoration: none;
 	padding: 4px 8px;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.wp-block-query-pagination-numbers .page-numbers {
-		transition: color 0.15s ease;
-	}
+	transition: color 0.15s ease;
 }
 
 .wp-block-query-pagination-numbers .page-numbers:hover {
@@ -1202,18 +810,8 @@ input[type="radio"]:focus {
 	font-weight: 600;
 }
 
-.wp-block-query-pagination-previous,
-.wp-block-query-pagination-next {
-	color: var(--wp--preset--color--neutral-500);
-}
-
-.wp-block-query-pagination-previous:hover,
-.wp-block-query-pagination-next:hover {
-	color: var(--wp--preset--color--neutral-900);
-}
-
 /* ==========================================================================
-   Event grid layouts (block-level)
+   Grid layouts
    ========================================================================== */
 
 .wp-block-groups-upcoming-events,
@@ -1237,7 +835,6 @@ input[type="radio"]:focus {
 	}
 }
 
-/* Member grid */
 .wp-block-groups-group-members {
 	display: grid;
 	gap: 16px;
@@ -1257,99 +854,23 @@ input[type="radio"]:focus {
 }
 
 /* ==========================================================================
-   Typography warmth & color throughout
+   Navigation overlay (hamburger menu)
    ========================================================================== */
 
-/* Bolder section headings with coral accent */
-main h2.wp-block-heading {
-	font-weight: 800;
-	color: var(--wp--preset--color--primary-900);
-	position: relative;
-	padding-bottom: 12px;
+.wp-block-navigation__responsive-container.is-menu-open {
+	background-color: var(--wp--preset--color--neutral-0);
+	color: var(--wp--preset--color--neutral-900);
+	padding: 32px;
 }
 
-main h2.wp-block-heading::after {
-	content: '';
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 48px;
-	height: 3px;
-	background: var(--wp--preset--color--accent-500);
-	border-radius: 2px;
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a {
+	font-size: var(--wp--preset--font-size--body-lg);
+	padding: 8px 0;
+	color: var(--wp--preset--color--neutral-700);
 }
 
-main h1.wp-block-heading,
-main .wp-block-post-title {
-	font-weight: 800;
-	letter-spacing: -0.03em;
-	color: var(--wp--preset--color--primary-900);
-}
-
-/* Single event content section headings */
-.groups-site-event-content h2.wp-block-heading {
-	color: var(--wp--preset--color--primary-800);
-	border-left: 4px solid var(--wp--preset--color--accent-500);
-	padding-left: 16px;
-	padding-bottom: 0;
-}
-
-.groups-site-event-content h2.wp-block-heading::after {
-	display: none;
-}
-
-/* Content links - warmer underline */
-main .wp-block-post-content a:not(.wp-block-button__link) {
-	color: var(--wp--preset--color--primary-700);
-	text-decoration-color: var(--wp--preset--color--accent-300);
-	text-underline-offset: 3px;
-	text-decoration-thickness: 2px;
-}
-
-main .wp-block-post-content a:not(.wp-block-button__link):hover {
-	color: var(--wp--preset--color--accent-600);
-	text-decoration-color: var(--wp--preset--color--accent-500);
-}
-
-/* ==========================================================================
-   Front page main content area - subtle tinted background
-   ========================================================================== */
-
-.groups-site-front-main {
-	position: relative;
-}
-
-.groups-site-front-main::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 300px;
-	background: linear-gradient(180deg, var(--wp--preset--color--primary-50) 0%, transparent 100%);
-	pointer-events: none;
-	z-index: -1;
-}
-
-/* Decorative community SVG illustration (hero) */
-.groups-site-hero-illustration {
-	position: absolute;
-	right: var(--edge-space, 40px);
-	bottom: 20px;
-	width: 280px;
-	height: 200px;
-	opacity: 0.18;
-	pointer-events: none;
-	z-index: 0;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 200' fill='none'%3E%3Ccircle cx='140' cy='80' r='28' fill='white' opacity='0.7'/%3E%3Ccircle cx='75' cy='120' r='20' fill='white' opacity='0.5'/%3E%3Ccircle cx='205' cy='120' r='20' fill='white' opacity='0.5'/%3E%3Ccircle cx='50' cy='70' r='14' fill='white' opacity='0.3'/%3E%3Ccircle cx='230' cy='60' r='14' fill='white' opacity='0.3'/%3E%3Cline x1='118' y1='90' x2='88' y2='108' stroke='white' stroke-width='2' opacity='0.35'/%3E%3Cline x1='162' y1='90' x2='192' y2='108' stroke='white' stroke-width='2' opacity='0.35'/%3E%3Cline x1='62' y1='80' x2='70' y2='105' stroke='white' stroke-width='1.5' opacity='0.25'/%3E%3Cline x1='218' y1='72' x2='212' y2='105' stroke='white' stroke-width='1.5' opacity='0.25'/%3E%3Ccircle cx='140' cy='80' r='50' stroke='white' stroke-width='1' opacity='0.12' fill='none'/%3E%3Ccircle cx='140' cy='80' r='80' stroke='white' stroke-width='1' opacity='0.08' fill='none'/%3E%3Ccircle cx='140' cy='80' r='110' stroke='white' stroke-width='0.5' opacity='0.05' fill='none'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-size: contain;
-}
-
-@media (max-width: 767px) {
-	.groups-site-hero-illustration {
-		display: none;
-	}
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a:hover {
+	color: var(--wp--preset--color--neutral-950);
 }
 
 /* ==========================================================================
@@ -1363,24 +884,4 @@ main .wp-block-post-content a:not(.wp-block-button__link):hover {
 		transition-duration: 0.01ms !important;
 		animation-duration: 0.01ms !important;
 	}
-}
-
-/* ==========================================================================
-   Navigation overlay (hamburger menu)
-   ========================================================================== */
-
-.wp-block-navigation__responsive-container.is-menu-open {
-	background-color: var(--wp--preset--color--neutral-0, #ffffff);
-	color: var(--wp--preset--color--neutral-900);
-	padding: 32px;
-}
-
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a {
-	font-size: var(--text-body-lg);
-	padding: 8px 0;
-	color: var(--wp--preset--color--neutral-700);
-}
-
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item a:hover {
-	color: var(--wp--preset--color--neutral-950);
 }
