@@ -3,58 +3,6 @@
 	flex-direction: column;
 	gap: var(--wp--preset--spacing--30, 12px);
 
-	// ── Next Event Callout ──────────────────────────────────────────
-	&__next-event {
-		display: flex;
-		align-items: center;
-		gap: var(--wp--preset--spacing--30, 12px);
-		padding: var(--wp--preset--spacing--40, 16px) var(--wp--preset--spacing--50, 24px);
-		background: var(--wp--preset--color--primary-50, #F4F6FF);
-		border: 1px solid var(--wp--preset--color--primary-200, #CDD5FC);
-		border-radius: 10px;
-		text-decoration: none;
-		color: inherit;
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-		&:hover {
-			border-color: var(--wp--preset--color--primary-400, #7B91F5);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-		}
-	}
-
-	&__next-event-label {
-		font-size: var(--wp--preset--font-size--caption, 12px);
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--wp--preset--color--primary-700, #2D41A6);
-		white-space: nowrap;
-	}
-
-	&__next-event-title {
-		font-family: var(--wp--preset--font-family--heading);
-		font-size: var(--wp--preset--font-size--body, 16px);
-		font-weight: 600;
-		color: var(--wp--preset--color--neutral-950, #141118);
-		flex: 1;
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	&__next-event-date {
-		font-size: var(--wp--preset--font-size--small, 14px);
-		color: var(--wp--preset--color--neutral-600, #635E6C);
-		white-space: nowrap;
-	}
-
-	&__next-event-arrow {
-		font-size: 18px;
-		color: var(--wp--preset--color--primary-500, #5570F1);
-		flex-shrink: 0;
-	}
-
 	// ── Stat Cards Grid ─────────────────────────────────────────────
 	&__cards {
 		display: flex;
@@ -102,20 +50,6 @@
 	// ── Responsive ──────────────────────────────────────────────────
 
 	@media (max-width: 600px) {
-		&__next-event {
-			flex-wrap: wrap;
-		}
-
-		&__next-event-title {
-			white-space: normal;
-			order: 3;
-			flex-basis: 100%;
-		}
-
-		&__next-event-arrow {
-			display: none;
-		}
-
 		&__cards {
 			flex-wrap: wrap;
 		}
