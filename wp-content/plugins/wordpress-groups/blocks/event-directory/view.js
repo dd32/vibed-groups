@@ -812,6 +812,12 @@ function init() {
 	const containers = document.querySelectorAll( '.wp-block-groups-event-directory' );
 
 	containers.forEach( ( container ) => {
+		// Skip hydration for network-aggregated views (main directory site).
+		// The server-rendered HTML already contains cross-site event data.
+		if ( container.dataset.network === 'true' ) {
+			return;
+		}
+
 		const perPage = parseInt( container.dataset.perPage, 10 ) || 10;
 		let categories = [];
 

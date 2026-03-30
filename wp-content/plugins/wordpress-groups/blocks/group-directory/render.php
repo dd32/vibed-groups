@@ -2,9 +2,8 @@
 /**
  * Server-side render for the Group Directory block.
  *
- * Renders the initial list of groups from the REST API so the page is
- * usable without JavaScript. The view script hydrates the container for
- * interactive search and pagination.
+ * Renders the list of group sites in the multisite network.
+ * Each non-main site is treated as a community group.
  *
  * @package Groups\Blocks
  *
@@ -15,94 +14,77 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$per_page = ! empty( $attributes['perPage'] ) ? absint( $attributes['perPage'] ) : 12;
-
-// Query groups from the main site using the same logic as the REST controller.
+$per_page     = ! empty( $attributes['perPage'] ) ? absint( $attributes['perPage'] ) : 12;
 $main_site_id = get_main_site_id();
-switch_to_blog( $main_site_id );
 
-$query = new WP_Query( [
-	'post_type'      => 'wp_meetup',
-	'posts_per_page' => $per_page,
-	'paged'          => 1,
-	'orderby'        => 'title',
-	'order'          => 'ASC',
-	'post_status'    => 'meetup-active',
+// Get all non-main sites in the network.
+$sites = get_sites( [
+	'number'       => $per_page,
+	'site__not_in' => [ $main_site_id ],
+	'public'       => 1,
+	'archived'     => 0,
+	'deleted'      => 0,
+	'orderby'      => 'registered',
+	'order'        => 'ASC',
 ] );
 
-$groups      = [];
-$total       = (int) $query->found_posts;
-$total_pages = (int) $query->max_num_pages;
+$groups    = [];
+$total     = (int) get_sites( [
+	'count'        => true,
+	'site__not_in' => [ $main_site_id ],
+	'public'       => 1,
+	'archived'     => 0,
+	'deleted'      => 0,
+] );
+$total_pages = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
 
-foreach ( $query->posts as $post ) {
-	$site_id = get_post_meta( $post->ID, '_meetup_site_id', true );
-	$site_url = '';
+foreach ( $sites as $site ) {
+	switch_to_blog( $site->blog_id );
 
-	if ( $site_id ) {
-		$blog_details = get_blog_details( (int) $site_id );
-		if ( $blog_details ) {
-			$site_url = esc_url( $blog_details->siteurl );
-		}
+	$member_count_data = count_users();
+	$member_count      = isset( $member_count_data['total_users'] ) ? (int) $member_count_data['total_users'] : 0;
+	$site_name         = get_bloginfo( 'name' );
+	$site_url          = home_url( '/' );
+	$site_description  = get_bloginfo( 'description' );
+
+	// Count upcoming events on this site.
+	$upcoming_count = 0;
+	if ( post_type_exists( 'event' ) ) {
+		$upcoming_query = new WP_Query( [
+			'post_type'              => 'event',
+			'post_status'            => [ 'event-scheduled', 'publish' ],
+			'posts_per_page'         => 1,
+			'no_found_rows'          => false,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'fields'                 => 'ids',
+		] );
+		$upcoming_count = (int) $upcoming_query->found_posts;
 	}
 
+	restore_current_blog();
+
 	$groups[] = [
-		'id'           => (int) $post->ID,
-		'name'         => esc_html( $post->post_title ),
-		'city'         => sanitize_text_field( get_post_meta( $post->ID, '_meetup_city', true ) ),
-		'country'      => sanitize_text_field( get_post_meta( $post->ID, '_meetup_country', true ) ),
-		'latitude'     => (float) get_post_meta( $post->ID, '_meetup_latitude', true ),
-		'longitude'    => (float) get_post_meta( $post->ID, '_meetup_longitude', true ),
-		'member_count' => absint( get_post_meta( $post->ID, '_meetup_member_count', true ) ),
-		'site_url'     => $site_url,
+		'id'             => (int) $site->blog_id,
+		'name'           => esc_html( $site_name ),
+		'description'    => esc_html( $site_description ),
+		'member_count'   => $member_count,
+		'upcoming_count' => $upcoming_count,
+		'site_url'       => esc_url( $site_url ),
+		'registered'     => $site->registered,
 	];
 }
 
-restore_current_blog();
-
-// Build a JSON array of groups with valid coordinates for the map view.
-$map_groups = [];
-foreach ( $groups as $group ) {
-	if ( ! empty( $group['latitude'] ) && ! empty( $group['longitude'] ) ) {
-		$map_groups[] = [
-			'id'        => $group['id'],
-			'name'      => $group['name'],
-			'city'      => $group['city'],
-			'country'   => $group['country'],
-			'latitude'  => $group['latitude'],
-			'longitude' => $group['longitude'],
-			'site_url'  => $group['site_url'],
-		];
-	}
-}
-
-// Enqueue Leaflet CSS locally (same as venue-map block).
-wp_enqueue_style(
-	'leaflet',
-	plugins_url( 'assets/vendor/leaflet/leaflet.css', GROUPS_PLUGIN_FILE ),
-	[],
-	'1.9.4'
-);
-
-// Enqueue Leaflet JS locally (same as venue-map block).
-wp_enqueue_script(
-	'leaflet',
-	plugins_url( 'assets/vendor/leaflet/leaflet.js', GROUPS_PLUGIN_FILE ),
-	[],
-	'1.9.4',
-	true
-);
-
 $wrapper_attributes = get_block_wrapper_attributes( [
-	'class'            => 'wp-block-groups-group-directory',
-	'data-per-page'    => $per_page,
-	'data-total'       => $total,
-	'data-pages'       => $total_pages,
-	'data-groups'      => wp_json_encode( $groups ),
-	'data-map-groups'  => wp_json_encode( $map_groups ),
+	'class'         => 'wp-block-groups-group-directory',
+	'data-per-page' => $per_page,
+	'data-total'    => $total,
+	'data-pages'    => $total_pages,
+	'data-groups'   => wp_json_encode( $groups ),
 ] );
 ?>
 
-<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated by get_block_wrapper_attributes(). ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="wp-block-groups-group-directory__search">
 		<label for="group-directory-search" class="screen-reader-text">
 			<?php esc_html_e( 'Search groups', 'wordpress-groups' ); ?>
@@ -111,7 +93,7 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 			type="search"
 			id="group-directory-search"
 			class="wp-block-groups-group-directory__search-input"
-			placeholder="<?php esc_attr_e( 'Search groups\u2026', 'wordpress-groups' ); ?>"
+			placeholder="<?php esc_attr_e( 'Search groups…', 'wordpress-groups' ); ?>"
 		/>
 	</div>
 
@@ -123,24 +105,15 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 		<?php else : ?>
 			<div class="wp-block-groups-group-directory__grid">
 				<?php foreach ( $groups as $group ) : ?>
-					<article class="wp-block-groups-group-directory__card">
+					<a href="<?php echo esc_url( $group['site_url'] ); ?>" class="wp-block-groups-group-directory__card">
 						<h3 class="wp-block-groups-group-directory__card-name">
-							<?php if ( $group['site_url'] ) : ?>
-								<a href="<?php echo esc_url( $group['site_url'] ); ?>">
-									<?php echo esc_html( $group['name'] ); ?>
-								</a>
-							<?php else : ?>
-								<?php echo esc_html( $group['name'] ); ?>
-							<?php endif; ?>
+							<?php echo esc_html( $group['name'] ); ?>
 						</h3>
 
-						<?php if ( $group['city'] || $group['country'] ) : ?>
-							<div class="wp-block-groups-group-directory__card-location">
-								<?php
-								$location_parts = array_filter( [ $group['city'], $group['country'] ] );
-								echo esc_html( implode( ', ', $location_parts ) );
-								?>
-							</div>
+						<?php if ( $group['description'] ) : ?>
+							<p class="wp-block-groups-group-directory__card-description">
+								<?php echo esc_html( $group['description'] ); ?>
+							</p>
 						<?php endif; ?>
 
 						<div class="wp-block-groups-group-directory__card-meta">
@@ -153,8 +126,19 @@ $wrapper_attributes = get_block_wrapper_attributes( [
 								);
 								?>
 							</span>
+							<?php if ( $group['upcoming_count'] > 0 ) : ?>
+								<span class="wp-block-groups-group-directory__card-events">
+									<?php
+									printf(
+										/* translators: %s: Number of upcoming events. */
+										esc_html( _n( '%s upcoming event', '%s upcoming events', $group['upcoming_count'], 'wordpress-groups' ) ),
+										number_format_i18n( $group['upcoming_count'] )
+									);
+									?>
+								</span>
+							<?php endif; ?>
 						</div>
-					</article>
+					</a>
 				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>
