@@ -1,0 +1,187 @@
+/**
+ * Groups Directory — Custom styles.
+ *
+ * Component-level styling that complements theme.json.
+ *
+ * @package Groups_Directory
+ */
+
+/* -------------------------------------------------------------------------
+ * Header
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Hero
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-hero h1 {
+	text-wrap: balance;
+}
+
+.groups-directory-hero .wp-block-search {
+	max-width: 520px;
+}
+
+.groups-directory-hero .wp-block-search__input {
+	border: 1px solid var(--wp--preset--color--neutral-300);
+	border-radius: 8px;
+	padding: 14px 16px;
+	font-size: var(--wp--preset--font-size--body);
+	background: var(--wp--preset--color--neutral-0);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.groups-directory-hero .wp-block-search__input:focus {
+	border-color: var(--wp--preset--color--primary-500);
+	box-shadow: 0 0 0 3px var(--wp--preset--color--primary-100);
+	outline: none;
+}
+
+.groups-directory-hero .wp-block-search__button {
+	border-radius: 8px;
+	padding: 14px 24px;
+	font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------
+ * Stat Cards
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-stat-card {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.groups-directory-stat-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.groups-directory-stat-number {
+	color: var(--wp--preset--color--primary-700);
+}
+
+/* -------------------------------------------------------------------------
+ * Search (archive pages)
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-search .wp-block-search__input {
+	border: 1px solid var(--wp--preset--color--neutral-300);
+	border-radius: 8px;
+	padding: 12px 16px;
+	font-size: var(--wp--preset--font-size--body);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.groups-directory-search .wp-block-search__input:focus {
+	border-color: var(--wp--preset--color--primary-500);
+	box-shadow: 0 0 0 3px var(--wp--preset--color--primary-100);
+	outline: none;
+}
+
+.groups-directory-search .wp-block-search__button {
+	border-radius: 8px;
+	padding: 12px 20px;
+	font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------
+ * Sidebar info card
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-sidebar {
+	position: sticky;
+	top: 80px;
+	align-self: start;
+}
+
+.groups-directory-info-card .wp-block-button__link {
+	width: 100%;
+	justify-content: center;
+	text-align: center;
+}
+
+/* -------------------------------------------------------------------------
+ * Community callout
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-callout h2 {
+	text-wrap: balance;
+}
+
+/* -------------------------------------------------------------------------
+ * Footer
+ * ---------------------------------------------------------------------- */
+
+.groups-directory-footer a {
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.groups-directory-footer a:hover {
+	text-decoration: underline;
+}
+
+/* -------------------------------------------------------------------------
+ * Accessibility
+ * ---------------------------------------------------------------------- */
+
+.skip-link:focus {
+	position: fixed;
+	top: 8px;
+	left: 8px;
+	z-index: 999;
+	padding: 8px 16px;
+	background: var(--wp--preset--color--primary-700);
+	color: var(--wp--preset--color--neutral-0);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	text-decoration: none;
+	border-radius: 4px;
+	outline: 2px solid var(--wp--preset--color--primary-500);
+	outline-offset: 2px;
+	clip: auto;
+	clip-path: none;
+	width: auto;
+	height: auto;
+}
+
+/* -------------------------------------------------------------------------
+ * Global focus styles
+ * ---------------------------------------------------------------------- */
+
+*:focus-visible {
+	outline: 2px solid var(--wp--preset--color--primary-500);
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * Responsive
+ * ---------------------------------------------------------------------- */
+
+@media (max-width: 781px) {
+	.groups-directory-hero .wp-block-columns {
+		gap: var(--wp--preset--spacing--50);
+	}
+
+	.groups-directory-callout .wp-block-columns {
+		gap: var(--wp--preset--spacing--50);
+	}
+
+	.groups-directory-sidebar {
+		position: static;
+	}
+
+	.groups-directory-hero-visual {
+		order: -1;
+	}
+}
