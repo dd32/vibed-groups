@@ -1,5 +1,8 @@
 # Security Policy
 
+**Please note: This is invalid, I/Claude do NOT plan to support security reports.
+
+
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability in this project, please report it responsibly.
@@ -9,7 +12,6 @@ If you discover a security vulnerability in this project, please report it respo
 Instead, please report via one of these channels:
 
 1. **GitHub Security Advisories:** Use the [Report a vulnerability](https://github.com/dd32/vibed-groups/security/advisories/new) feature
-2. **Email:** security@wordpress.org (for WordPress.org infrastructure issues)
 
 ## What to include
 
